@@ -56,6 +56,15 @@ export function normalizeKey(text: string): string {
     .replace(/\s+/g, '_')
 }
 
+/** Canal is the source account (uppercase); stakeholder is the speaker (mixed case).
+ *  Returns true when both refer to the same person — used to avoid showing the name twice. */
+export function isRedundantCanal(canal: string | null, stakeholder: string): boolean {
+  if (!canal) return true
+  const c = canal.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  const s = stakeholder.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+  return c === s || c.includes(s) || s.includes(c)
+}
+
 const JNE_FOTO_BASE = 'https://mpesije.jne.gob.pe/apidocs/'
 
 export function buildFotoUrl(fotoUrl: string | null | undefined): string | null {

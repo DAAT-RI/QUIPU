@@ -1,12 +1,12 @@
 import { useParams, Link } from 'react-router-dom'
 import { useState } from 'react'
-import { useCandidato, useHojaVida } from '@/hooks/useCandidatos'
+import { useCandidato, useCandidatoSiblings, useHojaVida } from '@/hooks/useCandidatos'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
-import { formatDate } from '@/lib/utils'
+import { formatDate, isRedundantCanal } from '@/lib/utils'
 import {
   ArrowLeft,
   User,
@@ -79,6 +79,19 @@ function formatFieldLabel(key: string): string {
   return FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
+/** Cargo importance: lower number = more important */
+function cargoPriority(cargo: string | null): number {
+  if (!cargo) return 99
+  const c = cargo.toUpperCase()
+  if (c.includes('PRESIDENTE DE LA REP')) return 1
+  if (c.includes('PRIMER VICEPRESIDENTE') || c.includes('PRIMERA VICEPRESIDENTA')) return 2
+  if (c.includes('SEGUNDO VICEPRESIDENTE') || c.includes('SEGUNDA VICEPRESIDENTA')) return 3
+  if (c.includes('VICEPRESIDENTE') || c.includes('VICEPRESIDENTA')) return 4
+  if (c.includes('SENADOR') || c.includes('SENADORA')) return 5
+  if (c.includes('DIPUTADO') || c.includes('DIPUTADA')) return 6
+  return 10
+}
+
 const tabs = [
   { key: 'resumen', label: 'Resumen', icon: User },
   { key: 'educacion', label: 'Educacion', icon: GraduationCap },
@@ -124,7 +137,8 @@ export function CandidatoDetalle() {
     error: errorCandidato,
   } = useCandidato(id)
 
-  const { data: hojaVida, isLoading: loadingHoja } = useHojaVida(candidato?.id)
+  const { data: siblings } = useCandidatoSiblings(candidato?.id, candidato?.dni)
+  const { data: hojaVida, isLoading: loadingHoja } = useHojaVida(candidato?.id, candidato?.dni)
 
   const { data: declaracionesData, isLoading: loadingDeclaraciones } = useDeclaraciones({
     stakeholder: candidato?.apellido_paterno ?? undefined,
@@ -166,11 +180,28 @@ export function CandidatoDetalle() {
                   {candidato.partido_nombre}
                 </span>
               )}
-              {candidato.cargo_postula && (
-                <span className="text-sm text-muted-foreground">
-                  {candidato.cargo_postula}
-                </span>
-              )}
+              {/* All candidacies sorted by importance (Presidente first) */}
+              {[candidato, ...(siblings ?? [])]
+                .sort((a, b) => cargoPriority(a.cargo_postula) - cargoPriority(b.cargo_postula))
+                .map((c) => {
+                  const isCurrent = c.id === candidato.id
+                  return isCurrent ? (
+                    <span
+                      key={c.id}
+                      className="inline-block rounded-md bg-muted px-2.5 py-1 text-xs font-medium text-foreground"
+                    >
+                      {c.cargo_postula}
+                    </span>
+                  ) : (
+                    <Link
+                      key={c.id}
+                      to={`/candidatos/${c.id}`}
+                      className="inline-block rounded-md bg-muted/60 px-2.5 py-1 text-xs font-medium text-muted-foreground hover:bg-primary/10 hover:text-primary transition-colors"
+                    >
+                      {c.cargo_postula}
+                    </Link>
+                  )
+                })}
               {candidato.departamento && (
                 <span className="text-sm text-muted-foreground">
                   {candidato.departamento}
@@ -350,7 +381,7 @@ export function CandidatoDetalle() {
                           <p className="text-sm leading-relaxed">{d.contenido}</p>
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                             <span className="font-medium">{d.stakeholder}</span>
-                            {d.canal && (
+                            {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
                               <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium">
                                 {d.canal}
                               </span>

@@ -94,7 +94,7 @@ CREATE TABLE IF NOT EXISTS quipu_promesas_planes (
 CREATE TABLE IF NOT EXISTS quipu_candidatos (
     id SERIAL PRIMARY KEY,
     id_hoja_vida VARCHAR(20),
-    dni VARCHAR(15) UNIQUE,
+    dni VARCHAR(15),
 
     -- Datos personales
     nombres VARCHAR(200),
@@ -130,7 +130,10 @@ CREATE TABLE IF NOT EXISTS quipu_candidatos (
 
     -- Auditoria
     fecha_registro TIMESTAMPTZ DEFAULT NOW(),
-    metadata JSONB
+    metadata JSONB,
+
+    -- Un candidato puede postular a multiples cargos (ej: presidente + senador)
+    UNIQUE (dni, cargo_eleccion)
 );
 
 -- =====================================================
@@ -257,19 +260,20 @@ JOIN quipu_partidos pp ON p.partido_id = pp.id
 LEFT JOIN quipu_categorias_promesas c ON p.categoria = c.nombre;
 
 -- Vista: resumen por partido
+-- total_candidatos computed from actual candidatos (unique DNIs), not stale static field
 CREATE OR REPLACE VIEW v_quipu_resumen_partidos AS
 SELECT
     pp.id,
     pp.nombre_oficial,
     pp.candidato_presidencial,
-    pp.total_candidatos,
+    (SELECT COUNT(DISTINCT c.dni)::int FROM quipu_candidatos c WHERE c.partido_id = pp.id) as total_candidatos,
     COUNT(p.id) as total_promesas,
     ARRAY_AGG(DISTINCT p.categoria) as categorias
 FROM quipu_partidos pp
 LEFT JOIN quipu_promesas_planes p ON pp.id = p.partido_id
 GROUP BY pp.id;
 
--- Vista: candidatos con partido
+-- Vista: candidatos con partido (incluye todas las postulaciones)
 CREATE OR REPLACE VIEW v_quipu_candidatos_completos AS
 SELECT
     c.*,
@@ -277,3 +281,21 @@ SELECT
     pp.candidato_presidencial as candidato_presidente
 FROM quipu_candidatos c
 LEFT JOIN quipu_partidos pp ON c.partido_id = pp.id;
+
+-- Vista: candidatos unicos (una fila por DNI, cargo mas importante)
+-- Usada en listados y busqueda para evitar duplicados
+CREATE OR REPLACE VIEW v_quipu_candidatos_unicos AS
+SELECT DISTINCT ON (c.dni)
+    c.*,
+    pp.nombre_oficial as partido_nombre,
+    pp.candidato_presidencial as candidato_presidente
+FROM quipu_candidatos c
+LEFT JOIN quipu_partidos pp ON c.partido_id = pp.id
+ORDER BY c.dni,
+    CASE
+        WHEN c.cargo_postula ILIKE '%PRESIDENTE DE LA REP%' THEN 1
+        WHEN c.cargo_postula ILIKE '%VICEPRESIDENTE%' THEN 2
+        WHEN c.cargo_postula ILIKE '%SENADOR%' THEN 3
+        WHEN c.cargo_postula ILIKE '%DIPUTADO%' THEN 4
+        ELSE 5
+    END;

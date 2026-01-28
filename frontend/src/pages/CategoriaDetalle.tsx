@@ -5,7 +5,7 @@ import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { CATEGORY_CONFIG } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { formatNumber, formatDate } from '@/lib/utils'
+import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import {
   ArrowLeft,
   ArrowRight,
@@ -278,7 +278,7 @@ export function CategoriaDetalle() {
                         {d.contenido}
                       </blockquote>
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                        {d.canal && (
+                        {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
                           <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                             {d.canal}
                           </span>

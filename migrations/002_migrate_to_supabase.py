@@ -165,11 +165,11 @@ def migrate_candidatos(supabase, partido_ids):
 
         candidatos.append(candidato)
 
-    # Insertar en batches (upsert por DNI)
+    # Insertar en batches (upsert por DNI + cargo — un candidato puede postular a multiples cargos)
     batch_size = 100
     for i in range(0, len(candidatos), batch_size):
         batch = candidatos[i:i+batch_size]
-        supabase.table('quipu_candidatos').upsert(batch, on_conflict='dni').execute()
+        supabase.table('quipu_candidatos').upsert(batch, on_conflict='dni,cargo_eleccion').execute()
 
         if (i + batch_size) % 1000 == 0:
             print(f"    {i + batch_size:,}/{len(candidatos):,} candidatos...")
@@ -177,6 +177,10 @@ def migrate_candidatos(supabase, partido_ids):
     print(f"    ✓ {len(candidatos):,} candidatos migrados")
 
     # Retornar mapeo dni -> id para vincular hojas_vida
+    # Nota: candidatos con multiples postulaciones (85 DNIs) tendran
+    # el ultimo ID registrado; la hoja de vida es por persona,
+    # asi que vincularlo a cualquiera de sus registros es suficiente.
+    # El frontend hace fallback por DNI para cubrir ambos registros.
     # Paginar porque Supabase retorna max 1000 rows por defecto
     candidato_map = {}
     offset = 0

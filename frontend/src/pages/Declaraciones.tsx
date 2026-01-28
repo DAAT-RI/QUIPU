@@ -5,7 +5,7 @@ import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { formatDate } from '@/lib/utils'
+import { formatDate, isRedundantCanal } from '@/lib/utils'
 import { QUIPU_MASTER_TEMAS } from '@/lib/constants'
 import {
   ExternalLink,
@@ -19,11 +19,12 @@ import {
 const PAGE_LIMIT = 20
 
 const CANAL_OPTIONS = [
-  { value: 'TV', label: 'TV' },
-  { value: 'Radio', label: 'Radio' },
-  { value: 'Prensa', label: 'Prensa' },
-  { value: 'Digital', label: 'Digital' },
-  { value: 'Redes Sociales', label: 'Redes Sociales' },
+  { value: 'RAFAEL LOPEZALIAGA', label: 'Rafael López Aliaga' },
+  { value: 'VLADIMIR CERRON', label: 'Vladimir Cerrón' },
+  { value: 'PODEMOS PERÚ', label: 'Podemos Perú' },
+  { value: 'CARLOS ESPÁ', label: 'Carlos Espá' },
+  { value: 'ROBERTO SÁNCHEZ', label: 'Roberto Sánchez' },
+  { value: 'ALEX GONZALES', label: 'Alex Gonzales' },
 ]
 
 const TEMA_OPTIONS = QUIPU_MASTER_TEMAS.map((t) => ({ value: t, label: t }))
@@ -162,7 +163,7 @@ export function Declaraciones() {
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm">{d.stakeholder}</p>
-                    {d.canal && (
+                    {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
                       <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
                         {d.canal}
                       </span>

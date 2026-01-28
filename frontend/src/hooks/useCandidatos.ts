@@ -7,7 +7,7 @@ export function useCandidatos(filters: CandidatoFilters) {
     queryKey: ['candidatos', filters],
     queryFn: async () => {
       let query = supabase
-        .from('v_quipu_candidatos_completos')
+        .from('v_quipu_candidatos_unicos')
         .select('*', { count: 'exact' })
 
       if (filters.search) {
@@ -56,7 +56,7 @@ export function useSearchCandidatosByName(search: string) {
     enabled: search.length >= 2,
     queryFn: async () => {
       const { data, error } = await supabase
-        .from('v_quipu_candidatos_completos')
+        .from('v_quipu_candidatos_unicos')
         .select('*')
         .ilike('nombre_completo', `%${search}%`)
         .limit(20)
@@ -66,18 +66,65 @@ export function useSearchCandidatosByName(search: string) {
   })
 }
 
-export function useHojaVida(candidatoId: number | undefined) {
+/**
+ * Fetch other candidacy records for the same person (same DNI, different cargo).
+ * Returns sibling records excluding the current candidato ID.
+ */
+export function useCandidatoSiblings(candidatoId: number | undefined, dni?: string | null) {
   return useQuery({
-    queryKey: ['hoja-vida', candidatoId],
+    queryKey: ['candidato-siblings', candidatoId, dni],
+    enabled: !!candidatoId && !!dni,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('v_quipu_candidatos_completos')
+        .select('*')
+        .eq('dni', dni!)
+        .neq('id', candidatoId!)
+      if (error) throw error
+      return data as CandidatoCompleto[]
+    },
+  })
+}
+
+/**
+ * Fetch hoja de vida for a candidato.
+ * A person can have multiple candidacy records (same DNI, different cargo),
+ * so the hoja_vida may be linked to a sibling candidato_id.
+ * We try direct ID first, then fall back to any candidato with the same DNI.
+ */
+export function useHojaVida(candidatoId: number | undefined, dni?: string | null) {
+  return useQuery({
+    queryKey: ['hoja-vida', candidatoId, dni],
     enabled: !!candidatoId,
     queryFn: async () => {
+      // Direct lookup by candidato_id
       const { data, error } = await supabase
         .from('quipu_hojas_vida')
         .select('*')
         .eq('candidato_id', candidatoId!)
         .maybeSingle()
       if (error) throw error
-      return data as HojaVida | null
+      if (data) return data as HojaVida
+
+      // Fallback: look up via any candidato record sharing the same DNI
+      if (dni) {
+        const { data: siblings } = await supabase
+          .from('quipu_candidatos')
+          .select('id')
+          .eq('dni', dni)
+        if (siblings && siblings.length > 0) {
+          const ids = siblings.map((c) => c.id)
+          const { data: hv, error: hvError } = await supabase
+            .from('quipu_hojas_vida')
+            .select('*')
+            .in('candidato_id', ids)
+            .maybeSingle()
+          if (hvError) throw hvError
+          return (hv as HojaVida) ?? null
+        }
+      }
+
+      return null
     },
   })
 }

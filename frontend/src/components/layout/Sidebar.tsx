@@ -7,7 +7,6 @@ import {
   Building2,
   Tags,
   GitCompare,
-  Map,
   Menu,
   X,
 } from 'lucide-react'
@@ -22,7 +21,6 @@ const navigation = [
   { name: 'Partidos', href: '/partidos', icon: Building2 },
   { name: 'Categorias', href: '/categorias', icon: Tags },
   { name: 'Comparar', href: '/comparar', icon: GitCompare },
-  { name: 'Mapa Electoral', href: '/mapa', icon: Map },
 ]
 
 export function Sidebar() {

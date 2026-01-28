@@ -10,7 +10,7 @@ import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { PLAN_CATEGORIES } from '@/lib/constants'
-import { formatNumber, formatDate } from '@/lib/utils'
+import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
 const SOURCE_OPTIONS = [
@@ -139,7 +139,7 @@ function CandidatoColumn({
                       {d.tema}
                     </span>
                   )}
-                  {d.canal && (
+                  {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
                     <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
                       {d.canal}
                     </span>
