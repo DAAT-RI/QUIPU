@@ -1,0 +1,17 @@
+# Secrets
+.env
+
+# Virtual environment
+.venv/
+
+# Data (too large for git)
+data/promesas_v2.db
+fotos/
+
+# Python
+__pycache__/
+*.pyc
+
+# Misc
+nul
+.claude/

@@ -1,0 +1,223 @@
+{
+  "descripcion": "Mapeo de nombres de partido (como aparecen en Firebase) a archivos PDF",
+  "fecha_creacion": "2026-01-21",
+  "partidos": {
+    "FE EN EL PERU": {
+      "pdf_completo": "Fe en el Peru - Alvaro Paz de la Barra.pdf",
+      "pdf_resumen": "Fe en el Peru resumen.pdf",
+      "candidato": "Alvaro Paz de la Barra",
+      "total_candidatos": 147
+    },
+    "PARTIDO POLITICO PRIN": {
+      "pdf_completo": "PRIN - Walter Chirinos.pdf",
+      "pdf_resumen": "PRIN resumen.pdf",
+      "candidato": "Walter Chirinos",
+      "total_candidatos": 175
+    },
+    "PARTIDO PAIS PARA TODOS": {
+      "pdf_completo": "Pais para todos - Carlos Álvarez.pdf",
+      "pdf_resumen": "Pais para todos resumen.pdf",
+      "candidato": "Carlos Álvarez",
+      "total_candidatos": 191
+    },
+    "PARTIDO DEMOCRATICO SOMOS PERU": {
+      "pdf_completo": "Somos Peru - George Forsyth.pdf",
+      "pdf_resumen": "Somos Peru resumen.pdf",
+      "candidato": "George Forsyth",
+      "total_candidatos": 191
+    },
+    "ALIANZA PARA EL PROGRESO": {
+      "pdf_completo": "Alianza para el Progreso - César Acuña.pdf",
+      "pdf_resumen": "Alianza para el Progreso resumen.pdf",
+      "candidato": "César Acuña",
+      "total_candidatos": 191
+    },
+    "JUNTOS POR EL PERU": {
+      "pdf_completo": "Juntos por el Peru - Roberto Sánchez.pdf",
+      "pdf_resumen": "Juntos por el Peru resumen.pdf",
+      "candidato": "Roberto Sánchez",
+      "total_candidatos": 135
+    },
+    "PARTIDO DEMOCRATA UNIDO PERU": {
+      "pdf_completo": "Partido Unido Peru - charlie Carrasco.pdf",
+      "pdf_resumen": "Partido Unido Peru - resumen.pdf",
+      "candidato": "Charlie Carrasco",
+      "total_candidatos": 191
+    },
+    "PARTIDO POLITICO INTEGRIDAD DEMOCRATICA": {
+      "pdf_completo": "Integridad democrática - Wolfgang Grozo.pdf",
+      "pdf_resumen": "Integridad democrática resumen.pdf",
+      "candidato": "Wolfgang Grozo",
+      "total_candidatos": 191
+    },
+    "PARTIDO MORADO": {
+      "pdf_completo": "Partido Morado - Mesias Guevara.pdf",
+      "pdf_resumen": "Partido Morado resumen.pdf",
+      "candidato": "Mesias Guevara",
+      "total_candidatos": 155
+    },
+    "PARTIDO POLITICO COOPERACION POPULAR": {
+      "pdf_completo": "Cooperacion popular - Yonhy Lescano.pdf",
+      "pdf_resumen": "Cooperacion popular resumen.pdf",
+      "candidato": "Yonhy Lescano",
+      "total_candidatos": 191
+    },
+    "PARTIDO SICREO": {
+      "pdf_completo": "Sí creo - Carlos Espá.pdf",
+      "pdf_resumen": "Sí creo resumen.pdf",
+      "candidato": "Carlos Espá",
+      "total_candidatos": 107
+    },
+    "UN CAMINO DIFERENTE": {
+      "pdf_completo": "Un camino diferente - Rosario Fernández.pdf",
+      "pdf_resumen": "Un camino diferente resumen.pdf",
+      "candidato": "Rosario Fernández",
+      "total_candidatos": 191
+    },
+    "PARTIDO CIVICO OBRAS": {
+      "pdf_completo": "Obras - Ricardo Belmont.pdf",
+      "pdf_resumen": "Obras resumen.pdf",
+      "candidato": "Ricardo Belmont",
+      "total_candidatos": 175
+    },
+    "ALIANZA ELECTORAL VENCEREMOS": {
+      "pdf_completo": "Venceremos - Ronald Atencio.pdf",
+      "pdf_resumen": "Venceremos resumen.pdf",
+      "candidato": "Ronald Atencio",
+      "total_candidatos": 191
+    },
+    "PARTIDO POLITICO PERU PRIMERO": {
+      "pdf_completo": "Peru Primero - Mario Vizcarra.pdf",
+      "pdf_resumen": "Peru Primero resumen.pdf",
+      "candidato": "Mario Vizcarra",
+      "total_candidatos": 191
+    },
+    "AHORA NACION - AN": {
+      "pdf_completo": "Ahora Nación - Alfonso López Chau.pdf",
+      "pdf_resumen": "Ahora Nación resumen.pdf",
+      "candidato": "Alfonso López Chau",
+      "total_candidatos": 191
+    },
+    "RENOVACION POPULAR": {
+      "pdf_completo": "Renovación Popular - Rafael López Aliaga.pdf",
+      "pdf_resumen": "Renovación Popular resumen.pdf",
+      "candidato": "Rafael López Aliaga",
+      "total_candidatos": 191
+    },
+    "PARTIDO APRISTA PERUANO": {
+      "pdf_completo": "Partido Aprista - Enrique Valderrama.pdf",
+      "pdf_resumen": "Partido Aprista - resumen.pdf",
+      "candidato": "Enrique Valderrama",
+      "total_candidatos": 191
+    },
+    "PERU MODERNO": {
+      "pdf_completo": "Peru Moderno - Carlos Jaico.pdf",
+      "pdf_resumen": "Peru Moderno resumen.pdf",
+      "candidato": "Carlos Jaico",
+      "total_candidatos": 145
+    },
+    "PARTIDO PATRIOTICO DEL PERU": {
+      "pdf_completo": "Partido Patriótico del Perú - Herbert Caller.pdf",
+      "pdf_resumen": "Partido Patriótico del Perú resumen.pdf",
+      "candidato": "Herbert Caller",
+      "total_candidatos": 145
+    },
+    "PROGRESEMOS": {
+      "pdf_completo": "Progresemos - Paul Jaimes.pdf",
+      "pdf_resumen": "Progresemos resumen.pdf",
+      "candidato": "Paul Jaimes",
+      "total_candidatos": 187
+    },
+    "FUERZA Y LIBERTAD": {
+      "pdf_completo": "Fuerza y Libertad - Fiorella Molinelli.pdf",
+      "pdf_resumen": "Fuerza y Libertad - resumen.pdf",
+      "candidato": "Fiorella Molinelli",
+      "total_candidatos": 191
+    },
+    "UNIDAD NACIONAL": {
+      "pdf_completo": "Unidad Nacional - Roberto Chiabra.pdf",
+      "pdf_resumen": "Unidad Nacional resumen.pdf",
+      "candidato": "Roberto Chiabra",
+      "total_candidatos": 191
+    },
+    "SALVEMOS AL PERU": {
+      "pdf_completo": "Salvemos al Perú - Antonio Ortiz.pdf",
+      "pdf_resumen": "Salvemos al Perú resumen.pdf",
+      "candidato": "Antonio Ortiz",
+      "total_candidatos": 95
+    },
+    "FUERZA POPULAR": {
+      "pdf_completo": "Fuerza Popular - Keiko Fujimori.pdf",
+      "pdf_resumen": "Fuerza Popular resumen.pdf",
+      "candidato": "Keiko Fujimori",
+      "total_candidatos": 191
+    },
+    "PARTIDO FRENTE DE LA ESPERANZA 2021": {
+      "pdf_completo": "Frente de la Esperanza - Fernando Olivera.pdf",
+      "pdf_resumen": "Frente de la Esperanza - resumen.pdf",
+      "candidato": "Fernando Olivera",
+      "total_candidatos": 190
+    },
+    "AVANZA PAIS - PARTIDO DE INTEGRACION SOCIAL": {
+      "pdf_completo": "Avanza Pais - Jose Williams.pdf",
+      "pdf_resumen": "Avanza Pais resumen.pdf",
+      "candidato": "Jose Williams",
+      "total_candidatos": 191
+    },
+    "PARTIDO POLITICO NACIONAL PERU LIBRE": {
+      "pdf_completo": "Perú Libre - Vladimir Cerrón.pdf",
+      "pdf_resumen": "Perú Libre resumen.pdf",
+      "candidato": "Vladimir Cerrón",
+      "total_candidatos": 191
+    },
+    "PARTIDO DE LOS TRABAJADORES Y EMPRENDEDORES PTE - PERU": {
+      "pdf_completo": "Partido de los Trabajadores y emprendedores - Napoleon Becerra.pdf",
+      "pdf_resumen": "Partido de los Trabajadores y emprendedores resumen.pdf",
+      "candidato": "Napoleon Becerra",
+      "total_candidatos": 155
+    },
+    "LIBERTAD POPULAR": {
+      "pdf_completo": "Libertad Popular - Rafael Belaunde.pdf",
+      "pdf_resumen": "Libertad Popular resumen.pdf",
+      "candidato": "Rafael Belaunde",
+      "total_candidatos": 191
+    },
+    "PARTIDO POLITICO PERU ACCION": {
+      "pdf_completo": "Peru Accion - Francisco Diez Canseco.pdf",
+      "pdf_resumen": "Peru Accion resumen.pdf",
+      "candidato": "Francisco Diez Canseco",
+      "total_candidatos": 191
+    },
+    "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO": {
+      "pdf_completo": "Primero La Gente - Marisol Pérez Tello.pdf",
+      "pdf_resumen": "Primero La Gente resumen.pdf",
+      "candidato": "Marisol Pérez Tello",
+      "total_candidatos": 3
+    },
+    "PODEMOS PERU": {
+      "pdf_completo": "Podemos Perú - José Luna.pdf",
+      "pdf_resumen": "Podemos Perú resumen.pdf",
+      "candidato": "José Luna",
+      "total_candidatos": 191
+    },
+    "PARTIDO DEMOCRATA VERDE": {
+      "pdf_completo": "Demócrata verde - Alex Gonzales.pdf",
+      "pdf_resumen": "Demócrata verde resumen.pdf",
+      "candidato": "Alex Gonzales",
+      "total_candidatos": 191
+    },
+    "PARTIDO DEL BUEN GOBIERNO": {
+      "pdf_completo": "Buen gobierno - Jorge Nieto.pdf",
+      "pdf_resumen": "Buen gobierno resumen.pdf",
+      "candidato": "Jorge Nieto",
+      "total_candidatos": 187
+    }
+  },
+  "partidos_sin_pdf": [
+    "PARTIDO DEMOCRATICO FEDERAL",
+    "FRENTE POPULAR AGRICOLA FIA DEL PERU",
+    "PARTIDO CIUDADANOS POR EL PERU"
+  ],
+  "total_partidos_con_pdf": 35,
+  "total_partidos_sin_pdf": 3
+}
