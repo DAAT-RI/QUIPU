@@ -18,6 +18,7 @@ import argparse
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
+from tqdm import tqdm
 
 # Cargar .env
 load_dotenv()
@@ -123,6 +124,12 @@ def fetch_promesas(supabase: Client, limit: Optional[int] = None, offset: int = 
     return result.data
 
 
+def count_promesas(supabase: Client) -> int:
+    """Cuenta el total de promesas."""
+    result = supabase.table("quipu_promesas_planes").select("id", count="exact").execute()
+    return result.count or 0
+
+
 def update_categoria(supabase: Client, promesa_id: int, nueva_categoria: str, dry_run: bool = False):
     """Actualiza la categoría de una promesa."""
     if dry_run:
@@ -162,6 +169,12 @@ def main():
     supabase, client = init_clients()
     print("OK\n")
 
+    # Contar total de promesas
+    total_promesas = count_promesas(supabase)
+    target = args.limit if args.limit else total_promesas
+    print(f"Total promesas en BD: {total_promesas}")
+    print(f"Promesas a procesar: {target}\n")
+
     # Estadísticas
     total_processed = 0
     total_updated = 0
@@ -171,56 +184,55 @@ def main():
 
     offset = args.offset
 
-    while True:
-        # Obtener batch
-        promesas = fetch_promesas(supabase, args.batch_size, offset)
-        if not promesas:
-            break
+    # Progress bar
+    with tqdm(total=target, desc="Clasificando", unit="promesas") as pbar:
+        while True:
+            # Obtener batch
+            promesas = fetch_promesas(supabase, args.batch_size, offset)
+            if not promesas:
+                break
 
-        print(f"Procesando batch: offset={offset}, count={len(promesas)}")
+            for promesa in promesas:
+                promesa_id = promesa["id"]
+                texto = promesa.get("resumen") or promesa["texto_original"]
+                categoria_actual = promesa["categoria"]
 
-        for promesa in promesas:
-            promesa_id = promesa["id"]
-            texto = promesa.get("resumen") or promesa["texto_original"]
-            categoria_actual = promesa["categoria"]
+                # Clasificar
+                nueva_categoria = classify_promesa(client, texto)
 
-            # Clasificar
-            nueva_categoria = classify_promesa(client, texto)
-
-            if nueva_categoria is None:
-                total_errors += 1
-                continue
-
-            # Contabilizar
-            category_counts[nueva_categoria] = category_counts.get(nueva_categoria, 0) + 1
-
-            # Actualizar si cambió
-            if nueva_categoria != categoria_actual:
-                if update_categoria(supabase, promesa_id, nueva_categoria, args.dry_run):
-                    total_updated += 1
-                    print(f"  [{promesa_id}] {categoria_actual} -> {nueva_categoria}")
-                else:
+                if nueva_categoria is None:
                     total_errors += 1
-            else:
-                total_unchanged += 1
+                    pbar.update(1)
+                    continue
 
-            total_processed += 1
+                # Contabilizar
+                category_counts[nueva_categoria] = category_counts.get(nueva_categoria, 0) + 1
 
-            # Delay para no saturar API
-            time.sleep(args.delay)
+                # Actualizar si cambió
+                if nueva_categoria != categoria_actual:
+                    if update_categoria(supabase, promesa_id, nueva_categoria, args.dry_run):
+                        total_updated += 1
+                        pbar.set_postfix(updated=total_updated, errors=total_errors)
+                    else:
+                        total_errors += 1
+                else:
+                    total_unchanged += 1
+
+                total_processed += 1
+                pbar.update(1)
+
+                # Delay para no saturar API
+                time.sleep(args.delay)
+
+                # Límite total
+                if args.limit and total_processed >= args.limit:
+                    break
 
             # Límite total
             if args.limit and total_processed >= args.limit:
                 break
 
-        # Progreso
-        print(f"  Progreso: {total_processed} procesadas, {total_updated} actualizadas, {total_errors} errores\n")
-
-        # Límite total
-        if args.limit and total_processed >= args.limit:
-            break
-
-        offset += args.batch_size
+            offset += args.batch_size
 
     # Resumen final
     print("=" * 60)
