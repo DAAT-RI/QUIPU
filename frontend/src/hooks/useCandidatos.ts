@@ -19,7 +19,8 @@ export function useCandidatos(filters: CandidatoFilters) {
       if (filters.partido_id) {
         query = query.eq('partido_id', filters.partido_id)
       }
-      if (filters.departamento) {
+      // Skip departamento filter for PRESIDENCIAL (national position, not regional)
+      if (filters.departamento && filters.tipo_eleccion !== 'PRESIDENCIAL') {
         query = query.eq('departamento', filters.departamento)
       }
 

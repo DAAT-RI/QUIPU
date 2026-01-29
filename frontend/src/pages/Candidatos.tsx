@@ -71,6 +71,15 @@ export function Candidatos() {
     }
   }
 
+  // Clear departamento when PRESIDENCIAL is selected (national position)
+  function handleTipoEleccionChange(value: string) {
+    setTipoEleccion(value)
+    if (value === 'PRESIDENCIAL') {
+      setDepartamento('')
+    }
+    setPage(0)
+  }
+
   return (
     <div className="space-y-8">
       {/* Header */}
@@ -97,15 +106,16 @@ export function Candidatos() {
           />
           <FilterSelect
             value={tipoEleccion}
-            onChange={handleFilterChange(setTipoEleccion)}
+            onChange={handleTipoEleccionChange}
             options={TIPO_ELECCION_OPTIONS}
             placeholder="Tipo de Elección"
           />
           <FilterSelect
-            value={departamento}
+            value={tipoEleccion === 'PRESIDENCIAL' ? '' : departamento}
             onChange={handleFilterChange(setDepartamento)}
             options={DEPARTAMENTO_OPTIONS}
             placeholder="Departamento"
+            disabled={tipoEleccion === 'PRESIDENCIAL'}
           />
           <FilterSelect
             value={partidoId}
