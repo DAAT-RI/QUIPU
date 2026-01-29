@@ -14,7 +14,6 @@ import {
   ChevronRight,
   MessageSquareQuote,
   ArrowRight,
-  Building2,
   AtSign,
 } from 'lucide-react'
 
@@ -178,10 +177,10 @@ export function Declaraciones() {
         <>
           {/* Declaration Cards */}
           <div className="space-y-3">
-            {declarations.map((d, idx) => (
+            {declarations.map((d) => (
               <Link
-                key={`${d.master_id}-${idx}`}
-                to={`/declaraciones/${d.master_id}`}
+                key={`${d.master_id}-${d.idx}`}
+                to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
                 className="group block rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
               >
                 {/* Header: Stakeholder + Canal (si diferente) + Fecha */}
@@ -221,44 +220,24 @@ export function Declaraciones() {
                   «{d.contenido}»
                 </blockquote>
 
-                {/* Tags: Tema interacción + Temas artículo */}
-                <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                  {d.tema_interaccion && (
-                    <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-medium">
-                      {d.tema_interaccion}
-                    </span>
-                  )}
-                  {d.temas &&
-                    d.temas
+                {/* Tags: Temas de la interacción + Canal */}
+                <div className="flex flex-wrap items-center gap-1.5">
+                  {d.tema_interaccion &&
+                    d.tema_interaccion
                       .split(';')
-                      .slice(0, 2) // Solo mostrar 2 temas
                       .map((t) => t.trim())
                       .filter(Boolean)
                       .map((t) => (
-                        <span key={t} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                        <span key={t} className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-medium">
                           {t}
                         </span>
                       ))}
+                  {d.canal && (
+                    <span className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-0.5 text-[10px] font-medium">
+                      {d.canal}
+                    </span>
+                  )}
                 </div>
-
-                {/* Organizaciones mencionadas - DESTACAR para gremios */}
-                {d.organizaciones && d.organizaciones !== 'N/A' && (
-                  <div className="flex flex-wrap items-center gap-1.5">
-                    <Building2 className="h-3 w-3 text-amber-600 dark:text-amber-400" />
-                    {d.organizaciones.split(/[,;]/).slice(0, 3).map((org, i) => {
-                      const trimmed = org.trim()
-                      if (!trimmed || trimmed === 'N/A') return null
-                      return (
-                        <span
-                          key={i}
-                          className="rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-0.5 text-[10px] font-medium"
-                        >
-                          {trimmed}
-                        </span>
-                      )
-                    })}
-                  </div>
-                )}
 
                 {/* Arrow indicator */}
                 <div className="flex justify-end mt-2">

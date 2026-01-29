@@ -138,6 +138,7 @@ export interface Declaracion {
 // Vista v_quipu_declaraciones - Nueva estructura con todos los campos
 export interface DeclaracionView {
   master_id: string
+  idx: number  // Índice de la interacción en el array (0-based)
   canal: string | null
   titulo: string | null  // Título del artículo/post
   resumen: string | null  // Resumen del ARTÍCULO (no de la declaración)
@@ -200,7 +201,7 @@ export interface DeclaracionFilters {
   temaDeclaracion?: string
   organizacion?: string  // Filtrar por organización mencionada
   producto?: string
-  partido?: string  // Filter by partido name (matches canal or stakeholder)
+  partido?: string  // Filter by partido name (matches organizaciones, stakeholder, or contenido)
   search?: string  // Busca en CONTENIDO (lo que dijo), NO en keywords/titulo
   offset: number
   limit: number

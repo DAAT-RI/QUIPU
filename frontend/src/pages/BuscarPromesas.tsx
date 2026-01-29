@@ -21,13 +21,13 @@ export function BuscarPromesas() {
 
   const { data: partidos } = usePartidos()
 
+  // Get partido name for filtering
+  const selectedPartido = (partidos ?? []).find(p => String(p.id) === partidoId)
+
   const {
     data: promesasResult,
     isLoading: loadingPromesas,
-  } = useSearchPromesas(query, categoria || undefined, partidoId ? Number(partidoId) : undefined)
-
-  // Get partido name for filtering declaraciones
-  const selectedPartido = (partidos ?? []).find(p => String(p.id) === partidoId)
+  } = useSearchPromesas(query, categoria || undefined, selectedPartido?.nombre_oficial)
 
   const {
     data: declaracionesResult,
@@ -148,10 +148,10 @@ export function BuscarPromesas() {
                 Sin resultados en medios
               </div>
             ) : (
-              declaraciones.map((d, idx) => (
+              declaraciones.map((d) => (
                 <Link
-                  key={`${d.master_id}-${idx}`}
-                  to={`/declaraciones/${d.master_id}`}
+                  key={`${d.master_id}-${d.idx}`}
+                  to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
                   className="group block p-3 hover:bg-muted/30 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">

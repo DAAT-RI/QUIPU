@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { useParams, Link } from 'react-router-dom'
+import { useState, useEffect, useRef } from 'react'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { useDeclaracionEntry } from '@/hooks/useDeclaraciones'
 import { useStakeholderCandidato } from '@/hooks/useStakeholderCandidato'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -33,6 +33,8 @@ const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
 
 export function DeclaracionDetalle() {
   const { id } = useParams()
+  const [searchParams] = useSearchParams()
+  const highlightIdx = parseInt(searchParams.get('idx') ?? '-1', 10)
   const { data: entry, isLoading, isError, refetch } = useDeclaracionEntry(id)
   const [activeTab, setActiveTab] = useState<TabKey>('declaraciones')
 
@@ -41,11 +43,18 @@ export function DeclaracionDetalle() {
     return <ErrorState message="No se pudo cargar la declaración" onRetry={() => refetch()} />
   }
 
-  const declarations: Interaccion[] =
-    entry.interacciones?.filter((i) => i.type === 'declaration') ?? []
+  // Preserve original index for highlighting from URL param
+  const declarationsWithIdx = (entry.interacciones ?? [])
+    .map((i, idx) => ({ ...i, originalIdx: idx }))
+    .filter((i) => i.type === 'declaration')
 
-  const mentions: Interaccion[] =
-    entry.interacciones?.filter((i) => i.type === 'mention') ?? []
+  const mentionsWithIdx = (entry.interacciones ?? [])
+    .map((i, idx) => ({ ...i, originalIdx: idx }))
+    .filter((i) => i.type === 'mention')
+
+  // For counting (legacy)
+  const declarations = declarationsWithIdx
+  const mentions = mentionsWithIdx
 
   // Parse comma/semicolon-separated fields
   const parseList = (str: string | null | undefined, separator = /[,;]/) =>
@@ -144,7 +153,7 @@ export function DeclaracionDetalle() {
       {/* Tab Content */}
       <div className="min-h-[300px]">
         {activeTab === 'declaraciones' && (
-          <TabDeclaraciones declarations={declarations} />
+          <TabDeclaraciones declarations={declarationsWithIdx} highlightIdx={highlightIdx} />
         )}
         {activeTab === 'fuente' && (
           <TabFuente entry={entry} temasList={temasList} keywordsList={keywordsList} />
@@ -166,7 +175,26 @@ export function DeclaracionDetalle() {
 }
 
 // Tab: Declaraciones (PRINCIPAL)
-function TabDeclaraciones({ declarations }: { declarations: Interaccion[] }) {
+type InteraccionWithIdx = Interaccion & { originalIdx: number }
+
+function TabDeclaraciones({
+  declarations,
+  highlightIdx,
+}: {
+  declarations: InteraccionWithIdx[]
+  highlightIdx: number
+}) {
+  const highlightRef = useRef<HTMLDivElement>(null)
+
+  // Scroll to highlighted item when loaded
+  useEffect(() => {
+    if (highlightRef.current && highlightIdx >= 0) {
+      setTimeout(() => {
+        highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }, 100)
+    }
+  }, [highlightIdx])
+
   if (declarations.length === 0) {
     return (
       <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
@@ -177,8 +205,14 @@ function TabDeclaraciones({ declarations }: { declarations: Interaccion[] }) {
 
   return (
     <div className="rounded-xl border bg-card divide-y">
-      {declarations.map((d, idx) => (
-        <DeclarationItem key={idx} declaration={d} />
+      {declarations.map((d) => (
+        <div
+          key={d.originalIdx}
+          ref={d.originalIdx === highlightIdx ? highlightRef : null}
+          className={d.originalIdx === highlightIdx ? 'ring-2 ring-primary bg-primary/5 rounded-lg' : ''}
+        >
+          <DeclarationItem declaration={d} />
+        </div>
       ))}
     </div>
   )

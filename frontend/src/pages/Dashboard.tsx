@@ -11,6 +11,8 @@ import {
   UserCheck,
   Vote,
   ChevronDown,
+  Quote,
+  AtSign,
 } from 'lucide-react'
 
 import { useDashboardStats, usePromesasPorCategoria, useTopPartidos } from '@/hooks/useDashboardStats'
@@ -219,10 +221,10 @@ export function Dashboard() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
             {/* Feed de declaraciones - columna principal */}
             <div className="lg:col-span-2 space-y-2">
-              {recentDeclaraciones.map((decl, idx) => (
+              {recentDeclaraciones.map((decl) => (
                 <Link
-                  key={`${decl.master_id}-${idx}`}
-                  to={`/declaraciones/${decl.master_id}`}
+                  key={`${decl.master_id}-${decl.idx}`}
+                  to={`/declaraciones/${decl.master_id}?idx=${decl.idx}`}
                   className="group flex items-start gap-4 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
                 >
                   <div className="min-w-0 flex-1">
@@ -231,6 +233,17 @@ export function Dashboard() {
                       {decl.canal && !isRedundantCanal(decl.canal, decl.stakeholder) && (
                         <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                           {decl.canal}
+                        </span>
+                      )}
+                      {decl.tipo === 'mention' ? (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 text-[11px] font-medium">
+                          <AtSign className="h-3 w-3" />
+                          Mención
+                        </span>
+                      ) : (
+                        <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[11px] font-medium">
+                          <Quote className="h-3 w-3" />
+                          Declaración
                         </span>
                       )}
                     </div>

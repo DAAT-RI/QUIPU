@@ -2,19 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { DeclaracionFilters, DeclaracionView, QuipuMasterEntry } from '@/types/database'
 
-// Mapa de equivalencias para búsqueda accent-insensitive
-const ACCENT_MAP: Record<string, string> = {
-  'politica': 'Política',
-  'partidos politicos': 'Partidos Políticos',
-  'corrupcion y transparencia': 'Corrupción y Transparencia',
-  'elecciones y sistemas electorales': 'Elecciones y Sistemas Electorales',
-  'gobierno y administracion publica': 'Gobierno y Administración Pública',
+/** Remove accents from text for accent-insensitive search */
+function removeAccents(text: string): string {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 }
 
-/** Devuelve variante con tildes si existe */
-function getAccentedVariant(text: string): string | null {
-  const key = text.toLowerCase()
-  return ACCENT_MAP[key] || null
+/** Generate search variants (with and without accents) */
+function getSearchVariants(text: string): string[] {
+  const withoutAccents = removeAccents(text)
+  const variants = new Set([text.toLowerCase(), withoutAccents.toLowerCase()])
+  return Array.from(variants)
 }
 
 /**
@@ -56,13 +53,8 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
 
       // Filtro por tema de la declaración específica (con soporte para tildes)
       if (filters.temaDeclaracion) {
-        const accentedVariant = getAccentedVariant(filters.temaDeclaracion)
-        if (accentedVariant) {
-          // Buscar ambas variantes: con y sin tildes
-          query = query.or(`tema_interaccion.ilike.%${filters.temaDeclaracion}%,tema_interaccion.ilike.%${accentedVariant}%`)
-        } else {
-          query = query.ilike('tema_interaccion', `%${filters.temaDeclaracion}%`)
-        }
+        const variants = getSearchVariants(filters.temaDeclaracion)
+        query = query.or(variants.map(v => `tema_interaccion.ilike.%${v}%`).join(','))
       }
 
       // Filtro por organización mencionada (IMPORTANTE para gremios)
@@ -75,15 +67,21 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
         query = query.ilike('contenido', `%${filters.producto}%`)
       }
 
-      // Filtro por partido (busca en canal o stakeholder)
+      // Filtro por partido (busca en organizaciones, stakeholder y contenido)
       if (filters.partido) {
-        query = query.or(`canal.ilike.%${filters.partido}%,stakeholder.ilike.%${filters.partido}%`)
+        query = query.or(`organizaciones.ilike.%${filters.partido}%,stakeholder.ilike.%${filters.partido}%,contenido.ilike.%${filters.partido}%`)
       }
 
       // Búsqueda general - IMPORTANTE: buscar en CONTENIDO (lo que dijo)
       // NO buscar en keywords/titulo (son del artículo, no de la declaración)
+      // Soporta búsqueda con/sin acentos (mineria = minería)
       if (filters.search) {
-        query = query.or(`contenido.ilike.%${filters.search}%,stakeholder.ilike.%${filters.search}%`)
+        const variants = getSearchVariants(filters.search)
+        const conditions = variants.flatMap(v => [
+          `contenido.ilike.%${v}%`,
+          `stakeholder.ilike.%${v}%`
+        ])
+        query = query.or(conditions.join(','))
       }
 
       // Ordenar por fecha descendente y paginar
