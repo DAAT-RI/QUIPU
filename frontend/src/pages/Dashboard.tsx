@@ -251,14 +251,19 @@ export function Dashboard() {
                       {decl.contenido}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      {decl.tema_interaccion && (
-                        <span className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                          {decl.tema_interaccion}
-                        </span>
-                      )}
-                      {decl.organizaciones && (
-                        <span className="rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 text-[11px] font-medium">
-                          {decl.organizaciones}
+                      {decl.tema_interaccion &&
+                        decl.tema_interaccion
+                          .split(';')
+                          .map((t) => t.trim())
+                          .filter(Boolean)
+                          .map((t) => (
+                            <span key={t} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
+                              {t}
+                            </span>
+                          ))}
+                      {decl.canal && (
+                        <span className="rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-0.5 text-[11px] font-medium">
+                          {decl.canal}
                         </span>
                       )}
                     </div>
