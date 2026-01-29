@@ -121,7 +121,9 @@ function renderJsonArray(data: unknown[] | null | undefined, label: string) {
       {data.map((item, i) => (
         <div key={i} className="p-4 text-sm">
           {typeof item === 'object' && item !== null
-            ? Object.entries(item as Record<string, unknown>).map(([k, v]) => (
+            ? Object.entries(item as Record<string, unknown>)
+                .filter(([k]) => k !== 'titulado')
+                .map(([k, v]) => (
                 <p key={k}>
                   <span className="font-medium text-muted-foreground">{formatFieldLabel(k)}:</span>{' '}
                   {formatFieldValue(v)}
