@@ -5,16 +5,18 @@ Reemplaza las 15 categorías genéricas por las 267 categorías específicas de 
 
 Uso:
     python 004_reclassify_categories_gemini.py [--dry-run] [--batch-size N] [--limit N]
+    python 004_reclassify_categories_gemini.py --resume  # Continúa desde el último checkpoint
 
 Requiere:
     - SUPABASE_URL y SUPABASE_SERVICE_KEY en variables de entorno
-    - GOOGLE_API_KEY para Gemini
+    - GEMINI_API_KEY para Gemini
 """
 
 import os
 import json
 import time
 import argparse
+import signal
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
@@ -34,9 +36,40 @@ GOOGLE_API_KEY = os.getenv("GEMINI_API_KEY") or os.getenv("GOOGLE_API_KEY")
 # Cargar categorías desde JSON
 SCRIPT_DIR = Path(__file__).parent.parent
 CATEGORIES_PATH = SCRIPT_DIR / "docs" / "categorias.json"
+CHECKPOINT_PATH = Path(__file__).parent / ".reclassify_checkpoint.json"
 
 with open(CATEGORIES_PATH, "r", encoding="utf-8") as f:
     CATEGORIES_267 = json.load(f)
+
+# Estado global para checkpoint
+checkpoint_state = {
+    "last_id": 0,
+    "total_processed": 0,
+    "total_updated": 0,
+    "total_unchanged": 0,
+    "total_errors": 0,
+    "category_counts": {}
+}
+
+
+def save_checkpoint():
+    """Guarda el estado actual en un archivo checkpoint."""
+    with open(CHECKPOINT_PATH, "w", encoding="utf-8") as f:
+        json.dump(checkpoint_state, f, ensure_ascii=False, indent=2)
+
+
+def load_checkpoint() -> dict:
+    """Carga el estado desde el archivo checkpoint."""
+    if CHECKPOINT_PATH.exists():
+        with open(CHECKPOINT_PATH, "r", encoding="utf-8") as f:
+            return json.load(f)
+    return None
+
+
+def clear_checkpoint():
+    """Elimina el archivo checkpoint."""
+    if CHECKPOINT_PATH.exists():
+        CHECKPOINT_PATH.unlink()
 
 # Crear string de categorías para el prompt
 CATEGORIES_LIST_STR = "\n".join(f"- {cat}" for cat in CATEGORIES_267)

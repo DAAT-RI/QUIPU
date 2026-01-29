@@ -118,7 +118,7 @@ export function Declaraciones() {
             value={tipo}
             onChange={handleFilterChange(setTipo)}
             options={TIPO_OPTIONS}
-            placeholder="Tipo"
+            placeholder="Mostrar"
           />
           <FilterSelect
             value={canal}
