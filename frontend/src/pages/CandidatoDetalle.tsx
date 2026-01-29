@@ -79,6 +79,13 @@ function formatFieldLabel(key: string): string {
   return FIELD_LABELS[key] ?? key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
 }
 
+function formatFieldValue(value: unknown): string {
+  const str = String(value)
+  // Replace "0000" year with "Actualidad"
+  if (str === '0000' || str === '0') return 'Actualidad'
+  return str
+}
+
 /** Cargo importance: lower number = more important */
 function cargoPriority(cargo: string | null): number {
   if (!cargo) return 99
@@ -117,10 +124,10 @@ function renderJsonArray(data: unknown[] | null | undefined, label: string) {
             ? Object.entries(item as Record<string, unknown>).map(([k, v]) => (
                 <p key={k}>
                   <span className="font-medium text-muted-foreground">{formatFieldLabel(k)}:</span>{' '}
-                  {String(v)}
+                  {formatFieldValue(v)}
                 </p>
               ))
-            : String(item)}
+            : formatFieldValue(item)}
         </div>
       ))}
     </div>
@@ -281,7 +288,7 @@ export function CandidatoDetalle() {
                     <div className="rounded-xl border bg-card p-4 text-sm">
                       {Object.entries(hojaVida.educacion_basica).map(([k, v]) => (
                         <p key={k}>
-                          <span className="font-medium text-muted-foreground">{formatFieldLabel(k)}:</span> {String(v)}
+                          <span className="font-medium text-muted-foreground">{formatFieldLabel(k)}:</span> {formatFieldValue(v)}
                         </p>
                       ))}
                     </div>
@@ -469,10 +476,10 @@ function LegalSection({
           {typeof item === 'object' && item !== null
             ? Object.entries(item as Record<string, unknown>).map(([k, v]) => (
                 <p key={k}>
-                  <span className="font-medium">{formatFieldLabel(k)}:</span> {String(v)}
+                  <span className="font-medium">{formatFieldLabel(k)}:</span> {formatFieldValue(v)}
                 </p>
               ))
-            : String(item)}
+            : formatFieldValue(item)}
         </div>
       ))}
     </div>
