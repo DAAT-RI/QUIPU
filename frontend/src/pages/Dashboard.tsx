@@ -7,7 +7,6 @@ import {
   MessageSquareQuote,
   ArrowRight,
   TrendingUp,
-  AlertTriangle,
   Crown,
   UserCheck,
   Vote,
@@ -193,14 +192,14 @@ export function Dashboard() {
         </div>
       </section>
 
-      {/* Alertas Recientes — top priority for business clients */}
+      {/* Declaraciones Recientes — two columns: feed + categories */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-              <AlertTriangle className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <MessageSquareQuote className="h-4 w-4 text-primary" />
             </div>
-            <h2 className="text-lg font-semibold">Alertas Recientes</h2>
+            <h2 className="text-lg font-semibold">Declaraciones Recientes</h2>
           </div>
           <Link
             to="/declaraciones"
@@ -217,46 +216,94 @@ export function Dashboard() {
             No se encontraron declaraciones recientes.
           </div>
         ) : (
-          <div className="space-y-2">
-            {recentDeclaraciones.map((decl, idx) => (
-              <Link
-                key={`${decl.master_id}-${idx}`}
-                to={`/declaraciones/${decl.master_id}`}
-                className="group flex items-start gap-4 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
-              >
-                <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm">{decl.stakeholder}</p>
-                    {decl.canal && !isRedundantCanal(decl.canal, decl.stakeholder) && (
-                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                        {decl.canal}
-                      </span>
-                    )}
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Feed de declaraciones - columna principal */}
+            <div className="lg:col-span-2 space-y-2">
+              {recentDeclaraciones.map((decl, idx) => (
+                <Link
+                  key={`${decl.master_id}-${idx}`}
+                  to={`/declaraciones/${decl.master_id}`}
+                  className="group flex items-start gap-4 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+                >
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2">
+                      <p className="font-semibold text-sm">{decl.stakeholder}</p>
+                      {decl.canal && !isRedundantCanal(decl.canal, decl.stakeholder) && (
+                        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                          {decl.canal}
+                        </span>
+                      )}
+                    </div>
+                    <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
+                      {decl.contenido}
+                    </p>
+                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
+                      {decl.tema_interaccion && (
+                        <span className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
+                          {decl.tema_interaccion}
+                        </span>
+                      )}
+                      {decl.organizaciones && (
+                        <span className="rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 text-[11px] font-medium">
+                          {decl.organizaciones}
+                        </span>
+                      )}
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
-                    {decl.contenido}
-                  </p>
-                  <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    {decl.tema_interaccion && (
-                      <span className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                        {decl.tema_interaccion}
-                      </span>
-                    )}
-                    {decl.organizaciones && (
-                      <span className="rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 text-[11px] font-medium">
-                        {decl.organizaciones}
-                      </span>
-                    )}
+                  <div className="shrink-0 text-right flex flex-col items-end gap-1">
+                    <span className="text-xs text-muted-foreground">
+                      {formatDate(decl.fecha)}
+                    </span>
+                    <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors mt-1" />
                   </div>
-                </div>
-                <div className="shrink-0 text-right flex flex-col items-end gap-1">
-                  <span className="text-xs text-muted-foreground">
-                    {formatDate(decl.fecha)}
-                  </span>
-                  <ArrowRight className="h-4 w-4 text-muted-foreground/40 group-hover:text-primary transition-colors mt-1" />
-                </div>
-              </Link>
-            ))}
+                </Link>
+              ))}
+            </div>
+
+            {/* Categorías del feed - columna lateral */}
+            <div className="space-y-3">
+              <p className="text-sm font-medium text-muted-foreground">Categorías en el feed</p>
+              <div className="rounded-xl border bg-card divide-y">
+                {(() => {
+                  // Extraer categorías únicas de las declaraciones
+                  const categoryMap = new Map<string, number>()
+                  recentDeclaraciones.forEach((decl) => {
+                    if (decl.tema_interaccion) {
+                      categoryMap.set(
+                        decl.tema_interaccion,
+                        (categoryMap.get(decl.tema_interaccion) || 0) + 1
+                      )
+                    }
+                  })
+                  const categories = Array.from(categoryMap.entries())
+                    .sort((a, b) => b[1] - a[1])
+
+                  if (categories.length === 0) {
+                    return (
+                      <div className="p-4 text-center text-sm text-muted-foreground">
+                        Sin categorías
+                      </div>
+                    )
+                  }
+
+                  return categories.map(([cat, count]) => (
+                    <Link
+                      key={cat}
+                      to={`/declaraciones?tema=${encodeURIComponent(cat)}`}
+                      className="group flex items-center justify-between p-3 transition-colors hover:bg-muted/30"
+                    >
+                      <span className="text-sm font-medium truncate">{cat}</span>
+                      <div className="flex items-center gap-2 shrink-0">
+                        <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">
+                          {count}
+                        </span>
+                        <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
+                      </div>
+                    </Link>
+                  ))
+                })()}
+              </div>
+            </div>
           </div>
         )}
       </section>
