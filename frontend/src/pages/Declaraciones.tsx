@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useDeclaraciones, useCanales, useOrganizacionesMencionadas } from '@/hooks/useDeclaraciones'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
@@ -30,14 +30,24 @@ const TIPO_OPTIONS = [
 const TEMA_OPTIONS = QUIPU_MASTER_TEMAS.map((t) => ({ value: t, label: t }))
 
 export function Declaraciones() {
+  const [searchParams] = useSearchParams()
+  const stakeholderFromUrl = searchParams.get('stakeholder') || ''
+
   // Default: solo declarations (mentions tienen mucho ruido)
   const [tipo, setTipo] = useState<string>('declaration')
   const [search, setSearch] = useState('')
+  const [stakeholder, setStakeholder] = useState(stakeholderFromUrl)
   const [canal, setCanal] = useState('')
   const [tema, setTema] = useState('')
   const [organizacion, setOrganizacion] = useState('')
   const [producto, setProducto] = useState('')
   const [page, setPage] = useState(0)
+
+  // Sync stakeholder with URL param
+  useEffect(() => {
+    setStakeholder(stakeholderFromUrl)
+    setPage(0)
+  }, [stakeholderFromUrl])
 
   // Obtener canales y organizaciones dinámicamente
   const { data: canalesData } = useCanales()
@@ -51,6 +61,7 @@ export function Declaraciones() {
   const { data, isLoading, isError } = useDeclaraciones({
     tipo: tipo as 'declaration' | 'mention' | undefined || undefined,
     search: search || undefined,
+    stakeholder: stakeholder || undefined,
     canal: canal || undefined,
     tema: tema || undefined,
     organizacion: organizacion || undefined,
@@ -89,13 +100,19 @@ export function Declaraciones() {
 
       {/* Filters Card */}
       <div className="rounded-xl border bg-card p-4 space-y-3">
-        {/* Row 1: Search + Tipo + Canal */}
+        {/* Row 1: Search + Stakeholder + Tipo + Canal */}
         <div className="flex flex-col sm:flex-row gap-3">
           <SearchInput
             value={search}
             onChange={handleFilterChange(setSearch)}
             placeholder="Buscar en lo que dijeron..."
             className="flex-1"
+          />
+          <SearchInput
+            value={stakeholder}
+            onChange={handleFilterChange(setStakeholder)}
+            placeholder="Quién dijo..."
+            className="sm:w-48"
           />
           <FilterSelect
             value={tipo}

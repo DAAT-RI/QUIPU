@@ -26,12 +26,16 @@ export function BuscarPromesas() {
     isLoading: loadingPromesas,
   } = useSearchPromesas(query, categoria || undefined, partidoId ? Number(partidoId) : undefined)
 
+  // Get partido name for filtering declaraciones
+  const selectedPartido = (partidos ?? []).find(p => String(p.id) === partidoId)
+
   const {
     data: declaracionesResult,
     isLoading: loadingDeclaraciones,
   } = useDeclaraciones({
     search: query.length >= 3 ? query : undefined,
     tipo: 'declaration',
+    partido: selectedPartido?.nombre_oficial,
     offset: 0,
     limit: 20,
   })

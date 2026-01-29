@@ -9,7 +9,7 @@ import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { formatNumber } from '@/lib/utils'
-import { Users, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
+import { Users, ChevronLeft, ChevronRight, ArrowRight, MessageSquareQuote } from 'lucide-react'
 import { PAGE_SIZE } from '@/lib/constants'
 
 const TIPO_ELECCION_OPTIONS = [
@@ -141,57 +141,84 @@ export function Candidatos() {
       ) : view === 'grid' ? (
         /* Grid View */
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {candidatos.map((c) => (
-            <Link
-              key={c.id}
-              to={`/candidatos/${c.id}`}
-              className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
-            >
-              <div className="flex flex-col items-center text-center">
-                <CandidatoAvatar nombre={c.nombre_completo || ''} fotoUrl={c.foto_url} size="lg" />
-                <h3 className="mt-3 font-semibold text-sm group-hover:text-primary transition-colors">
-                  {c.nombre_completo}
-                </h3>
-                {c.partido_nombre && (
-                  <span className="mt-1.5 inline-block rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                    {c.partido_nombre}
-                  </span>
-                )}
-                <p className="mt-1 text-xs text-muted-foreground">{c.cargo_postula}</p>
-                {c.departamento && (
-                  <p className="text-xs text-muted-foreground">{c.departamento}</p>
-                )}
+          {candidatos.map((c) => {
+            const apellido = c.apellido_paterno ?? c.nombre_completo?.split(' ').pop() ?? ''
+            return (
+              <div
+                key={c.id}
+                className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+              >
+                <Link to={`/candidatos/${c.id}`} className="flex flex-col items-center text-center">
+                  <CandidatoAvatar nombre={c.nombre_completo || ''} fotoUrl={c.foto_url} size="lg" />
+                  <h3 className="mt-3 font-semibold text-sm group-hover:text-primary transition-colors">
+                    {c.nombre_completo}
+                  </h3>
+                  {c.partido_nombre && (
+                    <span className="mt-1.5 inline-block rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
+                      {c.partido_nombre}
+                    </span>
+                  )}
+                  <p className="mt-1 text-xs text-muted-foreground">{c.cargo_postula}</p>
+                  {c.departamento && (
+                    <p className="text-xs text-muted-foreground">{c.departamento}</p>
+                  )}
+                </Link>
+                {/* Declarations link */}
+                <Link
+                  to={`/declaraciones?stakeholder=${encodeURIComponent(apellido)}`}
+                  className="mt-3 flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                  title="Ver declaraciones en medios"
+                >
+                  <MessageSquareQuote className="h-3.5 w-3.5" />
+                  <span>Declaraciones</span>
+                </Link>
               </div>
-            </Link>
-          ))}
+            )
+          })}
         </div>
       ) : (
         /* List View */
         <div className="rounded-xl border bg-card divide-y">
-          {candidatos.map((c) => (
-            <Link
-              key={c.id}
-              to={`/candidatos/${c.id}`}
-              className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
-            >
-              <CandidatoAvatar nombre={c.nombre_completo || ''} fotoUrl={c.foto_url} size="md" />
-              <div className="flex-1 min-w-0">
-                <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
-                  {c.nombre_completo}
-                </p>
-                <p className="text-xs text-muted-foreground">
-                  {c.cargo_postula}
-                  {c.departamento ? ` \u2022 ${c.departamento}` : ''}
-                </p>
+          {candidatos.map((c) => {
+            const apellido = c.apellido_paterno ?? c.nombre_completo?.split(' ').pop() ?? ''
+            return (
+              <div
+                key={c.id}
+                className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
+              >
+                <Link to={`/candidatos/${c.id}`} className="flex items-center gap-4 flex-1 min-w-0">
+                  <CandidatoAvatar nombre={c.nombre_completo || ''} fotoUrl={c.foto_url} size="md" />
+                  <div className="flex-1 min-w-0">
+                    <p className="font-medium text-sm truncate group-hover:text-primary transition-colors">
+                      {c.nombre_completo}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {c.cargo_postula}
+                      {c.departamento ? ` \u2022 ${c.departamento}` : ''}
+                    </p>
+                  </div>
+                </Link>
+                {c.partido_nombre && (
+                  <span className="hidden sm:inline-block rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
+                    {c.partido_nombre}
+                  </span>
+                )}
+                <Link
+                  to={`/declaraciones?stakeholder=${encodeURIComponent(apellido)}`}
+                  className="p-2 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                  title="Ver declaraciones en medios"
+                >
+                  <MessageSquareQuote className="h-4 w-4" />
+                </Link>
+                <Link
+                  to={`/candidatos/${c.id}`}
+                  className="p-2 text-muted-foreground/30 hover:text-primary transition-colors"
+                >
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
               </div>
-              {c.partido_nombre && (
-                <span className="hidden sm:inline-block rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                  {c.partido_nombre}
-                </span>
-              )}
-              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-            </Link>
-          ))}
+            )
+          })}
         </div>
       )}
 
