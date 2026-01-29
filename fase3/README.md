@@ -30,11 +30,20 @@ python scripts/sync_master_declaraciones.py
 python scripts/create_test_client.py
 ```
 
+## Documentación
+
+| Documento | Contenido |
+|-----------|-----------|
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Modelo de datos, diagramas, queries SQL |
+| [FRONTEND_MIGRATION.md](FRONTEND_MIGRATION.md) | Impacto en frontend, hooks a modificar, componentes nuevos |
+
 ## Estructura
 
 ```
 fase3/
 ├── README.md
+├── ARCHITECTURE.md             # Arquitectura de datos
+├── FRONTEND_MIGRATION.md       # Guía migración frontend
 ├── migrations/
 │   ├── 001_quipu_clientes.sql      # Clientes + usuarios
 │   ├── 002_quipu_temas.sql         # Catálogo de temas
