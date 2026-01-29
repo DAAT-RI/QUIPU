@@ -65,6 +65,17 @@ export function isRedundantCanal(canal: string | null, stakeholder: string): boo
   return c === s || c.includes(s) || s.includes(c)
 }
 
+/** Returns 'white' or 'black' depending on which has better contrast with the given hex color. */
+export function getContrastColor(hex: string): string {
+  const c = hex.replace('#', '')
+  const r = parseInt(c.substring(0, 2), 16)
+  const g = parseInt(c.substring(2, 4), 16)
+  const b = parseInt(c.substring(4, 6), 16)
+  // W3C relative luminance formula
+  const luminance = (0.299 * r + 0.587 * g + 0.114 * b) / 255
+  return luminance > 0.55 ? '#000000' : '#ffffff'
+}
+
 const JNE_FOTO_BASE = 'https://mpesije.jne.gob.pe/apidocs/'
 
 export function buildFotoUrl(fotoUrl: string | null | undefined): string | null {

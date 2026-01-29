@@ -99,7 +99,7 @@ function CandidatoColumn({
         {showPlanes && !loadingPromesas && promesasList.length > 0 && (
           <div className="space-y-2">
             {sourceFilter === '' && (
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 Plan de Gobierno
               </p>
             )}
@@ -121,7 +121,7 @@ function CandidatoColumn({
         {showDeclaraciones && !loadingDecl && declaraciones.length > 0 && (
           <div className="space-y-2">
             {sourceFilter === '' && (
-              <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider">
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 En Medios
               </p>
             )}
@@ -135,17 +135,17 @@ function CandidatoColumn({
                 </blockquote>
                 <div className="mt-1.5 flex flex-wrap gap-1">
                   {d.tema && (
-                    <span className="inline-block rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[10px] font-medium">
+                    <span className="inline-block rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
                       {d.tema}
                     </span>
                   )}
                   {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                    <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                    <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
                       {d.canal}
                     </span>
                   )}
                   {d.fecha && (
-                    <span className="text-[10px] text-muted-foreground">
+                    <span className="text-[11px] text-muted-foreground">
                       {formatDate(d.fecha)}
                     </span>
                   )}
@@ -179,13 +179,21 @@ export function Comparar() {
     label: c.label,
   }))
 
-  // Filter out already selected candidates from search results
+  // Filter out already selected candidates and restrict to same tipo_eleccion
   const selectedIds = new Set(selectedCandidatos.map((c) => c.id))
-  const filteredResults = (searchResults ?? []).filter((c) => !selectedIds.has(c.id))
+  const firstTipo = selectedCandidatos[0]?.tipo_eleccion
+  const filteredResults = (searchResults ?? []).filter((c) => {
+    if (selectedIds.has(c.id)) return false
+    // If we have selections, only show candidates with same tipo_eleccion
+    if (firstTipo && c.tipo_eleccion !== firstTipo) return false
+    return true
+  })
 
   function addCandidato(candidato: CandidatoCompleto) {
     if (selectedCandidatos.length >= 4) return
     if (selectedIds.has(candidato.id)) return
+    // Enforce same category restriction
+    if (firstTipo && candidato.tipo_eleccion !== firstTipo) return
     setSelectedCandidatos((prev) => [...prev, candidato])
     setSearchQuery('')
   }
@@ -239,11 +247,13 @@ export function Comparar() {
                   No se encontraron candidatos
                 </div>
               ) : (
-                <div className="divide-y">
+                <div className="divide-y" role="listbox" aria-label="Resultados de busqueda">
                   {filteredResults.map((c) => (
                     <button
                       key={c.id}
                       type="button"
+                      role="option"
+                      aria-selected={false}
                       onClick={() => addCandidato(c)}
                       disabled={selectedCandidatos.length >= 4}
                       className="w-full flex items-center gap-3 p-3 text-left hover:bg-muted/30 transition-colors disabled:opacity-50"
@@ -266,7 +276,14 @@ export function Comparar() {
 
         {/* Selected candidates as pills */}
         {selectedCandidatos.length > 0 && (
-          <div className="flex flex-wrap gap-2 mt-3">
+          <div className="space-y-2 mt-3">
+            {/* Category indicator */}
+            {firstTipo && (
+              <p className="text-xs text-muted-foreground">
+                Comparando candidatos: <span className="font-medium text-foreground">{firstTipo}</span>
+              </p>
+            )}
+            <div className="flex flex-wrap gap-2">
             {selectedCandidatos.map((c) => (
               <span
                 key={c.id}
@@ -288,6 +305,7 @@ export function Comparar() {
                 Maximo 4 candidatos
               </span>
             )}
+            </div>
           </div>
         )}
       </div>

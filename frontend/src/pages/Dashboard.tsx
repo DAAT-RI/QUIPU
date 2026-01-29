@@ -8,15 +8,18 @@ import {
   ArrowRight,
   TrendingUp,
   AlertTriangle,
+  Crown,
+  UserCheck,
+  Vote,
 } from 'lucide-react'
 
 import { useDashboardStats, usePromesasPorCategoria, useTopPartidos } from '@/hooks/useDashboardStats'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
-import { useCandidatos } from '@/hooks/useCandidatos'
+import { useCandidatos, useCandidatoCountByTipo } from '@/hooks/useCandidatos'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { CATEGORY_CONFIG, CATEGORIES_LIST } from '@/lib/constants'
-import { formatNumber, formatDate } from '@/lib/utils'
+import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 
 export function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
@@ -33,6 +36,10 @@ export function Dashboard() {
     offset: 0,
     limit: 5,
   })
+
+  // Get candidate counts by cargo type
+  const { data: cargoCountsData } = useCandidatoCountByTipo()
+  const cargoCounts = cargoCountsData ?? {}
 
   const recentDeclaraciones = declaracionesResult?.data ?? []
   const topCandidatos = topCandidatosData?.data ?? []
@@ -108,6 +115,66 @@ export function Dashboard() {
         </div>
       )}
 
+      {/* Candidatos por Cargo — prominent navigation to reduce noise */}
+      <section>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
+            <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+          </div>
+          <h2 className="text-lg font-semibold">Candidatos por Cargo</h2>
+        </div>
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+          <Link
+            to="/candidatos?tipo=PRESIDENTE%20Y%20VICEPRESIDENTES"
+            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+                <Crown className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">
+                  {formatNumber(cargoCounts['PRESIDENTE Y VICEPRESIDENTES'] || 0)}
+                </p>
+                <p className="text-sm text-muted-foreground">Presidenciales</p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            to="/candidatos?tipo=CONGRESISTA%20DE%20LA%20REPUBLICA"
+            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
+                <UserCheck className="h-6 w-6 text-violet-600 dark:text-violet-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">
+                  {formatNumber(cargoCounts['CONGRESISTA DE LA REPUBLICA'] || 0)}
+                </p>
+                <p className="text-sm text-muted-foreground">Congresistas</p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            to="/candidatos?tipo=PARLAMENTO%20ANDINO"
+            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                <Vote className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">
+                  {formatNumber(cargoCounts['PARLAMENTO ANDINO'] || 0)}
+                </p>
+                <p className="text-sm text-muted-foreground">Parlamento Andino</p>
+              </div>
+            </div>
+          </Link>
+        </div>
+      </section>
+
       {/* Alertas Recientes — top priority for business clients */}
       <section>
         <div className="flex items-center justify-between mb-4">
@@ -142,8 +209,8 @@ export function Dashboard() {
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm">{decl.stakeholder}</p>
-                    {decl.canal && (
-                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                    {decl.canal && !isRedundantCanal(decl.canal, decl.stakeholder) && (
+                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                         {decl.canal}
                       </span>
                     )}

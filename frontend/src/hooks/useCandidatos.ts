@@ -14,7 +14,7 @@ export function useCandidatos(filters: CandidatoFilters) {
         query = query.ilike('nombre_completo', `%${filters.search}%`)
       }
       if (filters.tipo_eleccion) {
-        query = query.eq('tipo_eleccion', filters.tipo_eleccion)
+        query = query.ilike('tipo_eleccion', filters.tipo_eleccion)
       }
       if (filters.partido_id) {
         query = query.eq('partido_id', filters.partido_id)
@@ -92,6 +92,28 @@ export function useCandidatoSiblings(candidatoId: number | undefined, dni?: stri
  * so the hoja_vida may be linked to a sibling candidato_id.
  * We try direct ID first, then fall back to any candidato with the same DNI.
  */
+/**
+ * Get counts of candidates by tipo_eleccion for dashboard cargo cards.
+ */
+export function useCandidatoCountByTipo() {
+  return useQuery({
+    queryKey: ['candidato-count-by-tipo'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('v_quipu_candidatos_unicos')
+        .select('tipo_eleccion')
+      if (error) throw error
+      const counts: Record<string, number> = {}
+      for (const row of data) {
+        if (row.tipo_eleccion) {
+          counts[row.tipo_eleccion] = (counts[row.tipo_eleccion] || 0) + 1
+        }
+      }
+      return counts
+    },
+  })
+}
+
 export function useHojaVida(candidatoId: number | undefined, dni?: string | null) {
   return useQuery({
     queryKey: ['hoja-vida', candidatoId, dni],

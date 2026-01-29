@@ -1,5 +1,5 @@
-import { useState } from 'react'
-import { Link } from 'react-router-dom'
+import { useState, useEffect } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useCandidatos } from '@/hooks/useCandidatos'
 import { usePartidos } from '@/hooks/usePartidos'
 import { SearchInput } from '@/components/ui/SearchInput'
@@ -27,12 +27,21 @@ const DEPARTAMENTO_OPTIONS = [
 ].map((d) => ({ value: d, label: d }))
 
 export function Candidatos() {
+  const [searchParams] = useSearchParams()
+  const tipoFromUrl = searchParams.get('tipo') || ''
+
   const [search, setSearch] = useState('')
-  const [tipoEleccion, setTipoEleccion] = useState('')
+  const [tipoEleccion, setTipoEleccion] = useState(tipoFromUrl)
   const [departamento, setDepartamento] = useState('')
   const [partidoId, setPartidoId] = useState('')
   const [view, setView] = useState<'grid' | 'list'>('grid')
   const [page, setPage] = useState(0)
+
+  // Sync tipoEleccion with URL param when it changes
+  useEffect(() => {
+    setTipoEleccion(tipoFromUrl)
+    setPage(0)
+  }, [tipoFromUrl])
 
   const { data: partidos } = usePartidos()
 
@@ -177,26 +186,26 @@ export function Candidatos() {
 
       {/* Pagination */}
       {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 pt-2">
+        <div className="flex flex-wrap items-center justify-center gap-2 sm:gap-4 pt-2">
           <button
             type="button"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
-            className="inline-flex items-center gap-1 rounded-xl border bg-card px-4 py-2 text-sm font-medium transition-all hover:shadow-sm hover:border-primary/30 disabled:opacity-50 disabled:pointer-events-none"
+            className="inline-flex items-center gap-1 rounded-xl border bg-card px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all hover:shadow-sm hover:border-primary/30 disabled:opacity-50 disabled:pointer-events-none"
           >
             <ChevronLeft className="h-4 w-4" />
-            Anterior
+            <span className="hidden sm:inline">Anterior</span>
           </button>
-          <span className="text-sm text-muted-foreground tabular-nums">
-            Pagina {page + 1} de {formatNumber(totalPages)}
+          <span className="text-xs sm:text-sm text-muted-foreground tabular-nums" aria-live="polite">
+            {page + 1} / {formatNumber(totalPages)}
           </span>
           <button
             type="button"
             onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
             disabled={page >= totalPages - 1}
-            className="inline-flex items-center gap-1 rounded-xl border bg-card px-4 py-2 text-sm font-medium transition-all hover:shadow-sm hover:border-primary/30 disabled:opacity-50 disabled:pointer-events-none"
+            className="inline-flex items-center gap-1 rounded-xl border bg-card px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium transition-all hover:shadow-sm hover:border-primary/30 disabled:opacity-50 disabled:pointer-events-none"
           >
-            Siguiente
+            <span className="hidden sm:inline">Siguiente</span>
             <ChevronRight className="h-4 w-4" />
           </button>
         </div>

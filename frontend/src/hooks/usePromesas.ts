@@ -17,8 +17,10 @@ export function usePromesas(filters: PromesaFilters) {
         query = query.eq('categoria', filters.categoria)
       }
       if (filters.partido_id) {
-        query = query.eq('id', filters.partido_id)
-        // Note: for partido filtering by partido name, use ilike on partido column
+        query = query.eq('partido_id', filters.partido_id)
+      }
+      if (filters.partido) {
+        query = query.eq('partido', filters.partido)
       }
 
       query = query

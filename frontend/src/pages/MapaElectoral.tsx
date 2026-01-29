@@ -112,9 +112,9 @@ export function MapaElectoral() {
       </div>
 
       {/* Main content: grid + sidebar */}
-      <div className="flex gap-6">
+      <div className="flex flex-col lg:flex-row gap-6">
         {/* Department grid */}
-        <div className="flex-1 grid grid-cols-5 gap-2">
+        <div className="flex-1 grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-2">
           {DEPARTMENTS.map((dept) => {
             const count = counts[dept] || 0
             const isSelected = selectedDept === dept
@@ -144,7 +144,7 @@ export function MapaElectoral() {
 
         {/* Sidebar detail */}
         {selectedDept && (
-          <div className="w-80 shrink-0 rounded-xl border bg-card p-6 space-y-5 self-start">
+          <div className="w-full lg:w-80 lg:shrink-0 rounded-xl border bg-card p-6 space-y-5 self-start">
             {/* Header */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2.5">
@@ -156,6 +156,7 @@ export function MapaElectoral() {
               <button
                 onClick={() => setSelectedDept(null)}
                 className="rounded-lg p-1.5 hover:bg-muted transition-colors"
+                aria-label="Cerrar detalle"
               >
                 <X size={16} />
               </button>

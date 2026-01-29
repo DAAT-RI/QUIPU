@@ -69,6 +69,14 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
           return inKeywords || inContent
         })
       }
+      if (filters.partido) {
+        const p = filters.partido.toLowerCase()
+        filtered = filtered.filter(d => {
+          const canalMatch = d.canal?.toLowerCase().includes(p)
+          const stakeholderMatch = d.stakeholder.toLowerCase().includes(p)
+          return canalMatch || stakeholderMatch
+        })
+      }
       if (filters.search) {
         const q = filters.search.toLowerCase()
         filtered = filtered.filter(d =>

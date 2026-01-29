@@ -11,7 +11,7 @@ import {
   X,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
-import { useState } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -27,12 +27,26 @@ export function Sidebar() {
   const location = useLocation()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
+  const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), [])
+
+  // Close sidebar on Escape key
+  useEffect(() => {
+    if (!isMobileMenuOpen) return
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') closeMobileMenu()
+    }
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [isMobileMenuOpen, closeMobileMenu])
+
   return (
     <>
       {/* Mobile menu button */}
       <button
         onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
         className="lg:hidden fixed top-4 left-4 z-50 p-2 rounded-md bg-background border"
+        aria-label={isMobileMenuOpen ? 'Cerrar menu' : 'Abrir menu'}
+        aria-expanded={isMobileMenuOpen}
       >
         {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
       </button>
@@ -46,10 +60,15 @@ export function Sidebar() {
       >
         <div className="flex h-full flex-col">
           {/* Logo */}
-          <div className="flex h-16 items-center border-b px-6">
-            <h2 className="text-lg font-semibold tracking-tight">
-              Quipu <span className="text-primary">Electoral</span>
-            </h2>
+          <div className="flex h-16 items-center border-b px-4 gap-3">
+            <img src="/logo.png" alt="PARLEY" className="h-8 w-auto dark:hidden" />
+            <img src="/Logo_blanco.png" alt="PARLEY" className="h-8 w-auto hidden dark:block" />
+            <div>
+              <h2 className="text-base font-semibold tracking-tight leading-tight">
+                Quipu <span className="text-parley-gold">Electoral</span>
+              </h2>
+              <p className="text-[10px] text-muted-foreground">Peru 2026</p>
+            </div>
           </div>
 
           {/* Navigation */}
@@ -79,9 +98,10 @@ export function Sidebar() {
           </nav>
 
           {/* Footer */}
-          <div className="border-t p-4">
-            <p className="text-xs text-muted-foreground">
-              Peru 2026 — Inteligencia Electoral
+          <div className="border-t p-4 flex items-center gap-2">
+            <img src="/daat-white.png" alt="DAAT" className="h-5 w-auto opacity-60 dark:opacity-80 dark:invert-0 invert" />
+            <p className="text-[11px] text-muted-foreground">
+              Inteligencia Electoral
             </p>
           </div>
         </div>
@@ -91,7 +111,11 @@ export function Sidebar() {
       {isMobileMenuOpen && (
         <div
           className="lg:hidden fixed inset-0 z-30 bg-black/50"
-          onClick={() => setIsMobileMenuOpen(false)}
+          onClick={closeMobileMenu}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') closeMobileMenu() }}
+          role="button"
+          tabIndex={0}
+          aria-label="Cerrar menu"
         />
       )}
     </>

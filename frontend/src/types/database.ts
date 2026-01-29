@@ -174,6 +174,7 @@ export interface DeclaracionFilters {
   temaDeclaracion?: string
   organizacion?: string
   producto?: string
+  partido?: string  // Filter by partido name (matches canal or stakeholder)
   search?: string
   offset: number
   limit: number
@@ -192,6 +193,7 @@ export interface PromesaFilters {
   search?: string
   categoria?: string
   partido_id?: number
+  partido?: string  // Filter by partido name
   offset: number
   limit: number
 }

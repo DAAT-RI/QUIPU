@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { Link } from 'react-router-dom'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
+import { usePartidos } from '@/hooks/usePartidos'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -33,9 +34,17 @@ export function Declaraciones() {
   const [search, setSearch] = useState('')
   const [canal, setCanal] = useState('')
   const [tema, setTema] = useState('')
+  const [partido, setPartido] = useState('')
   const [organizacion, setOrganizacion] = useState('')
   const [producto, setProducto] = useState('')
   const [page, setPage] = useState(0)
+
+  // Get partidos for dropdown
+  const { data: partidos } = usePartidos()
+  const partidoOptions = useMemo(() => {
+    if (!partidos) return []
+    return partidos.map((p) => ({ value: p.nombre_oficial, label: p.nombre_oficial }))
+  }, [partidos])
 
   const offset = page * PAGE_LIMIT
 
@@ -45,6 +54,7 @@ export function Declaraciones() {
     tema,
     organizacion: organizacion || undefined,
     producto: producto || undefined,
+    partido: partido || undefined,
     offset,
     limit: PAGE_LIMIT,
   })
@@ -67,6 +77,11 @@ export function Declaraciones() {
 
   function handleTemaChange(value: string) {
     setTema(value)
+    setPage(0)
+  }
+
+  function handlePartidoChange(value: string) {
+    setPartido(value)
     setPage(0)
   }
 
@@ -118,6 +133,12 @@ export function Declaraciones() {
           />
         </div>
         <div className="flex flex-col sm:flex-row gap-3">
+          <FilterSelect
+            value={partido}
+            onChange={handlePartidoChange}
+            options={partidoOptions}
+            placeholder="Todos los partidos"
+          />
           <SearchInput
             value={organizacion}
             onChange={handleOrganizacionChange}
@@ -164,7 +185,7 @@ export function Declaraciones() {
                   <div className="flex items-center gap-2">
                     <p className="font-semibold text-sm">{d.stakeholder}</p>
                     {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                         {d.canal}
                       </span>
                     )}
@@ -207,6 +228,7 @@ export function Declaraciones() {
                       onClick={(e) => e.stopPropagation()}
                       className="text-muted-foreground hover:text-foreground transition-colors"
                       title="Ver fuente"
+                      aria-label="Ver fuente"
                     >
                       <ExternalLink size={14} />
                     </a>
@@ -229,7 +251,7 @@ export function Declaraciones() {
                 <ChevronLeft size={16} />
                 Anterior
               </button>
-              <span className="text-sm text-muted-foreground tabular-nums">
+              <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
                 Pagina {page + 1} de {totalPages}
               </span>
               <button

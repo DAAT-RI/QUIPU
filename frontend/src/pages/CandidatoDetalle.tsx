@@ -215,7 +215,7 @@ export function CandidatoDetalle() {
       {/* Tabs */}
       <div className="rounded-xl border bg-card overflow-hidden">
         <div className="border-b overflow-x-auto px-2">
-          <div className="flex -mb-px">
+          <div className="flex -mb-px" role="tablist">
             {tabs.map((tab) => {
               const Icon = tab.icon
               const isActive = activeTab === tab.key
@@ -223,6 +223,10 @@ export function CandidatoDetalle() {
                 <button
                   key={tab.key}
                   type="button"
+                  role="tab"
+                  aria-selected={isActive}
+                  aria-controls={`tabpanel-${tab.key}`}
+                  id={`tab-${tab.key}`}
                   onClick={() => setActiveTab(tab.key)}
                   className={`inline-flex items-center gap-1.5 whitespace-nowrap px-4 py-3 text-sm font-medium border-b-2 transition-colors ${
                     isActive
@@ -239,7 +243,7 @@ export function CandidatoDetalle() {
         </div>
 
         {/* Tab Content */}
-        <div className="p-6">
+        <div className="p-6" role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
           {activeTab === 'resumen' && (
             <div className="space-y-4">
               <div className="flex items-center gap-2.5 mb-4">
@@ -382,12 +386,12 @@ export function CandidatoDetalle() {
                           <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
                             <span className="font-medium">{d.stakeholder}</span>
                             {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                              <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium">
+                              <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium">
                                 {d.canal}
                               </span>
                             )}
                             {d.tema && (
-                              <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[10px] font-medium">
+                              <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
                                 {d.tema}
                               </span>
                             )}

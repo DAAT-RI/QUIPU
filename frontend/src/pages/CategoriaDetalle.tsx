@@ -2,9 +2,11 @@ import { useState, useMemo } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { usePromesas } from '@/hooks/usePromesas'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
+import { usePartidos } from '@/hooks/usePartidos'
 import { CATEGORY_CONFIG } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { FilterSelect } from '@/components/ui/FilterSelect'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import {
   ArrowLeft,
@@ -21,13 +23,22 @@ const LIMIT = 50
 export function CategoriaDetalle() {
   const { nombre } = useParams()
   const [page, setPage] = useState(0)
+  const [partidoFilter, setPartidoFilter] = useState('')
 
   const config = CATEGORY_CONFIG[nombre || '']
   const isDeclaracion = config?.source === 'declaracion'
 
+  // Get partidos for filter dropdown
+  const { data: partidos } = usePartidos()
+  const partidoOptions = useMemo(() => {
+    if (!partidos) return []
+    return partidos.map((p) => ({ value: p.nombre_oficial, label: p.nombre_oficial }))
+  }, [partidos])
+
   // --- Plan category data ---
   const { data: planData, isLoading: loadingPlan } = usePromesas({
     categoria: !isDeclaracion ? nombre : undefined,
+    partido: partidoFilter || undefined,
     offset: page * LIMIT,
     limit: LIMIT,
   })
@@ -127,7 +138,7 @@ export function CategoriaDetalle() {
               <p className="text-sm text-muted-foreground">
                 {formatNumber(totalCount)} {isDeclaracion ? 'declaraciones' : 'propuestas'}
               </p>
-              <span className={`rounded-md px-2 py-0.5 text-[10px] font-medium ${
+              <span className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${
                 isDeclaracion
                   ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
                   : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
@@ -180,12 +191,25 @@ export function CategoriaDetalle() {
             </section>
           )}
 
+          {/* Filter by partido */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Filtrar por partido politico
+            </p>
+            <FilterSelect
+              value={partidoFilter}
+              onChange={(v) => { setPartidoFilter(v); setPage(0) }}
+              options={partidoOptions}
+              placeholder="Todos los partidos"
+            />
+          </div>
+
           {/* Promesas list */}
           {loadingPlan ? (
             <LoadingSpinner />
           ) : promesas.length === 0 ? (
             <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              No se encontraron propuestas en esta categoria
+              No se encontraron propuestas {partidoFilter ? `de ${partidoFilter} ` : ''}en esta categoria
             </div>
           ) : (
             <>
@@ -279,7 +303,7 @@ export function CategoriaDetalle() {
                       </blockquote>
                       <div className="mt-2 flex flex-wrap items-center gap-1.5">
                         {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                             {d.canal}
                           </span>
                         )}
@@ -329,7 +353,7 @@ function Pagination({
         <ChevronLeft className="h-4 w-4" />
         Anterior
       </button>
-      <span className="text-sm text-muted-foreground tabular-nums">
+      <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
         Pagina {page + 1} de {totalPages} ({formatNumber(totalCount)} resultados)
       </span>
       <button

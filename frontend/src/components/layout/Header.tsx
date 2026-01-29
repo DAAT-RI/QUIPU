@@ -24,7 +24,7 @@ export function Header() {
   }, [])
 
   return (
-    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-card px-6">
+    <header className="sticky top-0 z-20 flex h-16 items-center justify-between border-b bg-card px-4 sm:px-6">
       <div className="lg:hidden w-10" />
 
       <div className="flex-1" />

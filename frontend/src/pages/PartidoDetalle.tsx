@@ -269,7 +269,7 @@ export function PartidoDetalle() {
                       <div className="flex items-center gap-2">
                         <p className="font-semibold text-sm">{d.stakeholder}</p>
                         {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground">
+                          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
                             {d.canal}
                           </span>
                         )}
@@ -312,6 +312,7 @@ export function PartidoDetalle() {
                           onClick={(e) => e.stopPropagation()}
                           className="text-muted-foreground hover:text-foreground transition-colors"
                           title="Ver fuente"
+                          aria-label="Ver fuente"
                         >
                           <ExternalLink size={14} />
                         </a>
@@ -374,7 +375,7 @@ export function PartidoDetalle() {
                       {c.nombre_completo}
                     </p>
                     {c.cargo_postula && (
-                      <p className="text-[10px] text-muted-foreground mt-0.5">{c.cargo_postula}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{c.cargo_postula}</p>
                     )}
                   </Link>
                 ))}

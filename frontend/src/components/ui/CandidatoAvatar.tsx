@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { cn, getInitials, buildFotoUrl } from '@/lib/utils'
 
 interface CandidatoAvatarProps {
@@ -21,6 +22,9 @@ export function CandidatoAvatar({
   className,
 }: CandidatoAvatarProps) {
   const fullUrl = buildFotoUrl(fotoUrl)
+  const [imgError, setImgError] = useState(false)
+  const showFallback = !fullUrl || imgError
+
   return (
     <div
       className={cn(
@@ -29,23 +33,19 @@ export function CandidatoAvatar({
         className
       )}
     >
-      {fullUrl ? (
+      {fullUrl && !imgError ? (
         <img
           src={fullUrl}
           alt={nombre}
           className="h-full w-full object-cover"
-          onError={(e) => {
-            e.currentTarget.style.display = 'none'
-            e.currentTarget.nextElementSibling?.classList.remove('hidden')
-          }}
+          onError={() => setImgError(true)}
         />
       ) : null}
-      <div className={cn(
-        'flex h-full w-full items-center justify-center bg-muted text-muted-foreground font-medium absolute inset-0',
-        fullUrl ? 'hidden' : ''
-      )}>
-        {getInitials(nombre)}
-      </div>
+      {showFallback && (
+        <div className="flex h-full w-full items-center justify-center bg-muted text-muted-foreground font-medium absolute inset-0">
+          {getInitials(nombre)}
+        </div>
+      )}
     </div>
   )
 }
