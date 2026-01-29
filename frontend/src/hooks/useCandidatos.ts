@@ -14,7 +14,7 @@ export function useCandidatos(filters: CandidatoFilters) {
         query = query.ilike('nombre_completo', `%${filters.search}%`)
       }
       if (filters.tipo_eleccion) {
-        query = query.ilike('tipo_eleccion', filters.tipo_eleccion)
+        query = query.eq('tipo_eleccion', filters.tipo_eleccion)
       }
       if (filters.partido_id) {
         query = query.eq('partido_id', filters.partido_id)
@@ -23,12 +23,15 @@ export function useCandidatos(filters: CandidatoFilters) {
         query = query.eq('departamento', filters.departamento)
       }
 
+      // Server-side ordering: orden_cargo (computed column), then partido
       query = query
-        .order('nombre_completo')
+        .order('orden_cargo')
+        .order('partido_nombre')
         .range(filters.offset, filters.offset + filters.limit - 1)
 
       const { data, error, count } = await query
       if (error) throw error
+
       return { data: data as CandidatoCompleto[], count: count ?? 0 }
     },
   })

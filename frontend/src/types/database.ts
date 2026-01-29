@@ -164,6 +164,7 @@ export interface ResumenPartido {
 export interface CandidatoCompleto extends Candidato {
   partido_nombre: string | null
   candidato_presidente: string | null
+  orden_cargo?: number  // Computed: 1=Presidente, 2=1er Vice, 3=2do Vice, 4=Senador, 5=Diputado
 }
 
 // Filtros

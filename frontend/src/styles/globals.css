@@ -1,5 +1,8 @@
 @import "tailwindcss";
 
+/* Enable dark mode with class strategy for Tailwind v4 */
+@custom-variant dark (&:where(.dark, .dark *));
+
 /* Arboria Light - Official PARLEY/DAAT Font */
 @font-face {
   font-family: 'Arboria';

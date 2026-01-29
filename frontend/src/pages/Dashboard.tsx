@@ -32,7 +32,7 @@ export function Dashboard() {
 
   // Get presidential candidates
   const { data: topCandidatosData } = useCandidatos({
-    tipo_eleccion: 'PRESIDENTE Y VICEPRESIDENTES',
+    tipo_eleccion: 'PRESIDENCIAL',
     offset: 0,
     limit: 5,
   })
@@ -123,9 +123,9 @@ export function Dashboard() {
           </div>
           <h2 className="text-lg font-semibold">Candidatos por Cargo</h2>
         </div>
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
-            to="/candidatos?tipo=PRESIDENTE%20Y%20VICEPRESIDENTES"
+            to="/candidatos?tipo=PRESIDENCIAL"
             className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
           >
             <div className="flex items-center gap-3">
@@ -134,14 +134,14 @@ export function Dashboard() {
               </div>
               <div>
                 <p className="text-2xl font-bold tracking-tight">
-                  {formatNumber(cargoCounts['PRESIDENTE Y VICEPRESIDENTES'] || 0)}
+                  {formatNumber(cargoCounts['PRESIDENCIAL'] || 0)}
                 </p>
-                <p className="text-sm text-muted-foreground">Presidenciales</p>
+                <p className="text-sm text-muted-foreground">Presidencial</p>
               </div>
             </div>
           </Link>
           <Link
-            to="/candidatos?tipo=CONGRESISTA%20DE%20LA%20REPUBLICA"
+            to="/candidatos?tipo=DIPUTADOS"
             className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
           >
             <div className="flex items-center gap-3">
@@ -150,14 +150,14 @@ export function Dashboard() {
               </div>
               <div>
                 <p className="text-2xl font-bold tracking-tight">
-                  {formatNumber(cargoCounts['CONGRESISTA DE LA REPUBLICA'] || 0)}
+                  {formatNumber(cargoCounts['DIPUTADOS'] || 0)}
                 </p>
-                <p className="text-sm text-muted-foreground">Congresistas</p>
+                <p className="text-sm text-muted-foreground">Diputados</p>
               </div>
             </div>
           </Link>
           <Link
-            to="/candidatos?tipo=PARLAMENTO%20ANDINO"
+            to="/candidatos?tipo=SENADORES%20DISTRITO%20%C3%9ANICO"
             className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
           >
             <div className="flex items-center gap-3">
@@ -166,9 +166,25 @@ export function Dashboard() {
               </div>
               <div>
                 <p className="text-2xl font-bold tracking-tight">
-                  {formatNumber(cargoCounts['PARLAMENTO ANDINO'] || 0)}
+                  {formatNumber(cargoCounts['SENADORES DISTRITO ÚNICO'] || 0)}
                 </p>
-                <p className="text-sm text-muted-foreground">Parlamento Andino</p>
+                <p className="text-sm text-muted-foreground">Senadores (D.Único)</p>
+              </div>
+            </div>
+          </Link>
+          <Link
+            to="/candidatos?tipo=SENADORES%20DISTRITO%20M%C3%9ALTIPLE"
+            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
+          >
+            <div className="flex items-center gap-3">
+              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+                <Vote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+              </div>
+              <div>
+                <p className="text-2xl font-bold tracking-tight">
+                  {formatNumber(cargoCounts['SENADORES DISTRITO MÚLTIPLE'] || 0)}
+                </p>
+                <p className="text-sm text-muted-foreground">Senadores (D.Múltiple)</p>
               </div>
             </div>
           </Link>

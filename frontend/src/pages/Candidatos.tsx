@@ -13,9 +13,10 @@ import { Users, ChevronLeft, ChevronRight, ArrowRight } from 'lucide-react'
 import { PAGE_SIZE } from '@/lib/constants'
 
 const TIPO_ELECCION_OPTIONS = [
-  { value: 'PRESIDENTE Y VICEPRESIDENTES', label: 'Presidente' },
-  { value: 'CONGRESISTA DE LA REPUBLICA', label: 'Congresista' },
-  { value: 'PARLAMENTO ANDINO', label: 'Parlamento Andino' },
+  { value: 'PRESIDENCIAL', label: 'Presidencial' },
+  { value: 'DIPUTADOS', label: 'Diputados' },
+  { value: 'SENADORES DISTRITO ÚNICO', label: 'Senadores (Distrito Único)' },
+  { value: 'SENADORES DISTRITO MÚLTIPLE', label: 'Senadores (Distrito Múltiple)' },
 ]
 
 const DEPARTAMENTO_OPTIONS = [
@@ -98,7 +99,7 @@ export function Candidatos() {
             value={tipoEleccion}
             onChange={handleFilterChange(setTipoEleccion)}
             options={TIPO_ELECCION_OPTIONS}
-            placeholder="Tipo de eleccion"
+            placeholder="Tipo de Elección"
           />
           <FilterSelect
             value={departamento}
