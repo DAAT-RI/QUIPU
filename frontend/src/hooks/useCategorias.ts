@@ -20,12 +20,15 @@ export function useCategorias() {
 export interface CategoriaCounts {
   plans: Record<string, number>
   declarations: Record<string, number>
+  /** Mapa de key normalizada -> label original (con tildes) para temas de declaraciones */
+  declarationLabels: Record<string, string>
 }
 
 /**
  * Fetches category counts from both plan de gobierno AND declaration temas.
  * Paginates through all plan rows to avoid Supabase's 1000-row default limit.
  * Uses normalizeKey to strip accents for proper matching.
+ * Also returns original labels for dynamic category generation.
  */
 export function useCategoriaCounts() {
   return useQuery({
@@ -60,17 +63,27 @@ export function useCategoriaCounts() {
       if (masterError) throw masterError
 
       const declarations: Record<string, number> = {}
+      const declarationLabels: Record<string, string> = {} // key -> label original
+
       for (const entry of (masterData as Pick<QuipuMasterEntry, 'interacciones'>[])) {
         if (!entry.interacciones) continue
         for (const inter of entry.interacciones as Interaccion[]) {
           if (inter.type !== 'declaration') continue
           if (!inter.tema) continue
-          const key = normalizeKey(inter.tema)
-          declarations[key] = (declarations[key] || 0) + 1
+          // Dividir temas múltiples separados por ; (ej: "Derechos Humanos; Política")
+          const temas = inter.tema.split(';').map(t => t.trim()).filter(Boolean)
+          for (const tema of temas) {
+            const key = normalizeKey(tema)
+            declarations[key] = (declarations[key] || 0) + 1
+            // Guardar el label original (primera vez que lo vemos)
+            if (!declarationLabels[key]) {
+              declarationLabels[key] = tema
+            }
+          }
         }
       }
 
-      return { plans, declarations } as CategoriaCounts
+      return { plans, declarations, declarationLabels } as CategoriaCounts
     },
   })
 }

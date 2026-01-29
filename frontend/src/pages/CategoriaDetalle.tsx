@@ -3,7 +3,8 @@ import { useParams, Link } from 'react-router-dom'
 import { usePromesas } from '@/hooks/usePromesas'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { usePartidos } from '@/hooks/usePartidos'
-import { CATEGORY_CONFIG } from '@/lib/constants'
+import { useCategoriaCounts } from '@/hooks/useCategorias'
+import { CATEGORY_CONFIG, PLAN_CATEGORIES, getDynamicCategoryConfig } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { FilterSelect } from '@/components/ui/FilterSelect'
@@ -20,13 +21,30 @@ import {
 
 const LIMIT = 50
 
+// Keys de categorías de plan (para determinar si es plan o declaración)
+const PLAN_KEYS = new Set(PLAN_CATEGORIES.map(c => c.key))
+
 export function CategoriaDetalle() {
   const { nombre } = useParams()
   const [page, setPage] = useState(0)
   const [partidoFilter, setPartidoFilter] = useState('')
 
-  const config = CATEGORY_CONFIG[nombre || '']
-  const isDeclaracion = config?.source === 'declaracion'
+  // Obtener labels dinámicos para temas de declaraciones
+  const { data: counts } = useCategoriaCounts()
+
+  // Determinar si es categoría de plan o declaración
+  const isPlanCategory = PLAN_KEYS.has(nombre || '')
+  const isDeclaracion = !isPlanCategory
+
+  // Obtener config: usar CATEGORY_CONFIG si existe, sino generar dinámico
+  const config = useMemo(() => {
+    if (CATEGORY_CONFIG[nombre || '']) {
+      return CATEGORY_CONFIG[nombre || '']
+    }
+    // Para temas dinámicos de declaraciones, usar el label original
+    const label = counts?.declarationLabels[nombre || ''] || nombre || ''
+    return getDynamicCategoryConfig(label, 0)
+  }, [nombre, counts])
 
   // Get partidos for filter dropdown
   const { data: partidos } = usePartidos()
@@ -95,7 +113,13 @@ export function CategoriaDetalle() {
   const maxPlanCount = planChart[0]?.count || 1
   const maxStakeholder = stakeholderChart[0]?.count || 1
 
-  if (!config) {
+  // Validar que la categoría existe: para planes debe estar en CATEGORY_CONFIG,
+  // para declaraciones se genera dinámicamente
+  const categoryExists = isPlanCategory
+    ? !!CATEGORY_CONFIG[nombre || '']
+    : true // Las declaraciones se generan dinámicamente
+
+  if (!categoryExists) {
     return (
       <div className="space-y-4">
         <Link

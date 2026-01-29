@@ -22,7 +22,9 @@ import {
   Vote,
   Building2,
   Rocket,
+  Tag,
 } from 'lucide-react'
+import { normalizeKey } from './utils'
 
 export type CategorySource = 'plan' | 'declaracion'
 
@@ -77,6 +79,33 @@ export const QUIPU_MASTER_TEMAS = [
   'Gobierno y Administracion Publica',
   'Startups y Emprendimiento',
 ] as const
+
+// Colores para temas dinámicos (se asignan cíclicamente)
+const DYNAMIC_COLORS = [
+  '#6366F1', '#8B5CF6', '#EC4899', '#F43F5E', '#F97316',
+  '#EAB308', '#22C55E', '#14B8A6', '#06B6D4', '#3B82F6',
+]
+
+/**
+ * Genera un CategoryConfig para temas de declaraciones que no tienen config explícito.
+ * Usa el label original (con tildes) y genera una key normalizada.
+ */
+export function getDynamicCategoryConfig(label: string, index: number = 0): CategoryConfig {
+  const key = normalizeKey(label)
+  // Si ya existe en CATEGORY_CONFIG, devolverlo
+  if (CATEGORY_CONFIG[key]) {
+    return CATEGORY_CONFIG[key]
+  }
+  // Generar config dinámico
+  return {
+    key,
+    label,
+    icon: Tag,
+    color: DYNAMIC_COLORS[index % DYNAMIC_COLORS.length],
+    order: 200 + index,
+    source: 'declaracion',
+  }
+}
 
 export const SOURCE_CONFIG = {
   twitter: { label: 'Twitter/X', color: '#1DA1F2' },

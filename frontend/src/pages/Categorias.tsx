@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCategoriaCounts } from '@/hooks/useCategorias'
-import { PLAN_CATEGORIES, DECLARATION_TEMAS } from '@/lib/constants'
+import { PLAN_CATEGORIES, getDynamicCategoryConfig } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { formatNumber } from '@/lib/utils'
 import { Tags, ArrowRight, FileText, MessageSquareQuote, ChevronDown } from 'lucide-react'
@@ -80,13 +80,17 @@ export function Categorias() {
     )
   }, [counts])
 
+  // Generar temas de declaraciones dinámicamente basado en los datos
   const sortedDeclTemas = useMemo(() => {
-    if (!counts) return DECLARATION_TEMAS
-    return [...DECLARATION_TEMAS]
-      .filter((t) => (counts.declarations[t.key] || 0) > 0)
-      .sort(
-        (a, b) => (counts.declarations[b.key] || 0) - (counts.declarations[a.key] || 0)
-      )
+    if (!counts) return []
+    // Crear configs dinámicos para todos los temas encontrados
+    return Object.entries(counts.declarations)
+      .filter(([, count]) => count > 0)
+      .sort(([, a], [, b]) => b - a)
+      .map(([key], index) => {
+        const label = counts.declarationLabels[key] || key
+        return getDynamicCategoryConfig(label, index)
+      })
   }, [counts])
 
   if (isLoading) return <LoadingSpinner />
