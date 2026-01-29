@@ -152,8 +152,10 @@ export function CandidatoDetalle() {
   const { data: siblings } = useCandidatoSiblings(candidato?.id, candidato?.dni)
   const { data: hojaVida, isLoading: loadingHoja } = useHojaVida(candidato?.id, candidato?.dni)
 
+  // Buscar por apellido paterno (más común en menciones) o nombre completo
+  const searchTerm = candidato?.apellido_paterno || candidato?.nombre_completo?.split(' ')[0]
   const { data: declaracionesData, isLoading: loadingDeclaraciones } = useDeclaraciones({
-    stakeholder: candidato?.apellido_paterno ?? undefined,
+    search: searchTerm,
     offset: 0,
     limit: 50,
   })
