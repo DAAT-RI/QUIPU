@@ -73,20 +73,80 @@ export interface HojaVida {
   id: number
   candidato_id: number | null
   id_hoja_vida: string | null
+
+  // Campos de estado y completitud (nuevos 2026-01-29)
+  estado_hv: string | null
+  porcentaje_completitud: number | null
+  fecha_termino_registro: string | null
+
+  // Verificaciones con fuentes externas
+  verificaciones: {
+    sunedu: string | null
+    sunarp: string | null
+    minedu_tec: string | null
+    infogob: string | null
+    rop: string | null
+    rop_renuncia: string | null
+  } | null
+
+  // Indicadores booleanos
+  indicadores: {
+    tiene_experiencia_laboral: boolean
+    tiene_educacion_basica: boolean
+    tiene_educacion_tecnica: boolean
+    tiene_educacion_universitaria: boolean
+    tiene_posgrado: boolean
+    tiene_cargo_partidario: boolean
+    tiene_cargo_eleccion: boolean
+    tiene_sentencia_penal: boolean
+    tiene_sentencia_obligacion: boolean
+    tiene_renuncia_partido: boolean
+    tiene_ingresos: boolean
+    tiene_inmueble: boolean
+    tiene_mueble: boolean
+    tiene_titularidad: boolean
+    tiene_info_adicional: boolean
+  } | null
+
+  // Educacion
   educacion_basica: Record<string, unknown> | null
   educacion_tecnica: Record<string, unknown> | null
   educacion_universitaria: unknown[] | null
   posgrado: unknown[] | null
+
+  // Experiencia y cargos
   experiencia_laboral: unknown[] | null
   cargos_partidarios: unknown[] | null
   cargos_eleccion: unknown[] | null
+  cargos_postula: Array<{
+    id_cargo: number
+    cargo: string
+    estado: string
+  }> | null
   renuncias_partidos: unknown[] | null
+  titularidades: unknown[] | null
+  declaraciones_juradas: {
+    renuncias_partidos_adicional: unknown[]
+    declaraciones_juradas: unknown[]
+    info_adicional: unknown[]
+    anotaciones_marginales: unknown[]
+  } | null
+
+  // Legal
   sentencias_penales: unknown[] | null
   sentencias_obligaciones: unknown[] | null
   procesos_penales: unknown[] | null
+
+  // Patrimonio
   bienes_muebles: unknown[] | null
   bienes_inmuebles: unknown[] | null
   ingresos: unknown[] | null
+
+  // Ubicacion
+  carne_extranjeria: string | null
+  ubigeo_nacimiento: string | null
+  ubigeo_domicilio: string | null
+
   fecha_extraccion: string
 }
 

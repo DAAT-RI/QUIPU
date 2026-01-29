@@ -21,6 +21,11 @@ import {
   Hash,
   Newspaper,
   BarChart3,
+  CheckCircle2,
+  XCircle,
+  AlertCircle,
+  Shield,
+  CircleCheck,
 } from 'lucide-react'
 import {
   RadarChart,
@@ -246,6 +251,19 @@ export function CandidatoDetalle() {
                 </span>
               )}
             </div>
+            {/* Estado de Hoja de Vida */}
+            {hojaVida?.estado_hv && (
+              <div className="mt-3">
+                <span className={`inline-flex items-center gap-1 rounded-md px-2 py-0.5 text-xs font-medium ${
+                  hojaVida.estado_hv === 'CONFIRMADA'
+                    ? 'bg-green-500/10 text-green-600 dark:text-green-400'
+                    : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                }`}>
+                  {hojaVida.estado_hv === 'CONFIRMADA' ? <CircleCheck className="h-3 w-3" /> : <AlertCircle className="h-3 w-3" />}
+                  {hojaVida.estado_hv}
+                </span>
+              </div>
+            )}
           </div>
         </div>
       </div>
@@ -293,7 +311,8 @@ export function CandidatoDetalle() {
           )}
 
           {activeTab === 'resumen' && (
-            <div className="space-y-4">
+            <div className="space-y-6">
+              {/* Información General */}
               <div className="flex items-center gap-2.5 mb-4">
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
                   <User className="h-4 w-4 text-primary" />
@@ -315,6 +334,53 @@ export function CandidatoDetalle() {
                   value={candidato.fecha_nacimiento ? formatDate(candidato.fecha_nacimiento) : null}
                 />
               </div>
+
+              {/* Indicadores de Hoja de Vida */}
+              {hojaVida?.indicadores && (
+                <>
+                  <div className="flex items-center gap-2.5 mt-6">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-500/10">
+                      <CheckCircle2 className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <h2 className="text-lg font-semibold">Indicadores de Hoja de Vida</h2>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    <IndicadorBadge label="Experiencia laboral" value={hojaVida.indicadores.tiene_experiencia_laboral} />
+                    <IndicadorBadge label="Educación básica" value={hojaVida.indicadores.tiene_educacion_basica} />
+                    <IndicadorBadge label="Educación técnica" value={hojaVida.indicadores.tiene_educacion_tecnica} />
+                    <IndicadorBadge label="Educación universitaria" value={hojaVida.indicadores.tiene_educacion_universitaria} />
+                    <IndicadorBadge label="Posgrado" value={hojaVida.indicadores.tiene_posgrado} />
+                    <IndicadorBadge label="Cargo partidario" value={hojaVida.indicadores.tiene_cargo_partidario} />
+                    <IndicadorBadge label="Cargo elección popular" value={hojaVida.indicadores.tiene_cargo_eleccion} />
+                    <IndicadorBadge label="Sentencia penal" value={hojaVida.indicadores.tiene_sentencia_penal} negative />
+                    <IndicadorBadge label="Sentencia obligación" value={hojaVida.indicadores.tiene_sentencia_obligacion} negative />
+                    <IndicadorBadge label="Renuncia a partido" value={hojaVida.indicadores.tiene_renuncia_partido} />
+                    <IndicadorBadge label="Declara ingresos" value={hojaVida.indicadores.tiene_ingresos} />
+                    <IndicadorBadge label="Tiene inmuebles" value={hojaVida.indicadores.tiene_inmueble} />
+                    <IndicadorBadge label="Tiene muebles" value={hojaVida.indicadores.tiene_mueble} />
+                  </div>
+                </>
+              )}
+
+              {/* Verificaciones */}
+              {hojaVida?.verificaciones && (
+                <>
+                  <div className="flex items-center gap-2.5 mt-6">
+                    <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-500/10">
+                      <Shield className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <h2 className="text-lg font-semibold">Verificaciones Oficiales</h2>
+                  </div>
+                  <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                    <VerificacionBadge label="SUNEDU" value={hojaVida.verificaciones.sunedu} />
+                    <VerificacionBadge label="SUNARP" value={hojaVida.verificaciones.sunarp} />
+                    <VerificacionBadge label="MINEDU Técnico" value={hojaVida.verificaciones.minedu_tec} />
+                    <VerificacionBadge label="InfoGob" value={hojaVida.verificaciones.infogob} />
+                    <VerificacionBadge label="ROP" value={hojaVida.verificaciones.rop} />
+                    <VerificacionBadge label="ROP Renuncia" value={hojaVida.verificaciones.rop_renuncia} />
+                  </div>
+                </>
+              )}
             </div>
           )}
 
@@ -444,6 +510,70 @@ function InfoRow({
     <div className="rounded-xl border bg-muted/30 p-3.5">
       <p className="text-[11px] uppercase tracking-wider text-muted-foreground font-medium">{label}</p>
       <p className="text-sm font-medium mt-0.5">{value || '\u2014'}</p>
+    </div>
+  )
+}
+
+function IndicadorBadge({
+  label,
+  value,
+  negative = false,
+}: {
+  label: string
+  value: boolean
+  negative?: boolean
+}) {
+  // For negative indicators (sentencias), true = bad, false = good
+  const isPositive = negative ? !value : value
+  return (
+    <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+      isPositive
+        ? 'border-green-500/20 bg-green-500/5'
+        : 'border-muted bg-muted/30'
+    }`}>
+      {value ? (
+        negative ? (
+          <XCircle className="h-4 w-4 text-red-500" />
+        ) : (
+          <CheckCircle2 className="h-4 w-4 text-green-500" />
+        )
+      ) : (
+        negative ? (
+          <CheckCircle2 className="h-4 w-4 text-green-500" />
+        ) : (
+          <XCircle className="h-4 w-4 text-muted-foreground/50" />
+        )
+      )}
+      <span className={value && negative ? 'text-red-600 dark:text-red-400 font-medium' : ''}>
+        {label}
+      </span>
+    </div>
+  )
+}
+
+function VerificacionBadge({
+  label,
+  value,
+}: {
+  label: string
+  value: string | null
+}) {
+  const hasData = value === 'CON DATOS'
+  return (
+    <div className={`flex items-center gap-2 rounded-lg border px-3 py-2 text-sm ${
+      hasData
+        ? 'border-green-500/20 bg-green-500/5'
+        : 'border-muted bg-muted/30'
+    }`}>
+      {hasData ? (
+        <CheckCircle2 className="h-4 w-4 text-green-500" />
+      ) : (
+        <AlertCircle className="h-4 w-4 text-muted-foreground/50" />
+      )}
+      <span>{label}</span>
+      <span className={`ml-auto text-xs ${hasData ? 'text-green-600 dark:text-green-400' : 'text-muted-foreground'}`}>
+        {value || 'Sin datos'}
+      </span>
     </div>
   )
 }
