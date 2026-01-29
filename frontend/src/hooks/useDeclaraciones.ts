@@ -115,13 +115,10 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
       // Soporta búsqueda con/sin acentos (mineria = minería)
       if (filters.search) {
         const variants = getSearchVariants(filters.search)
-        // Debug: log the variants being searched
-        console.log('[useDeclaraciones] Search variants:', variants)
         const conditions = variants.flatMap(v => [
           `contenido.ilike.%${v}%`,
           `stakeholder.ilike.%${v}%`
         ])
-        console.log('[useDeclaraciones] OR conditions:', conditions.join(','))
         query = query.or(conditions.join(','))
       }
 

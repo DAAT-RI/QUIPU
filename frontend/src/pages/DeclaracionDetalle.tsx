@@ -83,7 +83,6 @@ export function DeclaracionDetalle() {
         titulo={entry.titulo}
         resumen={entry.resumen}
         ruta={entry.ruta}
-        transcripcion={entry.transcripcion}
       />
 
       {/* Contexto (colapsable) */}
@@ -190,13 +189,11 @@ function FuenteSection({
   titulo,
   resumen,
   ruta,
-  transcripcion,
 }: {
   canal: string | null
   titulo: string | null
   resumen: string | null
   ruta: string | null
-  transcripcion: string | null
 }) {
   return (
     <div className="rounded-xl border bg-card p-5 space-y-4">
@@ -232,17 +229,6 @@ function FuenteSection({
           >
             <ExternalLink size={14} className="text-primary" />
             Ver fuente original
-          </a>
-        )}
-        {transcripcion && (
-          <a
-            href={transcripcion}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:border-primary/30 hover:bg-muted/30 transition-colors"
-          >
-            <ExternalLink size={14} className="text-muted-foreground" />
-            Transcripción
           </a>
         )}
       </div>
