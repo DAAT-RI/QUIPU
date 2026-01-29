@@ -17,6 +17,8 @@ import json
 import time
 import argparse
 import signal
+import asyncio
+from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 from typing import Optional
 from dotenv import load_dotenv
@@ -189,8 +191,8 @@ def main():
     parser.add_argument("--dry-run", action="store_true", help="Solo muestra cambios sin aplicarlos")
     parser.add_argument("--batch-size", type=int, default=50, help="Promesas por batch (default: 50)")
     parser.add_argument("--limit", type=int, help="Limitar número total de promesas a procesar en esta sesión")
-    parser.add_argument("--delay", type=float, default=0.1, help="Delay entre llamadas a Gemini (segundos)")
-    # --resume ya no es necesario, es el comportamiento por defecto
+    parser.add_argument("--delay", type=float, default=0.05, help="Delay entre llamadas a Gemini (segundos)")
+    parser.add_argument("--workers", type=int, default=10, help="Número de workers paralelos (default: 10)")
     parser.add_argument("--reset", action="store_true", help="Eliminar checkpoint y empezar desde cero")
     args = parser.parse_args()
 
@@ -217,7 +219,7 @@ def main():
     print(f"Categorías disponibles: {len(CATEGORIES_267)}")
     print(f"Modo: {'DRY-RUN (sin cambios)' if args.dry_run else 'PRODUCCIÓN'}")
     print(f"Batch size: {args.batch_size}")
-    print(f"Delay: {args.delay}s")
+    print(f"Workers paralelos: {args.workers}")
     print()
 
     # Inicializar
@@ -254,64 +256,62 @@ def main():
     # Estadísticas de sesión
     session_processed = 0
 
+    # Función para procesar una promesa (para uso en paralelo)
+    def process_one(promesa):
+        promesa_id = promesa["id"]
+        texto = promesa.get("resumen") or promesa["texto_original"]
+        categoria_actual = promesa["categoria"]
+        time.sleep(args.delay)  # Pequeño delay para evitar rate limit
+        nueva_categoria = classify_promesa(client, texto)
+        return promesa_id, categoria_actual, nueva_categoria
+
     # Progress bar
     with tqdm(total=target, desc="Clasificando", unit="promesas") as pbar:
         current_id = start_after_id
 
-        while session_processed < target:
-            # Obtener batch
-            promesas = fetch_promesas_after_id(supabase, current_id, args.batch_size)
-            if not promesas:
-                break
-
-            for promesa in promesas:
-                if args.limit and session_processed >= args.limit:
+        with ThreadPoolExecutor(max_workers=args.workers) as executor:
+            while session_processed < target:
+                # Obtener batch
+                batch_size = min(args.batch_size, target - session_processed)
+                promesas = fetch_promesas_after_id(supabase, current_id, batch_size)
+                if not promesas:
                     break
 
-                promesa_id = promesa["id"]
-                texto = promesa.get("resumen") or promesa["texto_original"]
-                categoria_actual = promesa["categoria"]
+                # Procesar batch en paralelo
+                futures = list(executor.map(process_one, promesas))
 
-                # Clasificar
-                nueva_categoria = classify_promesa(client, texto)
+                # Procesar resultados en orden
+                for promesa_id, categoria_actual, nueva_categoria in futures:
+                    current_id = promesa_id
+                    checkpoint_state["last_id"] = promesa_id
 
-                # Actualizar checkpoint
-                current_id = promesa_id
-                checkpoint_state["last_id"] = promesa_id
-
-                if nueva_categoria is None:
-                    checkpoint_state["total_errors"] += 1
-                    pbar.update(1)
-                    session_processed += 1
-                    continue
-
-                # Contabilizar
-                cat_counts = checkpoint_state["category_counts"]
-                cat_counts[nueva_categoria] = cat_counts.get(nueva_categoria, 0) + 1
-
-                # Actualizar si cambió
-                if nueva_categoria != categoria_actual:
-                    if update_categoria(supabase, promesa_id, nueva_categoria, args.dry_run):
-                        checkpoint_state["total_updated"] += 1
-                        pbar.set_postfix(
-                            upd=checkpoint_state["total_updated"],
-                            err=checkpoint_state["total_errors"]
-                        )
-                    else:
+                    if nueva_categoria is None:
                         checkpoint_state["total_errors"] += 1
-                else:
-                    checkpoint_state["total_unchanged"] += 1
+                    else:
+                        # Contabilizar
+                        cat_counts = checkpoint_state["category_counts"]
+                        cat_counts[nueva_categoria] = cat_counts.get(nueva_categoria, 0) + 1
 
-                checkpoint_state["total_processed"] += 1
-                session_processed += 1
-                pbar.update(1)
+                        # Actualizar si cambió
+                        if nueva_categoria != categoria_actual:
+                            if update_categoria(supabase, promesa_id, nueva_categoria, args.dry_run):
+                                checkpoint_state["total_updated"] += 1
+                            else:
+                                checkpoint_state["total_errors"] += 1
+                        else:
+                            checkpoint_state["total_unchanged"] += 1
 
-                # Delay para no saturar API
-                time.sleep(args.delay)
+                    checkpoint_state["total_processed"] += 1
+                    session_processed += 1
+                    pbar.update(1)
+                    pbar.set_postfix(
+                        upd=checkpoint_state["total_updated"],
+                        err=checkpoint_state["total_errors"]
+                    )
 
-            # Guardar checkpoint cada batch
-            if not args.dry_run:
-                save_checkpoint()
+                # Guardar checkpoint cada batch
+                if not args.dry_run:
+                    save_checkpoint()
 
     # Resumen final
     print("\n" + "=" * 60)
