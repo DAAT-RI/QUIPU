@@ -2,6 +2,21 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import type { DeclaracionFilters, DeclaracionView, QuipuMasterEntry } from '@/types/database'
 
+// Mapa de equivalencias para búsqueda accent-insensitive
+const ACCENT_MAP: Record<string, string> = {
+  'politica': 'Política',
+  'partidos politicos': 'Partidos Políticos',
+  'corrupcion y transparencia': 'Corrupción y Transparencia',
+  'elecciones y sistemas electorales': 'Elecciones y Sistemas Electorales',
+  'gobierno y administracion publica': 'Gobierno y Administración Pública',
+}
+
+/** Devuelve variante con tildes si existe */
+function getAccentedVariant(text: string): string | null {
+  const key = text.toLowerCase()
+  return ACCENT_MAP[key] || null
+}
+
 /**
  * Hook para obtener declaraciones desde v_quipu_declaraciones
  *
@@ -39,9 +54,15 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
         query = query.ilike('temas', `%${filters.tema}%`)
       }
 
-      // Filtro por tema de la declaración específica
+      // Filtro por tema de la declaración específica (con soporte para tildes)
       if (filters.temaDeclaracion) {
-        query = query.ilike('tema_interaccion', `%${filters.temaDeclaracion}%`)
+        const accentedVariant = getAccentedVariant(filters.temaDeclaracion)
+        if (accentedVariant) {
+          // Buscar ambas variantes: con y sin tildes
+          query = query.or(`tema_interaccion.ilike.%${filters.temaDeclaracion}%,tema_interaccion.ilike.%${accentedVariant}%`)
+        } else {
+          query = query.ilike('tema_interaccion', `%${filters.temaDeclaracion}%`)
+        }
       }
 
       // Filtro por organización mencionada (IMPORTANTE para gremios)
