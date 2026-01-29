@@ -144,14 +144,11 @@ def classify_promesa(client, texto: str, max_retries: int = 3) -> Optional[str]:
     return None
 
 
-def fetch_promesas(supabase: Client, limit: Optional[int] = None, offset: int = 0):
-    """Obtiene promesas de Supabase."""
+def fetch_promesas_after_id(supabase: Client, after_id: int, limit: int = 50):
+    """Obtiene promesas con ID mayor al especificado."""
     query = supabase.table("quipu_promesas_planes").select(
         "id, texto_original, resumen, categoria"
-    ).order("id")
-
-    if limit:
-        query = query.range(offset, offset + limit - 1)
+    ).gt("id", after_id).order("id").limit(limit)
 
     result = query.execute()
     return result.data
@@ -160,6 +157,12 @@ def fetch_promesas(supabase: Client, limit: Optional[int] = None, offset: int = 
 def count_promesas(supabase: Client) -> int:
     """Cuenta el total de promesas."""
     result = supabase.table("quipu_promesas_planes").select("id", count="exact").execute()
+    return result.count or 0
+
+
+def count_remaining(supabase: Client, after_id: int) -> int:
+    """Cuenta promesas con ID mayor al especificado."""
+    result = supabase.table("quipu_promesas_planes").select("id", count="exact").gt("id", after_id).execute()
     return result.count or 0
 
 
@@ -180,17 +183,38 @@ def update_categoria(supabase: Client, promesa_id: int, nueva_categoria: str, dr
 
 
 def main():
+    global checkpoint_state
+
     parser = argparse.ArgumentParser(description="Reclasifica promesas usando Gemini AI")
     parser.add_argument("--dry-run", action="store_true", help="Solo muestra cambios sin aplicarlos")
     parser.add_argument("--batch-size", type=int, default=50, help="Promesas por batch (default: 50)")
-    parser.add_argument("--limit", type=int, help="Limitar número total de promesas a procesar")
-    parser.add_argument("--offset", type=int, default=0, help="Offset inicial")
-    parser.add_argument("--delay", type=float, default=0.5, help="Delay entre llamadas a Gemini (segundos)")
+    parser.add_argument("--limit", type=int, help="Limitar número total de promesas a procesar en esta sesión")
+    parser.add_argument("--delay", type=float, default=0.1, help="Delay entre llamadas a Gemini (segundos)")
+    parser.add_argument("--resume", action="store_true", help="Continuar desde el último checkpoint")
+    parser.add_argument("--reset", action="store_true", help="Eliminar checkpoint y empezar desde cero")
     args = parser.parse_args()
 
     print("=" * 60)
     print("RECLASIFICACIÓN DE CATEGORÍAS CON GEMINI AI")
     print("=" * 60)
+
+    # Reset checkpoint si se solicita
+    if args.reset:
+        clear_checkpoint()
+        print("Checkpoint eliminado. Empezando desde cero.\n")
+
+    # Cargar checkpoint si existe
+    start_after_id = 0
+    if args.resume or CHECKPOINT_PATH.exists():
+        saved = load_checkpoint()
+        if saved:
+            checkpoint_state.update(saved)
+            start_after_id = saved["last_id"]
+            print(f"[RESUME] Continuando desde ID > {start_after_id}")
+            print(f"  Ya procesadas: {saved['total_processed']}")
+            print(f"  Ya actualizadas: {saved['total_updated']}")
+            print()
+
     print(f"Categorías disponibles: {len(CATEGORIES_267)}")
     print(f"Modo: {'DRY-RUN (sin cambios)' if args.dry_run else 'PRODUCCIÓN'}")
     print(f"Batch size: {args.batch_size}")
@@ -202,30 +226,49 @@ def main():
     supabase, client = init_clients()
     print("OK\n")
 
-    # Contar total de promesas
+    # Contar promesas restantes
     total_promesas = count_promesas(supabase)
-    target = args.limit if args.limit else total_promesas
+    remaining = count_remaining(supabase, start_after_id)
+    target = min(args.limit, remaining) if args.limit else remaining
+
     print(f"Total promesas en BD: {total_promesas}")
-    print(f"Promesas a procesar: {target}\n")
+    print(f"Restantes por procesar: {remaining}")
+    if args.limit:
+        print(f"Límite esta sesión: {args.limit}")
+    print()
 
-    # Estadísticas
-    total_processed = 0
-    total_updated = 0
-    total_unchanged = 0
-    total_errors = 0
-    category_counts = {}
+    if remaining == 0:
+        print("¡No hay promesas pendientes!")
+        clear_checkpoint()
+        return
 
-    offset = args.offset
+    # Handler para Ctrl+C
+    def handle_interrupt(signum, frame):
+        print(f"\n\n[INTERRUMPIDO] Guardando checkpoint...")
+        save_checkpoint()
+        print(f"Último ID: {checkpoint_state['last_id']}")
+        print(f"Para continuar: python {Path(__file__).name} --resume")
+        exit(0)
+
+    signal.signal(signal.SIGINT, handle_interrupt)
+
+    # Estadísticas de sesión
+    session_processed = 0
 
     # Progress bar
     with tqdm(total=target, desc="Clasificando", unit="promesas") as pbar:
-        while True:
+        current_id = start_after_id
+
+        while session_processed < target:
             # Obtener batch
-            promesas = fetch_promesas(supabase, args.batch_size, offset)
+            promesas = fetch_promesas_after_id(supabase, current_id, args.batch_size)
             if not promesas:
                 break
 
             for promesa in promesas:
+                if args.limit and session_processed >= args.limit:
+                    break
+
                 promesa_id = promesa["id"]
                 texto = promesa.get("resumen") or promesa["texto_original"]
                 categoria_actual = promesa["categoria"]
@@ -233,55 +276,70 @@ def main():
                 # Clasificar
                 nueva_categoria = classify_promesa(client, texto)
 
+                # Actualizar checkpoint
+                current_id = promesa_id
+                checkpoint_state["last_id"] = promesa_id
+
                 if nueva_categoria is None:
-                    total_errors += 1
+                    checkpoint_state["total_errors"] += 1
                     pbar.update(1)
+                    session_processed += 1
                     continue
 
                 # Contabilizar
-                category_counts[nueva_categoria] = category_counts.get(nueva_categoria, 0) + 1
+                cat_counts = checkpoint_state["category_counts"]
+                cat_counts[nueva_categoria] = cat_counts.get(nueva_categoria, 0) + 1
 
                 # Actualizar si cambió
                 if nueva_categoria != categoria_actual:
                     if update_categoria(supabase, promesa_id, nueva_categoria, args.dry_run):
-                        total_updated += 1
-                        pbar.set_postfix(updated=total_updated, errors=total_errors)
+                        checkpoint_state["total_updated"] += 1
+                        pbar.set_postfix(
+                            upd=checkpoint_state["total_updated"],
+                            err=checkpoint_state["total_errors"]
+                        )
                     else:
-                        total_errors += 1
+                        checkpoint_state["total_errors"] += 1
                 else:
-                    total_unchanged += 1
+                    checkpoint_state["total_unchanged"] += 1
 
-                total_processed += 1
+                checkpoint_state["total_processed"] += 1
+                session_processed += 1
                 pbar.update(1)
 
                 # Delay para no saturar API
                 time.sleep(args.delay)
 
-                # Límite total
-                if args.limit and total_processed >= args.limit:
-                    break
-
-            # Límite total
-            if args.limit and total_processed >= args.limit:
-                break
-
-            offset += args.batch_size
+            # Guardar checkpoint cada batch
+            if not args.dry_run:
+                save_checkpoint()
 
     # Resumen final
-    print("=" * 60)
+    print("\n" + "=" * 60)
     print("RESUMEN FINAL")
     print("=" * 60)
-    print(f"Total procesadas: {total_processed}")
-    print(f"Total actualizadas: {total_updated}")
-    print(f"Total sin cambio: {total_unchanged}")
-    print(f"Total errores: {total_errors}")
+    print(f"Procesadas esta sesión: {session_processed}")
+    print(f"Total acumulado: {checkpoint_state['total_processed']}")
+    print(f"Total actualizadas: {checkpoint_state['total_updated']}")
+    print(f"Total sin cambio: {checkpoint_state['total_unchanged']}")
+    print(f"Total errores: {checkpoint_state['total_errors']}")
+    print(f"Último ID: {checkpoint_state['last_id']}")
     print()
-    print("Top 20 categorías asignadas:")
-    for cat, count in sorted(category_counts.items(), key=lambda x: -x[1])[:20]:
+    print("Top 20 categorías:")
+    for cat, count in sorted(checkpoint_state["category_counts"].items(), key=lambda x: -x[1])[:20]:
         print(f"  {count:5d} - {cat}")
 
+    # Verificar si terminamos
+    remaining_after = count_remaining(supabase, checkpoint_state["last_id"])
+    if remaining_after == 0:
+        print("\n¡MIGRACIÓN COMPLETADA!")
+        clear_checkpoint()
+    else:
+        print(f"\nQuedan {remaining_after} promesas.")
+        print(f"Para continuar: python {Path(__file__).name} --resume")
+
     if args.dry_run:
-        print("\n[DRY-RUN] No se aplicaron cambios. Ejecuta sin --dry-run para aplicar.")
+        print("\n[DRY-RUN] No se aplicaron cambios.")
 
 
 if __name__ == "__main__":
