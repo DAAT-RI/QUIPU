@@ -16,7 +16,7 @@ import { useState, useEffect, useCallback } from 'react'
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
   { name: 'Declaraciones', href: '/declaraciones', icon: MessageSquareQuote },
-  { name: 'Buscar en Planes', href: '/buscar', icon: Search },
+  { name: 'Buscar Promesas', href: '/buscar', icon: Search },
   { name: 'Candidatos', href: '/candidatos', icon: Users },
   { name: 'Partidos', href: '/partidos', icon: Building2 },
   { name: 'Categorias', href: '/categorias', icon: Tags },

@@ -38,6 +38,26 @@ export function useCandidatos(filters: CandidatoFilters) {
   })
 }
 
+/**
+ * Fetch candidates by partial cargo_postula match.
+ * Used in Dashboard to separate Presidente, 1er Vice, 2do Vice.
+ */
+export function useCandidatosByCargo(cargoPattern: string, limit = 50) {
+  return useQuery({
+    queryKey: ['candidatos-cargo', cargoPattern, limit],
+    queryFn: async () => {
+      const { data, error, count } = await supabase
+        .from('v_quipu_candidatos_unicos')
+        .select('*', { count: 'exact' })
+        .ilike('cargo_postula', `%${cargoPattern}%`)
+        .order('partido_nombre')
+        .limit(limit)
+      if (error) throw error
+      return { data: data as CandidatoCompleto[], count: count ?? 0 }
+    },
+  })
+}
+
 export function useCandidato(id: string | undefined) {
   return useQuery({
     queryKey: ['candidato', id],
@@ -54,6 +74,10 @@ export function useCandidato(id: string | undefined) {
   })
 }
 
+/**
+ * Search candidatos by name, partido, or cargo.
+ * Used in Comparar page for flexible candidate selection.
+ */
 export function useSearchCandidatosByName(search: string) {
   return useQuery({
     queryKey: ['search-candidatos', search],
@@ -62,7 +86,7 @@ export function useSearchCandidatosByName(search: string) {
       const { data, error } = await supabase
         .from('v_quipu_candidatos_unicos')
         .select('*')
-        .ilike('nombre_completo', `%${search}%`)
+        .or(`nombre_completo.ilike.%${search}%,partido_nombre.ilike.%${search}%,cargo_postula.ilike.%${search}%`)
         .limit(20)
       if (error) throw error
       return data as CandidatoCompleto[]

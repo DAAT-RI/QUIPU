@@ -41,12 +41,13 @@ export function PartidoDetalle() {
   } = usePartido(id)
 
   const {
-    data: promesas,
+    data: promesasResult,
     isLoading: loadingPromesas,
   } = usePromesasByPartido(
     id ? Number(id) : undefined,
     categoriaFilter || undefined,
   )
+  const promesas = promesasResult?.data ?? []
 
   const { data: candidatosData } = useCandidatos({
     partido_id: id ? Number(id) : undefined,
@@ -85,8 +86,8 @@ export function PartidoDetalle() {
     for (const d of partidoDeclaraciones) {
       // Use individual declaration tema first, then fall back to entry-level temas
       const temas: string[] = []
-      if (d.tema) {
-        temas.push(d.tema)
+      if (d.tema_interaccion) {
+        temas.push(d.tema_interaccion)
       } else if (d.temas) {
         temas.push(...d.temas.split(';').map((t) => t.trim()).filter(Boolean))
       }
@@ -103,12 +104,14 @@ export function PartidoDetalle() {
   const maxTemaCount = temaChartData[0]?.count || 1
 
   // Build chart data: group all promesas (unfiltered) by categoria
-  const { data: allPromesas } = usePromesasByPartido(
+  const { data: allPromesasResult } = usePromesasByPartido(
     id ? Number(id) : undefined,
   )
+  const allPromesas = allPromesasResult?.data ?? []
+  const totalPromesas = allPromesasResult?.count ?? 0
 
   const chartData = useMemo(() => {
-    if (!allPromesas) return []
+    if (!allPromesas.length) return []
     const counts: Record<string, number> = {}
     for (const p of allPromesas) {
       counts[p.categoria] = (counts[p.categoria] || 0) + 1
@@ -123,8 +126,6 @@ export function PartidoDetalle() {
       }))
       .sort((a, b) => b.count - a.count)
   }, [allPromesas])
-
-  const totalPromesas = allPromesas?.length ?? 0
   const maxCount = chartData[0]?.count || 1
 
   const categoriaOptions = PLAN_CATEGORIES.map((c) => ({
@@ -278,9 +279,9 @@ export function PartidoDetalle() {
                         &laquo;{d.contenido}&raquo;
                       </blockquote>
                       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                        {d.tema && (
+                        {d.tema_interaccion && (
                           <span className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                            {d.tema}
+                            {d.tema_interaccion}
                           </span>
                         )}
                         {d.temas &&

@@ -1,5 +1,7 @@
+import { useState } from 'react'
 import { useParams, Link } from 'react-router-dom'
 import { useDeclaracionEntry } from '@/hooks/useDeclaraciones'
+import { useStakeholderCandidato } from '@/hooks/useStakeholderCandidato'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { formatDate } from '@/lib/utils'
@@ -12,39 +14,62 @@ import {
   Building2,
   Hash,
   MessageSquareQuote,
+  Users,
+  Globe,
+  AtSign,
+  Link as LinkIcon,
+  AlertTriangle,
 } from 'lucide-react'
 import type { Interaccion } from '@/types/database'
+
+type TabKey = 'declaraciones' | 'fuente' | 'contexto' | 'menciones'
+
+const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
+  { key: 'declaraciones', label: 'Declaraciones', icon: Quote },
+  { key: 'fuente', label: 'Fuente', icon: FileText },
+  { key: 'contexto', label: 'Contexto', icon: Users },
+  { key: 'menciones', label: 'Menciones', icon: AtSign },
+]
 
 export function DeclaracionDetalle() {
   const { id } = useParams()
   const { data: entry, isLoading, isError, refetch } = useDeclaracionEntry(id)
+  const [activeTab, setActiveTab] = useState<TabKey>('declaraciones')
 
   if (isLoading) return <LoadingSpinner />
   if (isError || !entry) {
-    return <ErrorState message="No se pudo cargar la declaracion" onRetry={() => refetch()} />
+    return <ErrorState message="No se pudo cargar la declaración" onRetry={() => refetch()} />
   }
 
   const declarations: Interaccion[] =
     entry.interacciones?.filter((i) => i.type === 'declaration') ?? []
 
-  const temasList = entry.temas
-    ? entry.temas.split(',').map((t) => t.trim()).filter(Boolean)
-    : []
+  const mentions: Interaccion[] =
+    entry.interacciones?.filter((i) => i.type === 'mention') ?? []
 
-  const keywordsList = entry.keywords
-    ? entry.keywords.split(',').map((k) => k.trim()).filter(Boolean)
-    : []
+  // Parse comma/semicolon-separated fields
+  const parseList = (str: string | null | undefined, separator = /[,;]/) =>
+    str ? str.split(separator).map((s) => s.trim()).filter(Boolean).filter(s => s !== 'N/A') : []
 
-  const orgList = entry.organizaciones
-    ? entry.organizaciones.split(',').map((o) => o.trim()).filter(Boolean)
-    : []
+  const temasList = parseList(entry.temas, /;/)
+  const keywordsList = parseList(entry.keywords, /,/)
+  const orgList = parseList(entry.organizaciones)
+  const ubiList = parseList(entry.ubicaciones)
+  const paisesList = parseList(entry.paises)
 
-  const ubiList = entry.ubicaciones
-    ? entry.ubicaciones.split(',').map((u) => u.trim()).filter(Boolean)
+  // Parse personas (format: "Nombre (descripción)")
+  const personasList = entry.personas
+    ? entry.personas.split(/(?<=\))\s*[;,]\s*(?=[A-Z])/).map((p) => {
+        const match = p.match(/^([^(]+)\s*\(([^)]+)\)$/)
+        if (match) {
+          return { nombre: match[1].trim(), descripcion: match[2].trim() }
+        }
+        return { nombre: p.trim(), descripcion: null }
+      }).filter(p => p.nombre)
     : []
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Back link */}
       <Link
         to="/declaraciones"
@@ -61,123 +86,359 @@ export function DeclaracionDetalle() {
             <MessageSquareQuote className="h-6 w-6 text-amber-600 dark:text-amber-400" />
           </div>
           <div className="flex-1 min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight">{entry.canal || 'Declaracion'}</h1>
+            <h1 className="text-xl font-bold tracking-tight">{entry.canal || 'Declaración'}</h1>
             <p className="text-sm text-muted-foreground mt-0.5">{formatDate(entry.fecha)}</p>
-            {entry.ruta && (
-              <a
-                href={entry.ruta}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="mt-2 inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
-              >
-                <ExternalLink size={14} />
-                Ver fuente original
-              </a>
-            )}
+            <div className="mt-3 flex flex-wrap gap-4 text-sm">
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <Quote size={14} className="text-primary" />
+                {declarations.length} declaraciones
+              </span>
+              <span className="flex items-center gap-1.5 text-muted-foreground">
+                <AtSign size={14} />
+                {mentions.length} menciones
+              </span>
+              {entry.ruta && (
+                <a
+                  href={entry.ruta}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center gap-1.5 text-primary hover:underline"
+                >
+                  <ExternalLink size={14} />
+                  Ver fuente
+                </a>
+              )}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Resumen */}
-      {entry.resumen && (
-        <section>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <FileText className="h-4 w-4 text-primary" />
-            </div>
-            <h2 className="text-lg font-semibold">Resumen</h2>
-          </div>
-          <div className="rounded-xl border bg-card p-5">
-            <p className="text-sm text-muted-foreground leading-relaxed">
-              {entry.resumen}
-            </p>
-          </div>
-        </section>
-      )}
+      {/* Tabs */}
+      <div className="flex gap-1 border-b">
+        {TABS.map((tab) => {
+          const Icon = tab.icon
+          const count = tab.key === 'declaraciones' ? declarations.length :
+                       tab.key === 'menciones' ? mentions.length : null
+          return (
+            <button
+              key={tab.key}
+              onClick={() => setActiveTab(tab.key)}
+              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
+                activeTab === tab.key
+                  ? 'border-primary text-primary'
+                  : 'border-transparent text-muted-foreground hover:text-foreground'
+              }`}
+            >
+              <Icon size={16} />
+              {tab.label}
+              {count !== null && count > 0 && (
+                <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
+                  {count}
+                </span>
+              )}
+            </button>
+          )
+        })}
+      </div>
 
-      {/* Declaraciones */}
-      {declarations.length > 0 && (
-        <section>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-              <Quote className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            </div>
-            <h2 className="text-lg font-semibold">
-              Declaraciones ({declarations.length})
-            </h2>
-          </div>
-          <div className="rounded-xl border bg-card divide-y">
-            {declarations.map((d, idx) => (
-              <div key={idx} className="p-5 space-y-2">
-                <p className="font-semibold text-sm flex items-center gap-2">
-                  <Quote size={14} className="text-primary shrink-0" />
-                  {d.stakeholder}
-                </p>
-                <blockquote className="text-sm text-muted-foreground border-l-2 border-primary pl-3 leading-relaxed">
-                  &laquo;{d.content}&raquo;
-                </blockquote>
-                {d.tema && (
-                  <span className="inline-block rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                    {d.tema}
-                  </span>
-                )}
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Metadata Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {temasList.length > 0 && (
-          <MetadataCard icon={Hash} color="bg-primary/10 text-primary" title="Temas" items={temasList} variant="default" />
+      {/* Tab Content */}
+      <div className="min-h-[300px]">
+        {activeTab === 'declaraciones' && (
+          <TabDeclaraciones declarations={declarations} />
         )}
-        {keywordsList.length > 0 && (
-          <MetadataCard icon={Hash} color="bg-muted text-muted-foreground" title="Keywords" items={keywordsList} variant="secondary" />
+        {activeTab === 'fuente' && (
+          <TabFuente entry={entry} temasList={temasList} keywordsList={keywordsList} />
         )}
-        {orgList.length > 0 && (
-          <MetadataCard icon={Building2} color="bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Organizaciones" items={orgList} variant="outline" />
+        {activeTab === 'contexto' && (
+          <TabContexto
+            personasList={personasList}
+            orgList={orgList}
+            ubiList={ubiList}
+            paisesList={paisesList}
+          />
         )}
-        {ubiList.length > 0 && (
-          <MetadataCard icon={MapPin} color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" title="Ubicaciones" items={ubiList} variant="outline" />
+        {activeTab === 'menciones' && (
+          <TabMenciones mentions={mentions} />
         )}
       </div>
     </div>
   )
 }
 
-function MetadataCard({
-  icon: Icon,
-  color,
-  title,
-  items,
-  variant,
-}: {
-  icon: React.ElementType
-  color: string
-  title: string
-  items: string[]
-  variant: 'default' | 'secondary' | 'outline'
-}) {
-  const tagStyles = {
-    default: 'bg-primary/10 text-primary',
-    secondary: 'bg-muted text-foreground',
-    outline: 'border border-border text-foreground',
+// Tab: Declaraciones (PRINCIPAL)
+function TabDeclaraciones({ declarations }: { declarations: Interaccion[] }) {
+  if (declarations.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+        No hay declaraciones en esta entrada
+      </div>
+    )
   }
 
   return (
-    <div className="rounded-xl border bg-card p-5">
-      <div className="flex items-center gap-2 mb-3">
-        <div className={`flex h-7 w-7 items-center justify-center rounded-lg ${color}`}>
-          <Icon className="h-3.5 w-3.5" />
-        </div>
-        <h3 className="text-sm font-semibold">{title}</h3>
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((item) => (
-          <span key={item} className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${tagStyles[variant]}`}>
-            {item}
+    <div className="rounded-xl border bg-card divide-y">
+      {declarations.map((d, idx) => (
+        <DeclarationItem key={idx} declaration={d} />
+      ))}
+    </div>
+  )
+}
+
+function DeclarationItem({ declaration }: { declaration: Interaccion }) {
+  // Try to link stakeholder to candidato
+  const { data: candidato } = useStakeholderCandidato(declaration.stakeholder)
+
+  return (
+    <div className="p-5 space-y-3">
+      <div className="flex items-center gap-2">
+        <Quote size={14} className="text-primary shrink-0" />
+        {candidato ? (
+          <Link
+            to={`/candidatos/${candidato.id}`}
+            className="font-semibold text-sm text-primary hover:underline"
+          >
+            {declaration.stakeholder}
+          </Link>
+        ) : (
+          <span className="font-semibold text-sm">{declaration.stakeholder}</span>
+        )}
+        {candidato && (
+          <span className="text-xs text-muted-foreground">
+            ({candidato.partido_nombre})
           </span>
+        )}
+      </div>
+      <blockquote className="text-sm text-foreground border-l-2 border-primary/50 pl-3 leading-relaxed">
+        «{declaration.content}»
+      </blockquote>
+      {declaration.tema && (
+        <span className="inline-block rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-medium">
+          {declaration.tema}
+        </span>
+      )}
+    </div>
+  )
+}
+
+// Tab: Fuente (resumen del ARTÍCULO)
+function TabFuente({
+  entry,
+  temasList,
+  keywordsList,
+}: {
+  entry: { titulo?: string | null; resumen?: string | null; fecha?: string | null; ruta?: string | null; transcripcion?: string | null }
+  temasList: string[]
+  keywordsList: string[]
+}) {
+  return (
+    <div className="space-y-4">
+      {/* Título */}
+      {entry.titulo && (
+        <div className="rounded-xl border bg-card p-5">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Título del artículo/post</h3>
+          <p className="text-sm leading-relaxed">{entry.titulo}</p>
+        </div>
+      )}
+
+      {/* Resumen */}
+      {entry.resumen && (
+        <div className="rounded-xl border bg-card p-5">
+          <h3 className="text-sm font-medium text-muted-foreground mb-2">Resumen (generado por IA)</h3>
+          <p className="text-sm text-muted-foreground leading-relaxed">{entry.resumen}</p>
+        </div>
+      )}
+
+      {/* Links */}
+      <div className="flex flex-wrap gap-3">
+        {entry.ruta && (
+          <a
+            href={entry.ruta}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm hover:border-primary/30 transition-colors"
+          >
+            <ExternalLink size={16} className="text-primary" />
+            Fuente original
+          </a>
+        )}
+        {entry.transcripcion && (
+          <a
+            href={entry.transcripcion}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm hover:border-primary/30 transition-colors"
+          >
+            <LinkIcon size={16} className="text-muted-foreground" />
+            Transcripción completa
+          </a>
+        )}
+      </div>
+
+      {/* Temas y Keywords */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        {temasList.length > 0 && (
+          <div className="rounded-xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Hash size={16} className="text-primary" />
+              <h3 className="text-sm font-semibold">Temas</h3>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {temasList.map((t) => (
+                <span key={t} className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-medium">
+                  {t}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {keywordsList.length > 0 && (
+          <div className="rounded-xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Hash size={16} className="text-muted-foreground" />
+              <h3 className="text-sm font-semibold">Keywords</h3>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {keywordsList.map((k) => (
+                <span key={k} className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium">
+                  {k}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Tab: Contexto
+function TabContexto({
+  personasList,
+  orgList,
+  ubiList,
+  paisesList,
+}: {
+  personasList: { nombre: string; descripcion: string | null }[]
+  orgList: string[]
+  ubiList: string[]
+  paisesList: string[]
+}) {
+  const hasContent = personasList.length > 0 || orgList.length > 0 || ubiList.length > 0 || paisesList.length > 0
+
+  if (!hasContent) {
+    return (
+      <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+        No hay información de contexto disponible
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Personas mencionadas con descripciones */}
+      {personasList.length > 0 && (
+        <div className="rounded-xl border bg-card p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Users size={16} className="text-primary" />
+            <h3 className="text-sm font-semibold">Personas mencionadas</h3>
+          </div>
+          <div className="space-y-3">
+            {personasList.map((p, idx) => (
+              <div key={idx} className="border-l-2 border-muted pl-3">
+                <p className="font-medium text-sm">{p.nombre}</p>
+                {p.descripcion && (
+                  <p className="text-xs text-muted-foreground mt-0.5">{p.descripcion}</p>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Grid: Orgs, Ubicaciones, Países */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        {orgList.length > 0 && (
+          <div className="rounded-xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Building2 size={16} className="text-amber-600 dark:text-amber-400" />
+              <h3 className="text-sm font-semibold">Organizaciones</h3>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {orgList.map((o) => (
+                <span key={o} className="rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-medium">
+                  {o}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {ubiList.length > 0 && (
+          <div className="rounded-xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <MapPin size={16} className="text-emerald-600 dark:text-emerald-400" />
+              <h3 className="text-sm font-semibold">Ubicaciones</h3>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {ubiList.map((u) => (
+                <span key={u} className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2.5 py-0.5 text-[11px] font-medium">
+                  {u}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+        {paisesList.length > 0 && (
+          <div className="rounded-xl border bg-card p-5">
+            <div className="flex items-center gap-2 mb-3">
+              <Globe size={16} className="text-blue-600 dark:text-blue-400" />
+              <h3 className="text-sm font-semibold">Países</h3>
+            </div>
+            <div className="flex flex-wrap gap-1.5">
+              {paisesList.map((p) => (
+                <span key={p} className="rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2.5 py-0.5 text-[11px] font-medium">
+                  {p}
+                </span>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// Tab: Menciones (SECUNDARIO - puede tener ruido)
+function TabMenciones({ mentions }: { mentions: Interaccion[] }) {
+  if (mentions.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
+        No hay menciones en esta entrada
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* Warning */}
+      <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20 p-3 text-sm text-amber-800 dark:text-amber-200">
+        <AlertTriangle size={16} />
+        Las menciones pueden contener ruido o información no relevante
+      </div>
+
+      <div className="rounded-xl border bg-card divide-y">
+        {mentions.map((m, idx) => (
+          <div key={idx} className="p-5 space-y-2">
+            <div className="flex items-center gap-2">
+              <AtSign size={14} className="text-muted-foreground shrink-0" />
+              <span className="font-medium text-sm">{m.stakeholder}</span>
+            </div>
+            <p className="text-sm text-muted-foreground pl-6">{m.content}</p>
+            {m.tema && (
+              <span className="ml-6 inline-block rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium">
+                {m.tema}
+              </span>
+            )}
+          </div>
         ))}
       </div>
     </div>

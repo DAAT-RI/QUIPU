@@ -15,11 +15,12 @@ import {
 
 import { useDashboardStats, usePromesasPorCategoria, useTopPartidos } from '@/hooks/useDashboardStats'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
-import { useCandidatos, useCandidatoCountByTipo } from '@/hooks/useCandidatos'
+import { useCandidatoCountByTipo, useCandidatosByCargo } from '@/hooks/useCandidatos'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { CATEGORY_CONFIG, CATEGORIES_LIST } from '@/lib/constants'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
+import type { CandidatoCompleto } from '@/types/database'
 
 export function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
@@ -30,19 +31,19 @@ export function Dashboard() {
     limit: 5,
   })
 
-  // Get presidential candidates
-  const { data: topCandidatosData } = useCandidatos({
-    tipo_eleccion: 'PRESIDENCIAL',
-    offset: 0,
-    limit: 5,
-  })
+  // Get presidential candidates by cargo type (separated)
+  const { data: presidentesData } = useCandidatosByCargo('PRESIDENTE DE LA REP', 50)
+  const { data: vice1Data } = useCandidatosByCargo('PRIMER VICEPRESIDENTE', 50)
+  const { data: vice2Data } = useCandidatosByCargo('SEGUNDO VICEPRESIDENTE', 50)
 
   // Get candidate counts by cargo type
   const { data: cargoCountsData } = useCandidatoCountByTipo()
   const cargoCounts = cargoCountsData ?? {}
 
   const recentDeclaraciones = declaracionesResult?.data ?? []
-  const topCandidatos = topCandidatosData?.data ?? []
+  const presidentes = presidentesData?.data ?? []
+  const vice1 = vice1Data?.data ?? []
+  const vice2 = vice2Data?.data ?? []
 
   // Build topic cards — top 6 categories sorted by count, with percentage
   const topicCards = useMemo(() => {
@@ -235,9 +236,9 @@ export function Dashboard() {
                     {decl.contenido}
                   </p>
                   <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                    {decl.tema && (
+                    {decl.tema_interaccion && (
                       <span className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                        {decl.tema}
+                        {decl.tema_interaccion}
                       </span>
                     )}
                     {decl.organizaciones && (
@@ -326,53 +327,44 @@ export function Dashboard() {
           )}
         </section>
 
-        {/* Candidatos Presidenciales */}
-        <section>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
-              <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
-            </div>
-            <h2 className="text-lg font-semibold">Candidatos Presidenciales</h2>
-          </div>
-          <div className="rounded-xl border bg-card divide-y">
-            {topCandidatos.length === 0 ? (
-              <div className="p-6 text-center text-sm text-muted-foreground">
-                Cargando candidatos...
+        {/* Candidatos Presidenciales - 3 sections */}
+        <section className="space-y-6">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
-            ) : (
-              topCandidatos.map((c, i) => (
-                <Link
-                  key={c.id}
-                  to={`/candidatos/${c.id}`}
-                  className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
-                >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary text-xs font-bold">
-                    {i + 1}
-                  </span>
-                  <CandidatoAvatar
-                    nombre={c.nombre_completo || ''}
-                    fotoUrl={c.foto_url}
-                    size="md"
-                  />
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
-                    <p className="text-xs text-muted-foreground truncate">
-                      {c.partido_nombre}
-                      {c.departamento ? ` \u2022 ${c.departamento}` : ''}
-                    </p>
-                  </div>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-                </Link>
-              ))
-            )}
+              <h2 className="text-lg font-semibold">Candidatos Presidenciales</h2>
+            </div>
+            <Link
+              to="/candidatos?tipo=PRESIDENCIAL"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+            >
+              Ver todos
+              <ArrowRight className="h-3.5 w-3.5" />
+            </Link>
           </div>
-          <Link
-            to="/candidatos"
-            className="mt-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
-          >
-            Ver todos los candidatos
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+
+          {/* Presidentes */}
+          <CandidatoCargoSection
+            title="Presidente de la República"
+            candidatos={presidentes}
+            color="amber"
+          />
+
+          {/* 1er Vicepresidente */}
+          <CandidatoCargoSection
+            title="Primer Vicepresidente"
+            candidatos={vice1}
+            color="violet"
+          />
+
+          {/* 2do Vicepresidente */}
+          <CandidatoCargoSection
+            title="Segundo Vicepresidente"
+            candidatos={vice2}
+            color="blue"
+          />
         </section>
       </div>
 
@@ -464,5 +456,81 @@ function StatPill({
         <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
       </div>
     </Link>
+  )
+}
+
+/* ── Candidato section by cargo ──────────────────────────────────── */
+const COLOR_CLASSES = {
+  amber: {
+    bg: 'bg-amber-500/10',
+    text: 'text-amber-600 dark:text-amber-400',
+  },
+  violet: {
+    bg: 'bg-violet-500/10',
+    text: 'text-violet-600 dark:text-violet-400',
+  },
+  blue: {
+    bg: 'bg-blue-500/10',
+    text: 'text-blue-600 dark:text-blue-400',
+  },
+} as const
+
+function CandidatoCargoSection({
+  title,
+  candidatos,
+  color,
+}: {
+  title: string
+  candidatos: CandidatoCompleto[]
+  color: keyof typeof COLOR_CLASSES
+}) {
+  const colors = COLOR_CLASSES[color]
+  const displayList = candidatos.slice(0, 5)
+  const remaining = candidatos.length - 5
+
+  return (
+    <div>
+      <div className="flex items-center justify-between mb-2">
+        <p className="text-sm font-medium text-muted-foreground">{title}</p>
+        <span className="text-xs text-muted-foreground">{candidatos.length} candidatos</span>
+      </div>
+      <div className="rounded-xl border bg-card divide-y">
+        {displayList.length === 0 ? (
+          <div className="p-4 text-center text-sm text-muted-foreground">
+            Cargando...
+          </div>
+        ) : (
+          displayList.map((c, i) => (
+            <Link
+              key={c.id}
+              to={`/candidatos/${c.id}`}
+              className="group flex items-center gap-3 p-3 transition-colors hover:bg-muted/30"
+            >
+              <span className={`flex h-6 w-6 shrink-0 items-center justify-center rounded-full ${colors.bg} ${colors.text} text-[10px] font-bold`}>
+                {i + 1}
+              </span>
+              <CandidatoAvatar
+                nombre={c.nombre_completo || ''}
+                fotoUrl={c.foto_url}
+                size="sm"
+              />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
+                <p className="text-xs text-muted-foreground truncate">{c.partido_nombre}</p>
+              </div>
+              <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+            </Link>
+          ))
+        )}
+        {remaining > 0 && (
+          <Link
+            to="/candidatos?tipo=PRESIDENCIAL"
+            className="block p-2.5 text-center text-xs text-muted-foreground hover:text-primary transition-colors"
+          >
+            +{remaining} más →
+          </Link>
+        )}
+      </div>
+    </div>
   )
 }

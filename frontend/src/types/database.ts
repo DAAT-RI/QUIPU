@@ -95,7 +95,7 @@ export interface QuipuMasterEntry {
   id: string
   canal: string | null
   titulo: string | null
-  resumen: string | null
+  resumen: string | null  // Nota: es resumen del ARTÍCULO/POST completo
   temas: string | null
   personas: string | null
   keywords: string | null
@@ -105,6 +105,7 @@ export interface QuipuMasterEntry {
   productos: string | null
   fecha: string | null
   ruta: string | null
+  transcripcion: string | null  // URL a transcripción completa
   url_clip: string | null
   interacciones: Interaccion[] | null
   processed_at: string | null
@@ -118,6 +119,7 @@ export interface Interaccion {
 }
 
 // Vista: v_quipu_declaraciones (aplanada de interacciones)
+// NOTA: resumen es del ARTÍCULO completo, no de la declaración individual
 export interface Declaracion {
   master_id: string
   canal: string | null
@@ -131,6 +133,28 @@ export interface Declaracion {
   contenido: string
   stakeholder: string
   tema: string | null
+}
+
+// Vista v_quipu_declaraciones - Nueva estructura con todos los campos
+export interface DeclaracionView {
+  master_id: string
+  canal: string | null
+  titulo: string | null  // Título del artículo/post
+  resumen: string | null  // Resumen del ARTÍCULO (no de la declaración)
+  temas: string | null  // Temas del artículo (semicolon separated)
+  personas: string | null  // Personas mencionadas con descripciones
+  keywords: string | null
+  organizaciones: string | null  // Orgs mencionadas - IMPORTANTE para gremios
+  ubicaciones: string | null
+  paises: string | null
+  productos: string | null
+  fecha: string | null
+  ruta: string | null  // URL fuente original
+  transcripcion: string | null  // URL a transcripción completa
+  tipo: 'declaration' | 'mention'  // Tipo de interacción
+  stakeholder: string  // Quién dijo/fue mencionado
+  contenido: string  // LO QUE DIJO - esto es lo más importante
+  tema_interaccion: string | null  // Tema específico de esta declaración
 }
 
 // Vista: v_quipu_promesas_planes_completas
@@ -169,14 +193,15 @@ export interface CandidatoCompleto extends Candidato {
 
 // Filtros
 export interface DeclaracionFilters {
+  tipo?: 'declaration' | 'mention'  // Default: 'declaration' (mentions tienen ruido)
   stakeholder?: string
   canal?: string
   tema?: string
   temaDeclaracion?: string
-  organizacion?: string
+  organizacion?: string  // Filtrar por organización mencionada
   producto?: string
   partido?: string  // Filter by partido name (matches canal or stakeholder)
-  search?: string
+  search?: string  // Busca en CONTENIDO (lo que dijo), NO en keywords/titulo
   offset: number
   limit: number
 }

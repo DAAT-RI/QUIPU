@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { X, Search, MessageSquareQuote, FileText, GitCompare, ArrowRight } from 'lucide-react'
+import { X, Search, MessageSquareQuote, FileText, GitCompare, ArrowRight, Sparkles } from 'lucide-react'
 import { useSearchCandidatosByName } from '@/hooks/useCandidatos'
-import { usePromesasByPartido } from '@/hooks/usePromesas'
+import { usePromesasByPartido, useSearchPromesasByPartido } from '@/hooks/usePromesas'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
@@ -9,7 +9,7 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
-import { PLAN_CATEGORIES } from '@/lib/constants'
+import { PLAN_CATEGORIES, QUIPU_MASTER_TEMAS } from '@/lib/constants'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
@@ -19,31 +19,56 @@ const SOURCE_OPTIONS = [
   { value: 'declaraciones', label: 'Declaraciones' },
 ]
 
+// Combine all temas for dropdown
+const TEMA_OPTIONS = [
+  ...PLAN_CATEGORIES.map(c => ({ value: c.key, label: c.label })),
+  ...QUIPU_MASTER_TEMAS
+    .filter(t => !PLAN_CATEGORIES.some(c => c.label.toLowerCase() === t.toLowerCase()))
+    .map(t => ({ value: t.toLowerCase(), label: t })),
+]
+
 function CandidatoColumn({
   candidato,
+  temaSearch,
   categoriaFilter,
   sourceFilter,
 }: {
   candidato: CandidatoCompleto
+  temaSearch: string
   categoriaFilter: string
   sourceFilter: string
 }) {
   const showPlanes = sourceFilter === '' || sourceFilter === 'plan'
   const showDeclaraciones = sourceFilter === '' || sourceFilter === 'declaraciones'
 
-  const { data: promesas, isLoading: loadingPromesas } = usePromesasByPartido(
-    showPlanes ? (candidato.partido_id ?? undefined) : undefined,
+  // If we have tema search, use search hook; otherwise use category filter
+  const { data: promesasSearch, isLoading: loadingSearch } = useSearchPromesasByPartido(
+    showPlanes && temaSearch.length >= 2 ? (candidato.partido_id ?? undefined) : undefined,
+    temaSearch
+  )
+
+  const { data: promesasCategoryResult, isLoading: loadingCategory } = usePromesasByPartido(
+    showPlanes && !temaSearch ? (candidato.partido_id ?? undefined) : undefined,
     categoriaFilter || undefined
   )
 
+  // Use search results if we have tema search, otherwise use category filter
+  const promesasList = temaSearch.length >= 2 ? (promesasSearch ?? []) : (promesasCategoryResult?.data ?? [])
+  const promesasCount = temaSearch.length >= 2 ? promesasList.length : (promesasCategoryResult?.count ?? 0)
+  const loadingPromesas = temaSearch.length >= 2 ? loadingSearch : loadingCategory
+
   const apellido = candidato.apellido_paterno ?? candidato.nombre_completo?.split(' ').pop() ?? ''
+
+  // Search in declaraciones by tema/search content
   const { data: declResult, isLoading: loadingDecl } = useDeclaraciones({
     stakeholder: showDeclaraciones ? apellido : undefined,
+    tipo: 'declaration', // Only declarations, not mentions
+    // Search in contenido when tema search is active
+    search: showDeclaraciones && temaSearch.length >= 2 ? temaSearch : undefined,
     offset: 0,
     limit: 50,
   })
 
-  const promesasList = promesas ?? []
   const declaraciones = declResult?.data ?? []
   const declCount = declResult?.count ?? 0
 
@@ -69,97 +94,114 @@ function CandidatoColumn({
         )}
       </div>
 
-      {/* Stats */}
+      {/* Stats - Declaraciones primero (eje principal) */}
       <div className="p-3 border-b flex justify-around text-center text-xs">
-        {showPlanes && (
-          <div>
-            <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
-              <FileText size={12} />
-              <span>Propuestas</span>
-            </div>
-            <p className="font-bold text-sm tabular-nums">{formatNumber(promesasList.length)}</p>
-          </div>
-        )}
         {showDeclaraciones && (
           <div>
             <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
               <MessageSquareQuote size={12} />
-              <span>Declaraciones</span>
+              <span>En Medios</span>
             </div>
             <p className="font-bold text-sm tabular-nums">{formatNumber(declCount)}</p>
+          </div>
+        )}
+        {showPlanes && (
+          <div>
+            <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
+              <FileText size={12} />
+              <span>En Plan</span>
+            </div>
+            <p className="font-bold text-sm tabular-nums">{formatNumber(promesasCount)}</p>
           </div>
         )}
       </div>
 
       {/* Content */}
-      <div className="p-3 space-y-3 max-h-[50vh] overflow-y-auto">
+      <div className="p-3 space-y-4 max-h-[50vh] overflow-y-auto">
         {(loadingPromesas || loadingDecl) && <LoadingSpinner />}
 
-        {/* Plan de Gobierno section */}
-        {showPlanes && !loadingPromesas && promesasList.length > 0 && (
+        {/* Declaraciones section - PRIMERO (eje principal) */}
+        {showDeclaraciones && !loadingDecl && (
           <div className="space-y-2">
-            {sourceFilter === '' && (
-              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Plan de Gobierno
-              </p>
-            )}
-            {promesasList.map((p) => (
-              <div
-                key={p.id}
-                className="rounded-lg border p-2.5 text-xs leading-relaxed"
-              >
-                <p>{p.resumen ?? p.texto_original}</p>
-                <div className="mt-1.5">
-                  <CategoryBadge categoria={p.categoria} />
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Declaraciones section */}
-        {showDeclaraciones && !loadingDecl && declaraciones.length > 0 && (
-          <div className="space-y-2">
-            {sourceFilter === '' && (
+            <div className="flex items-center gap-1.5">
+              <MessageSquareQuote size={14} className="text-amber-600 dark:text-amber-400" />
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
                 En Medios
               </p>
-            )}
-            {declaraciones.map((d, i) => (
-              <div
-                key={`${d.master_id}-${i}`}
-                className="rounded-lg border border-primary/20 p-2.5 text-xs leading-relaxed"
-              >
-                <blockquote className="italic text-muted-foreground border-l-2 border-primary pl-2">
-                  {d.contenido}
-                </blockquote>
-                <div className="mt-1.5 flex flex-wrap gap-1">
-                  {d.tema && (
-                    <span className="inline-block rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
-                      {d.tema}
-                    </span>
-                  )}
-                  {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                    <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] text-muted-foreground">
-                      {d.canal}
-                    </span>
-                  )}
-                  {d.fecha && (
-                    <span className="text-[11px] text-muted-foreground">
-                      {formatDate(d.fecha)}
-                    </span>
-                  )}
+            </div>
+            {declaraciones.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic py-3 text-center border rounded-lg bg-muted/20">
+                {temaSearch ? `Sin declaraciones sobre "${temaSearch}"` : 'Sin declaraciones encontradas'}
+              </p>
+            ) : (
+              declaraciones.slice(0, 5).map((d, i) => (
+                <div
+                  key={`${d.master_id}-${i}`}
+                  className="rounded-lg border border-amber-200/50 dark:border-amber-800/30 p-2.5 text-xs leading-relaxed bg-amber-50/30 dark:bg-amber-950/20"
+                >
+                  <blockquote className="italic border-l-2 border-amber-500/50 pl-2">
+                    «{d.contenido}»
+                  </blockquote>
+                  <div className="mt-1.5 flex flex-wrap gap-1">
+                    {d.tema_interaccion && (
+                      <span className="inline-block rounded-md bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-300 px-1.5 py-0.5 text-[10px] font-medium">
+                        {d.tema_interaccion}
+                      </span>
+                    )}
+                    {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
+                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                        {d.canal}
+                      </span>
+                    )}
+                    {d.fecha && (
+                      <span className="text-[10px] text-muted-foreground">
+                        {formatDate(d.fecha)}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
+              ))
+            )}
+            {declaraciones.length > 5 && (
+              <p className="text-[10px] text-muted-foreground text-center">
+                +{declaraciones.length - 5} más
+              </p>
+            )}
           </div>
         )}
 
-        {/* Empty state */}
-        {!loadingPromesas && !loadingDecl && promesasList.length === 0 && declaraciones.length === 0 && (
-          <p className="text-xs text-muted-foreground italic py-6 text-center">
-            Sin datos disponibles
-          </p>
+        {/* Plan de Gobierno section - SEGUNDO */}
+        {showPlanes && !loadingPromesas && (
+          <div className="space-y-2">
+            <div className="flex items-center gap-1.5">
+              <FileText size={14} className="text-indigo-600 dark:text-indigo-400" />
+              <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                En su Plan de Gobierno
+              </p>
+            </div>
+            {promesasList.length === 0 ? (
+              <p className="text-xs text-muted-foreground italic py-3 text-center border rounded-lg bg-muted/20">
+                {temaSearch ? `Sin propuestas sobre "${temaSearch}"` : 'Sin propuestas en esta categoría'}
+              </p>
+            ) : (
+              promesasList.slice(0, 5).map((p) => (
+                <div
+                  key={p.id}
+                  className="rounded-lg border p-2.5 text-xs leading-relaxed bg-indigo-50/30 dark:bg-indigo-950/20 border-indigo-200/50 dark:border-indigo-800/30"
+                >
+                  <p>{p.resumen ?? p.texto_original}</p>
+                  <div className="mt-1.5">
+                    <CategoryBadge categoria={p.categoria} />
+                  </div>
+                </div>
+              ))
+            )}
+            {promesasList.length > 5 && (
+              <p className="text-[10px] text-muted-foreground text-center">
+                +{promesasList.length - 5} más
+              </p>
+            )}
+          </div>
         )}
       </div>
     </div>
@@ -169,15 +211,11 @@ function CandidatoColumn({
 export function Comparar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCandidatos, setSelectedCandidatos] = useState<CandidatoCompleto[]>([])
+  const [temaSearch, setTemaSearch] = useState('')
   const [categoriaFilter, setCategoriaFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState('')
 
   const { data: searchResults, isLoading: searchLoading } = useSearchCandidatosByName(searchQuery)
-
-  const categoriaOptions = PLAN_CATEGORIES.map((c) => ({
-    value: c.key,
-    label: c.label,
-  }))
 
   // Filter out already selected candidates and restrict to same tipo_eleccion
   const selectedIds = new Set(selectedCandidatos.map((c) => c.id))
@@ -219,11 +257,45 @@ export function Comparar() {
           <GitCompare className="h-5 w-5 text-primary" />
         </div>
         <div>
-          <h1 className="text-2xl font-bold tracking-tight">Comparar Candidatos</h1>
+          <h1 className="text-2xl font-bold tracking-tight">Comparar Posiciones</h1>
           <p className="text-sm text-muted-foreground">
-            Analisis detallado de propuestas y declaraciones
+            Plan de Gobierno vs Declaraciones en Medios — ¿Coinciden?
           </p>
         </div>
+      </div>
+
+      {/* Tema Search */}
+      <div className="rounded-xl border bg-gradient-to-br from-primary/5 to-primary/10 p-4">
+        <div className="flex items-center gap-2 mb-3">
+          <Sparkles className="h-4 w-4 text-primary" />
+          <p className="text-sm font-medium">¿Sobre qué tema quieres comparar?</p>
+        </div>
+        <div className="flex flex-col sm:flex-row gap-3">
+          <SearchInput
+            value={temaSearch}
+            onChange={setTemaSearch}
+            placeholder="Ej: minería, impuestos, educación, salud..."
+            className="flex-1"
+          />
+          <FilterSelect
+            value={categoriaFilter}
+            onChange={(v) => {
+              setCategoriaFilter(v)
+              if (v) setTemaSearch('') // Clear search when selecting category
+            }}
+            options={TEMA_OPTIONS}
+            placeholder="O selecciona un tema"
+          />
+        </div>
+        {(temaSearch || categoriaFilter) && (
+          <p className="text-xs text-muted-foreground mt-2">
+            {temaSearch ? (
+              <>Buscando: <span className="font-medium text-primary">"{temaSearch}"</span> en planes y declaraciones</>
+            ) : (
+              <>Filtrando por: <span className="font-medium text-primary">{TEMA_OPTIONS.find(t => t.value === categoriaFilter)?.label || categoriaFilter}</span></>
+            )}
+          </p>
+        )}
       </div>
 
       {/* Candidate search */}
@@ -232,7 +304,7 @@ export function Comparar() {
           <SearchInput
             value={searchQuery}
             onChange={setSearchQuery}
-            placeholder="Buscar candidato por nombre..."
+            placeholder="Buscar por nombre, partido o cargo..."
             className="max-w-md"
           />
           {/* Search dropdown */}
@@ -310,21 +382,26 @@ export function Comparar() {
         )}
       </div>
 
-      {/* Filters */}
-      <div className="flex flex-col sm:flex-row gap-3">
-        <FilterSelect
-          value={sourceFilter}
-          onChange={setSourceFilter}
-          options={SOURCE_OPTIONS}
-          placeholder="Fuente"
-        />
-        <FilterSelect
-          value={categoriaFilter}
-          onChange={setCategoriaFilter}
-          options={categoriaOptions}
-          placeholder="Todas las categorias"
-        />
-      </div>
+      {/* Source Filter */}
+      {selectedCandidatos.length > 0 && (
+        <div className="flex flex-col sm:flex-row gap-3">
+          <FilterSelect
+            value={sourceFilter}
+            onChange={setSourceFilter}
+            options={SOURCE_OPTIONS}
+            placeholder="Mostrar: Ambos"
+          />
+          {(temaSearch || categoriaFilter) && (
+            <button
+              type="button"
+              onClick={() => { setTemaSearch(''); setCategoriaFilter('') }}
+              className="text-xs text-muted-foreground hover:text-foreground underline"
+            >
+              Limpiar filtro de tema
+            </button>
+          )}
+        </div>
+      )}
 
       {/* Prompt when no candidates selected */}
       {selectedCandidatos.length === 0 && (
@@ -341,6 +418,7 @@ export function Comparar() {
             <CandidatoColumn
               key={c.id}
               candidato={c}
+              temaSearch={temaSearch}
               categoriaFilter={categoriaFilter}
               sourceFilter={sourceFilter}
             />

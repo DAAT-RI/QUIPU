@@ -1,7 +1,6 @@
-import { useState, useMemo } from 'react'
+import { useState } from 'react'
 import { Link } from 'react-router-dom'
-import { useDeclaraciones } from '@/hooks/useDeclaraciones'
-import { usePartidos } from '@/hooks/usePartidos'
+import { useDeclaraciones, useCanales, useOrganizacionesMencionadas } from '@/hooks/useDeclaraciones'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
@@ -15,46 +14,47 @@ import {
   ChevronRight,
   MessageSquareQuote,
   ArrowRight,
+  Building2,
+  AtSign,
 } from 'lucide-react'
 
 const PAGE_LIMIT = 20
 
-const CANAL_OPTIONS = [
-  { value: 'RAFAEL LOPEZALIAGA', label: 'Rafael López Aliaga' },
-  { value: 'VLADIMIR CERRON', label: 'Vladimir Cerrón' },
-  { value: 'PODEMOS PERÚ', label: 'Podemos Perú' },
-  { value: 'CARLOS ESPÁ', label: 'Carlos Espá' },
-  { value: 'ROBERTO SÁNCHEZ', label: 'Roberto Sánchez' },
-  { value: 'ALEX GONZALES', label: 'Alex Gonzales' },
+// Tipo de interacción - default 'declaration' (mentions tienen ruido)
+const TIPO_OPTIONS = [
+  { value: 'declaration', label: 'Declaraciones' },
+  { value: 'mention', label: 'Menciones' },
+  { value: '', label: 'Todos' },
 ]
 
 const TEMA_OPTIONS = QUIPU_MASTER_TEMAS.map((t) => ({ value: t, label: t }))
 
 export function Declaraciones() {
+  // Default: solo declarations (mentions tienen mucho ruido)
+  const [tipo, setTipo] = useState<string>('declaration')
   const [search, setSearch] = useState('')
   const [canal, setCanal] = useState('')
   const [tema, setTema] = useState('')
-  const [partido, setPartido] = useState('')
   const [organizacion, setOrganizacion] = useState('')
   const [producto, setProducto] = useState('')
   const [page, setPage] = useState(0)
 
-  // Get partidos for dropdown
-  const { data: partidos } = usePartidos()
-  const partidoOptions = useMemo(() => {
-    if (!partidos) return []
-    return partidos.map((p) => ({ value: p.nombre_oficial, label: p.nombre_oficial }))
-  }, [partidos])
+  // Obtener canales y organizaciones dinámicamente
+  const { data: canalesData } = useCanales()
+  const { data: orgsData } = useOrganizacionesMencionadas()
+
+  const canalOptions = canalesData ?? []
+  const orgOptions = orgsData ?? []
 
   const offset = page * PAGE_LIMIT
 
   const { data, isLoading, isError } = useDeclaraciones({
-    search,
-    canal,
-    tema,
+    tipo: tipo as 'declaration' | 'mention' | undefined || undefined,
+    search: search || undefined,
+    canal: canal || undefined,
+    tema: tema || undefined,
     organizacion: organizacion || undefined,
     producto: producto || undefined,
-    partido: partido || undefined,
     offset,
     limit: PAGE_LIMIT,
   })
@@ -65,38 +65,15 @@ export function Declaraciones() {
   const hasNext = page < totalPages - 1
   const hasPrev = page > 0
 
-  function handleSearchChange(value: string) {
-    setSearch(value)
-    setPage(0)
-  }
-
-  function handleCanalChange(value: string) {
-    setCanal(value)
-    setPage(0)
-  }
-
-  function handleTemaChange(value: string) {
-    setTema(value)
-    setPage(0)
-  }
-
-  function handlePartidoChange(value: string) {
-    setPartido(value)
-    setPage(0)
-  }
-
-  function handleOrganizacionChange(value: string) {
-    setOrganizacion(value)
-    setPage(0)
-  }
-
-  function handleProductoChange(value: string) {
-    setProducto(value)
-    setPage(0)
+  function handleFilterChange<T>(setter: (v: T) => void) {
+    return (value: T) => {
+      setter(value)
+      setPage(0)
+    }
   }
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
@@ -105,66 +82,76 @@ export function Declaraciones() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Declaraciones</h1>
           <p className="text-sm text-muted-foreground">
-            Citas textuales de actores politicos — detecta las que afectan a tu sector
+            Citas textuales de candidatos — detecta las que afectan a tu sector
           </p>
         </div>
       </div>
 
       {/* Filters Card */}
       <div className="rounded-xl border bg-card p-4 space-y-3">
+        {/* Row 1: Search + Tipo + Canal */}
         <div className="flex flex-col sm:flex-row gap-3">
           <SearchInput
             value={search}
-            onChange={handleSearchChange}
-            placeholder="Buscar por contenido o actor..."
+            onChange={handleFilterChange(setSearch)}
+            placeholder="Buscar en lo que dijeron..."
             className="flex-1"
+          />
+          <FilterSelect
+            value={tipo}
+            onChange={handleFilterChange(setTipo)}
+            options={TIPO_OPTIONS}
+            placeholder="Tipo"
           />
           <FilterSelect
             value={canal}
-            onChange={handleCanalChange}
-            options={CANAL_OPTIONS}
-            placeholder="Todos los canales"
-          />
-          <FilterSelect
-            value={tema}
-            onChange={handleTemaChange}
-            options={TEMA_OPTIONS}
-            placeholder="Todos los temas"
+            onChange={handleFilterChange(setCanal)}
+            options={canalOptions}
+            placeholder="Fuente"
           />
         </div>
+
+        {/* Row 2: Tema + Organización + Sector */}
         <div className="flex flex-col sm:flex-row gap-3">
           <FilterSelect
-            value={partido}
-            onChange={handlePartidoChange}
-            options={partidoOptions}
-            placeholder="Todos los partidos"
+            value={tema}
+            onChange={handleFilterChange(setTema)}
+            options={TEMA_OPTIONS}
+            placeholder="Tema del artículo"
           />
-          <SearchInput
+          <FilterSelect
             value={organizacion}
-            onChange={handleOrganizacionChange}
-            placeholder="Filtrar por organizacion..."
-            className="flex-1"
+            onChange={handleFilterChange(setOrganizacion)}
+            options={orgOptions}
+            placeholder="Organización mencionada"
           />
           <SearchInput
             value={producto}
-            onChange={handleProductoChange}
-            placeholder="Filtrar por producto/sector..."
+            onChange={handleFilterChange(setProducto)}
+            placeholder="Buscar sector/industria..."
             className="flex-1"
           />
         </div>
       </div>
 
       {/* Stats */}
-      <p className="text-sm text-muted-foreground tabular-nums">
-        {count} declaraciones encontradas
-      </p>
+      <div className="flex items-center justify-between">
+        <p className="text-sm text-muted-foreground tabular-nums">
+          {count} {tipo === 'declaration' ? 'declaraciones' : tipo === 'mention' ? 'menciones' : 'resultados'}
+        </p>
+        {tipo === 'mention' && (
+          <p className="text-xs text-amber-600 dark:text-amber-400">
+            ⚠️ Las menciones pueden contener ruido
+          </p>
+        )}
+      </div>
 
       {/* Content */}
       {isLoading ? (
         <LoadingSpinner />
       ) : isError ? (
         <div className="rounded-xl border border-dashed p-12 text-center text-sm text-destructive">
-          Ocurrio un error al cargar las declaraciones
+          Ocurrió un error al cargar las declaraciones
         </div>
       ) : declarations.length === 0 ? (
         <EmptyState
@@ -179,60 +166,86 @@ export function Declaraciones() {
               <Link
                 key={`${d.master_id}-${idx}`}
                 to={`/declaraciones/${d.master_id}`}
-                className="group flex items-start gap-4 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+                className="group block rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <p className="font-semibold text-sm">{d.stakeholder}</p>
+                {/* Header: Stakeholder + Canal (si diferente) + Fecha */}
+                <div className="flex items-start justify-between gap-2 mb-2">
+                  <div className="flex items-center gap-2 min-w-0">
+                    {d.tipo === 'mention' ? (
+                      <AtSign className="h-4 w-4 text-muted-foreground shrink-0" />
+                    ) : (
+                      <Quote className="h-4 w-4 text-primary shrink-0" />
+                    )}
+                    <span className="font-semibold text-sm truncate">{d.stakeholder}</span>
                     {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
-                        {d.canal}
+                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] font-medium text-muted-foreground shrink-0">
+                        vía {d.canal}
                       </span>
                     )}
                   </div>
-                  <blockquote className="mt-2 text-sm text-muted-foreground border-l-2 border-primary pl-3 leading-relaxed">
-                    &laquo;{d.contenido}&raquo;
-                  </blockquote>
-                  <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                    {d.tema && (
-                      <span className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                        {d.tema}
-                      </span>
-                    )}
-                    {d.temas &&
-                      d.temas
-                        .split(';')
-                        .map((t) => t.trim())
-                        .filter(Boolean)
-                        .map((t) => (
-                          <span key={t} className="rounded-md bg-muted px-2 py-0.5 text-[11px] font-medium text-muted-foreground">
-                            {t}
-                          </span>
-                        ))}
-                    {d.organizaciones && (
-                      <span className="rounded-md bg-amber-500/10 text-amber-700 dark:text-amber-400 px-2 py-0.5 text-[11px] font-medium">
-                        {d.organizaciones}
-                      </span>
-                    )}
-                    {d.fecha && (
-                      <span className="text-[11px] text-muted-foreground">{formatDate(d.fecha)}</span>
+                  <div className="flex items-center gap-2 shrink-0 text-xs text-muted-foreground">
+                    {d.fecha && <span>{formatDate(d.fecha)}</span>}
+                    {d.ruta && (
+                      <a
+                        href={d.ruta}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        onClick={(e) => e.stopPropagation()}
+                        className="hover:text-foreground transition-colors"
+                        title="Ver fuente"
+                      >
+                        <ExternalLink size={12} />
+                      </a>
                     )}
                   </div>
                 </div>
-                <div className="shrink-0 flex flex-col items-end gap-2">
-                  {d.ruta && (
-                    <a
-                      href={d.ruta}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      onClick={(e) => e.stopPropagation()}
-                      className="text-muted-foreground hover:text-foreground transition-colors"
-                      title="Ver fuente"
-                      aria-label="Ver fuente"
-                    >
-                      <ExternalLink size={14} />
-                    </a>
+
+                {/* Contenido (lo que dijo) */}
+                <blockquote className="text-sm text-foreground border-l-2 border-primary/50 pl-3 leading-relaxed mb-3">
+                  «{d.contenido}»
+                </blockquote>
+
+                {/* Tags: Tema interacción + Temas artículo */}
+                <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                  {d.tema_interaccion && (
+                    <span className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-medium">
+                      {d.tema_interaccion}
+                    </span>
                   )}
+                  {d.temas &&
+                    d.temas
+                      .split(';')
+                      .slice(0, 2) // Solo mostrar 2 temas
+                      .map((t) => t.trim())
+                      .filter(Boolean)
+                      .map((t) => (
+                        <span key={t} className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium text-muted-foreground">
+                          {t}
+                        </span>
+                      ))}
+                </div>
+
+                {/* Organizaciones mencionadas - DESTACAR para gremios */}
+                {d.organizaciones && d.organizaciones !== 'N/A' && (
+                  <div className="flex flex-wrap items-center gap-1.5">
+                    <Building2 className="h-3 w-3 text-amber-600 dark:text-amber-400" />
+                    {d.organizaciones.split(/[,;]/).slice(0, 3).map((org, i) => {
+                      const trimmed = org.trim()
+                      if (!trimmed || trimmed === 'N/A') return null
+                      return (
+                        <span
+                          key={i}
+                          className="rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2 py-0.5 text-[10px] font-medium"
+                        >
+                          {trimmed}
+                        </span>
+                      )
+                    })}
+                  </div>
+                )}
+
+                {/* Arrow indicator */}
+                <div className="flex justify-end mt-2">
                   <ArrowRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-primary transition-colors" />
                 </div>
               </Link>
@@ -252,7 +265,7 @@ export function Declaraciones() {
                 Anterior
               </button>
               <span className="text-sm text-muted-foreground tabular-nums" aria-live="polite">
-                Pagina {page + 1} de {totalPages}
+                Página {page + 1} de {totalPages}
               </span>
               <button
                 type="button"

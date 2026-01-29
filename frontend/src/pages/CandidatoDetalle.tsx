@@ -390,9 +390,9 @@ export function CandidatoDetalle() {
                                 {d.canal}
                               </span>
                             )}
-                            {d.tema && (
+                            {d.tema_interaccion && (
                               <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
-                                {d.tema}
+                                {d.tema_interaccion}
                               </span>
                             )}
                             {d.fecha && <span>{formatDate(d.fecha)}</span>}

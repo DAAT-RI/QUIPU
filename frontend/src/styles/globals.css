@@ -48,8 +48,8 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
-  /* Fonts */
-  --font-sans: 'Arboria', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  /* Fonts - System fonts for body (more readable), Arboria for headings */
+  --font-sans: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
   --font-display: 'Arboria', system-ui, sans-serif;
 
   --animate-in: animateIn 0.2s ease-in-out;
@@ -131,13 +131,24 @@ body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: var(--font-sans);
+  font-weight: 400;
   font-feature-settings: "rlig" 1, "calt" 1;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Display font utility */
+/* Dark mode: slightly heavier font for better contrast on dark backgrounds */
+.dark body {
+  font-weight: 500;
+}
+
+/* Display font utility - Arboria for headings */
 .font-display {
+  font-family: var(--font-display);
+}
+
+/* Apply Arboria to main headings */
+h1, h2, h3 {
   font-family: var(--font-display);
 }
 

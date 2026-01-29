@@ -41,13 +41,35 @@ export function usePromesasByPartido(partidoId: number | undefined, categoria?: 
     queryFn: async () => {
       let query = supabase
         .from('quipu_promesas_planes')
-        .select('*')
+        .select('*', { count: 'exact' })
         .eq('partido_id', partidoId!)
       if (categoria) {
         query = query.eq('categoria', categoria)
       }
-      query = query.order('categoria').limit(500)
-      const { data, error } = await query
+      query = query.order('categoria').limit(100)
+      const { data, error, count } = await query
+      if (error) throw error
+      return { data: data ?? [], count: count ?? 0 }
+    },
+  })
+}
+
+/**
+ * Search promesas by text content for a specific partido
+ * Used in Comparar page to filter promesas by tema/search
+ */
+export function useSearchPromesasByPartido(partidoId: number | undefined, search: string) {
+  return useQuery({
+    queryKey: ['promesas-partido-search', partidoId, search],
+    enabled: !!partidoId && search.length >= 2,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('quipu_promesas_planes')
+        .select('*')
+        .eq('partido_id', partidoId!)
+        .or(`texto_original.ilike.%${search}%,resumen.ilike.%${search}%,categoria.ilike.%${search}%`)
+        .order('categoria')
+        .limit(100)
       if (error) throw error
       return data
     },
