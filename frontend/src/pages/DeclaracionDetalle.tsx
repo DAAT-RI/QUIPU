@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react'
+import { useState } from 'react'
 import { useParams, Link, useSearchParams } from 'react-router-dom'
 import { useDeclaracionEntry } from '@/hooks/useDeclaraciones'
 import { useStakeholderCandidato } from '@/hooks/useStakeholderCandidato'
@@ -9,76 +9,59 @@ import {
   ArrowLeft,
   ExternalLink,
   Quote,
-  FileText,
-  MapPin,
-  Building2,
+  ChevronDown,
+  ChevronUp,
+  Newspaper,
   Hash,
-  MessageSquareQuote,
-  Users,
+  Building2,
+  MapPin,
   Globe,
-  AtSign,
-  Link as LinkIcon,
-  AlertTriangle,
+  Users,
+  Calendar,
+  ArrowRight,
 } from 'lucide-react'
 import type { Interaccion } from '@/types/database'
-
-type TabKey = 'declaraciones' | 'fuente' | 'contexto' | 'menciones'
-
-const TABS: { key: TabKey; label: string; icon: React.ElementType }[] = [
-  { key: 'declaraciones', label: 'Declaraciones', icon: Quote },
-  { key: 'fuente', label: 'Fuente', icon: FileText },
-  { key: 'contexto', label: 'Contexto', icon: Users },
-  { key: 'menciones', label: 'Menciones', icon: AtSign },
-]
 
 export function DeclaracionDetalle() {
   const { id } = useParams()
   const [searchParams] = useSearchParams()
-  const highlightIdx = parseInt(searchParams.get('idx') ?? '-1', 10)
+  const idx = parseInt(searchParams.get('idx') ?? '0', 10)
   const { data: entry, isLoading, isError, refetch } = useDeclaracionEntry(id)
-  const [activeTab, setActiveTab] = useState<TabKey>('declaraciones')
+
+  const [showContexto, setShowContexto] = useState(false)
+  const [showOtras, setShowOtras] = useState(false)
 
   if (isLoading) return <LoadingSpinner />
   if (isError || !entry) {
     return <ErrorState message="No se pudo cargar la declaración" onRetry={() => refetch()} />
   }
 
-  // Preserve original index for highlighting from URL param
-  const declarationsWithIdx = (entry.interacciones ?? [])
-    .map((i, idx) => ({ ...i, originalIdx: idx }))
-    .filter((i) => i.type === 'declaration')
+  // La declaración hero (la que el usuario clickeó)
+  const heroDeclaration = entry.interacciones?.[idx]
 
-  const mentionsWithIdx = (entry.interacciones ?? [])
-    .map((i, idx) => ({ ...i, originalIdx: idx }))
-    .filter((i) => i.type === 'mention')
-
-  // For counting (legacy)
-  const declarations = declarationsWithIdx
-  const mentions = mentionsWithIdx
+  // Otras declaraciones del mismo artículo
+  const otherDeclarations = (entry.interacciones ?? [])
+    .map((i, i_idx) => ({ ...i, idx: i_idx }))
+    .filter((i) => i.idx !== idx && i.type === 'declaration')
 
   // Parse comma/semicolon-separated fields
   const parseList = (str: string | null | undefined, separator = /[,;]/) =>
     str ? str.split(separator).map((s) => s.trim()).filter(Boolean).filter(s => s !== 'N/A') : []
 
-  const temasList = parseList(entry.temas, /;/)
   const keywordsList = parseList(entry.keywords, /,/)
   const orgList = parseList(entry.organizaciones)
   const ubiList = parseList(entry.ubicaciones)
   const paisesList = parseList(entry.paises)
 
-  // Parse personas (format: "Nombre (descripción)")
-  const personasList = entry.personas
-    ? entry.personas.split(/(?<=\))\s*[;,]\s*(?=[A-Z])/).map((p) => {
-        const match = p.match(/^([^(]+)\s*\(([^)]+)\)$/)
-        if (match) {
-          return { nombre: match[1].trim(), descripcion: match[2].trim() }
-        }
-        return { nombre: p.trim(), descripcion: null }
-      }).filter(p => p.nombre)
-    : []
+  const hasContexto = keywordsList.length > 0 || orgList.length > 0 || ubiList.length > 0 || paisesList.length > 0
+
+  // Si no hay declaración hero válida, mostrar error
+  if (!heroDeclaration) {
+    return <ErrorState message="Declaración no encontrada" onRetry={() => refetch()} />
+  }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-3xl mx-auto">
       {/* Back link */}
       <Link
         to="/declaraciones"
@@ -88,393 +71,335 @@ export function DeclaracionDetalle() {
         Volver a declaraciones
       </Link>
 
-      {/* Header Card */}
-      <div className="rounded-xl border bg-card p-6">
-        <div className="flex items-start gap-4">
-          <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-            <MessageSquareQuote className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-          </div>
-          <div className="flex-1 min-w-0">
-            <h1 className="text-xl font-bold tracking-tight">{entry.canal || 'Declaración'}</h1>
-            <p className="text-sm text-muted-foreground mt-0.5">{formatDate(entry.fecha)}</p>
-            <div className="mt-3 flex flex-wrap gap-4 text-sm">
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <Quote size={14} className="text-primary" />
-                {declarations.length} declaraciones
-              </span>
-              <span className="flex items-center gap-1.5 text-muted-foreground">
-                <AtSign size={14} />
-                {mentions.length} menciones
-              </span>
-              {entry.ruta && (
-                <a
-                  href={entry.ruta}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center gap-1.5 text-primary hover:underline"
-                >
-                  <ExternalLink size={14} />
-                  Ver fuente
-                </a>
-              )}
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Hero: LA DECLARACIÓN */}
+      <HeroDeclaracion
+        declaration={heroDeclaration}
+        fecha={entry.fecha}
+      />
 
-      {/* Tabs */}
-      <div className="flex gap-1 border-b">
-        {TABS.map((tab) => {
-          const Icon = tab.icon
-          const count = tab.key === 'declaraciones' ? declarations.length :
-                       tab.key === 'menciones' ? mentions.length : null
-          return (
-            <button
-              key={tab.key}
-              onClick={() => setActiveTab(tab.key)}
-              className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors ${
-                activeTab === tab.key
-                  ? 'border-primary text-primary'
-                  : 'border-transparent text-muted-foreground hover:text-foreground'
-              }`}
-            >
-              <Icon size={16} />
-              {tab.label}
-              {count !== null && count > 0 && (
-                <span className="ml-1 rounded-full bg-muted px-1.5 py-0.5 text-[10px]">
-                  {count}
-                </span>
-              )}
-            </button>
-          )
-        })}
-      </div>
+      {/* Fuente */}
+      <FuenteSection
+        canal={entry.canal}
+        titulo={entry.titulo}
+        resumen={entry.resumen}
+        ruta={entry.ruta}
+        transcripcion={entry.transcripcion}
+      />
 
-      {/* Tab Content */}
-      <div className="min-h-[300px]">
-        {activeTab === 'declaraciones' && (
-          <TabDeclaraciones declarations={declarationsWithIdx} highlightIdx={highlightIdx} />
-        )}
-        {activeTab === 'fuente' && (
-          <TabFuente entry={entry} temasList={temasList} keywordsList={keywordsList} />
-        )}
-        {activeTab === 'contexto' && (
-          <TabContexto
-            personasList={personasList}
+      {/* Contexto (colapsable) */}
+      {hasContexto && (
+        <CollapsibleSection
+          title="Contexto"
+          icon={Hash}
+          isOpen={showContexto}
+          onToggle={() => setShowContexto(!showContexto)}
+          count={keywordsList.length + orgList.length + ubiList.length + paisesList.length}
+        >
+          <ContextoContent
+            keywordsList={keywordsList}
             orgList={orgList}
             ubiList={ubiList}
             paisesList={paisesList}
           />
-        )}
-        {activeTab === 'menciones' && (
-          <TabMenciones mentions={mentions} />
-        )}
-      </div>
-    </div>
-  )
-}
+        </CollapsibleSection>
+      )}
 
-// Tab: Declaraciones (PRINCIPAL)
-type InteraccionWithIdx = Interaccion & { originalIdx: number }
-
-function TabDeclaraciones({
-  declarations,
-  highlightIdx,
-}: {
-  declarations: InteraccionWithIdx[]
-  highlightIdx: number
-}) {
-  const highlightRef = useRef<HTMLDivElement>(null)
-
-  // Scroll to highlighted item when loaded
-  useEffect(() => {
-    if (highlightRef.current && highlightIdx >= 0) {
-      setTimeout(() => {
-        highlightRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
-      }, 100)
-    }
-  }, [highlightIdx])
-
-  if (declarations.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-        No hay declaraciones en esta entrada
-      </div>
-    )
-  }
-
-  return (
-    <div className="rounded-xl border bg-card divide-y">
-      {declarations.map((d) => (
-        <div
-          key={d.originalIdx}
-          ref={d.originalIdx === highlightIdx ? highlightRef : null}
-          className={d.originalIdx === highlightIdx ? 'ring-2 ring-primary bg-primary/5 rounded-lg' : ''}
+      {/* Otras declaraciones del artículo (colapsable) */}
+      {otherDeclarations.length > 0 && (
+        <CollapsibleSection
+          title="Otras declaraciones en este artículo"
+          icon={Users}
+          isOpen={showOtras}
+          onToggle={() => setShowOtras(!showOtras)}
+          count={otherDeclarations.length}
         >
-          <DeclarationItem declaration={d} />
-        </div>
-      ))}
+          <OtrasDeclaraciones
+            declarations={otherDeclarations}
+            masterId={id!}
+          />
+        </CollapsibleSection>
+      )}
     </div>
   )
 }
 
-function DeclarationItem({ declaration }: { declaration: Interaccion }) {
-  // Try to link stakeholder to candidato
+/* ── Hero: La declaración principal ─────────────────────────────── */
+function HeroDeclaracion({
+  declaration,
+  fecha,
+}: {
+  declaration: Interaccion
+  fecha: string | null
+}) {
   const { data: candidato } = useStakeholderCandidato(declaration.stakeholder)
 
   return (
-    <div className="p-5 space-y-3">
-      <div className="flex items-center gap-2">
-        <Quote size={14} className="text-primary shrink-0" />
-        {candidato ? (
-          <Link
-            to={`/candidatos/${candidato.id}`}
-            className="font-semibold text-sm text-primary hover:underline"
-          >
-            {declaration.stakeholder}
-          </Link>
-        ) : (
-          <span className="font-semibold text-sm">{declaration.stakeholder}</span>
-        )}
-        {candidato && (
-          <span className="text-xs text-muted-foreground">
-            ({candidato.partido_nombre})
-          </span>
-        )}
+    <div className="rounded-xl border bg-card p-6 space-y-4">
+      {/* Stakeholder + Partido */}
+      <div className="flex items-start gap-4">
+        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-primary/10">
+          <Quote className="h-6 w-6 text-primary" />
+        </div>
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-2 flex-wrap">
+            {candidato ? (
+              <Link
+                to={`/candidatos/${candidato.id}`}
+                className="text-xl font-bold tracking-tight text-primary hover:underline"
+              >
+                {declaration.stakeholder}
+              </Link>
+            ) : (
+              <h1 className="text-xl font-bold tracking-tight">{declaration.stakeholder}</h1>
+            )}
+          </div>
+          {candidato?.partido_nombre && (
+            <p className="text-sm text-muted-foreground mt-0.5">
+              {candidato.partido_nombre}
+            </p>
+          )}
+          {fecha && (
+            <div className="flex items-center gap-1.5 text-sm text-muted-foreground mt-2">
+              <Calendar size={14} />
+              {formatDate(fecha)}
+            </div>
+          )}
+        </div>
       </div>
-      <blockquote className="text-sm text-foreground border-l-2 border-primary/50 pl-3 leading-relaxed">
+
+      {/* La cita */}
+      <blockquote className="text-lg leading-relaxed border-l-4 border-primary/50 pl-4 py-2 bg-muted/30 rounded-r-lg">
         «{declaration.content}»
       </blockquote>
+
+      {/* Tema */}
       {declaration.tema && (
-        <span className="inline-block rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-medium">
-          {declaration.tema}
-        </span>
+        <div className="flex items-center gap-2">
+          <span className="rounded-full bg-primary/10 text-primary px-3 py-1 text-sm font-medium">
+            {declaration.tema}
+          </span>
+        </div>
       )}
     </div>
   )
 }
 
-// Tab: Fuente (resumen del ARTÍCULO)
-function TabFuente({
-  entry,
-  temasList,
-  keywordsList,
+/* ── Fuente ─────────────────────────────────────────────────────── */
+function FuenteSection({
+  canal,
+  titulo,
+  resumen,
+  ruta,
+  transcripcion,
 }: {
-  entry: { titulo?: string | null; resumen?: string | null; fecha?: string | null; ruta?: string | null; transcripcion?: string | null }
-  temasList: string[]
-  keywordsList: string[]
+  canal: string | null
+  titulo: string | null
+  resumen: string | null
+  ruta: string | null
+  transcripcion: string | null
 }) {
   return (
-    <div className="space-y-4">
-      {/* Título */}
-      {entry.titulo && (
-        <div className="rounded-xl border bg-card p-5">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Título del artículo/post</h3>
-          <p className="text-sm leading-relaxed">{entry.titulo}</p>
-        </div>
+    <div className="rounded-xl border bg-card p-5 space-y-4">
+      <div className="flex items-center gap-2">
+        <Newspaper size={18} className="text-muted-foreground" />
+        <h2 className="font-semibold">Fuente</h2>
+      </div>
+
+      {canal && (
+        <p className="text-sm font-medium">{canal}</p>
       )}
 
-      {/* Resumen */}
-      {entry.resumen && (
-        <div className="rounded-xl border bg-card p-5">
-          <h3 className="text-sm font-medium text-muted-foreground mb-2">Resumen (generado por IA)</h3>
-          <p className="text-sm text-muted-foreground leading-relaxed">{entry.resumen}</p>
-        </div>
+      {titulo && (
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          "{titulo}"
+        </p>
+      )}
+
+      {resumen && (
+        <p className="text-sm text-muted-foreground leading-relaxed">
+          {resumen}
+        </p>
       )}
 
       {/* Links */}
-      <div className="flex flex-wrap gap-3">
-        {entry.ruta && (
+      <div className="flex flex-wrap gap-3 pt-2">
+        {ruta && (
           <a
-            href={entry.ruta}
+            href={ruta}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm hover:border-primary/30 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:border-primary/30 hover:bg-muted/30 transition-colors"
           >
-            <ExternalLink size={16} className="text-primary" />
-            Fuente original
+            <ExternalLink size={14} className="text-primary" />
+            Ver fuente original
           </a>
         )}
-        {entry.transcripcion && (
+        {transcripcion && (
           <a
-            href={entry.transcripcion}
+            href={transcripcion}
             target="_blank"
             rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl border bg-card px-4 py-2.5 text-sm hover:border-primary/30 transition-colors"
+            className="inline-flex items-center gap-2 rounded-lg border px-3 py-2 text-sm hover:border-primary/30 hover:bg-muted/30 transition-colors"
           >
-            <LinkIcon size={16} className="text-muted-foreground" />
-            Transcripción completa
+            <ExternalLink size={14} className="text-muted-foreground" />
+            Transcripción
           </a>
-        )}
-      </div>
-
-      {/* Temas y Keywords */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        {temasList.length > 0 && (
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Hash size={16} className="text-primary" />
-              <h3 className="text-sm font-semibold">Temas</h3>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {temasList.map((t) => (
-                <span key={t} className="rounded-full bg-primary/10 text-primary px-2.5 py-0.5 text-[11px] font-medium">
-                  {t}
-                </span>
-              ))}
-            </div>
-          </div>
-        )}
-        {keywordsList.length > 0 && (
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Hash size={16} className="text-muted-foreground" />
-              <h3 className="text-sm font-semibold">Keywords</h3>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {keywordsList.map((k) => (
-                <span key={k} className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium">
-                  {k}
-                </span>
-              ))}
-            </div>
-          </div>
         )}
       </div>
     </div>
   )
 }
 
-// Tab: Contexto
-function TabContexto({
-  personasList,
+/* ── Sección colapsable genérica ────────────────────────────────── */
+function CollapsibleSection({
+  title,
+  icon: Icon,
+  isOpen,
+  onToggle,
+  count,
+  children,
+}: {
+  title: string
+  icon: React.ElementType
+  isOpen: boolean
+  onToggle: () => void
+  count?: number
+  children: React.ReactNode
+}) {
+  return (
+    <div className="rounded-xl border bg-card overflow-hidden">
+      <button
+        type="button"
+        onClick={onToggle}
+        className="w-full flex items-center justify-between p-4 text-sm font-medium hover:bg-muted/30 transition-colors"
+      >
+        <span className="flex items-center gap-2">
+          <Icon size={16} className="text-muted-foreground" />
+          {title}
+          {count !== undefined && count > 0 && (
+            <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
+              {count}
+            </span>
+          )}
+        </span>
+        {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+      {isOpen && (
+        <div className="border-t p-4">
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+/* ── Contenido del Contexto ─────────────────────────────────────── */
+function ContextoContent({
+  keywordsList,
   orgList,
   ubiList,
   paisesList,
 }: {
-  personasList: { nombre: string; descripcion: string | null }[]
+  keywordsList: string[]
   orgList: string[]
   ubiList: string[]
   paisesList: string[]
 }) {
-  const hasContent = personasList.length > 0 || orgList.length > 0 || ubiList.length > 0 || paisesList.length > 0
-
-  if (!hasContent) {
-    return (
-      <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-        No hay información de contexto disponible
-      </div>
-    )
-  }
-
   return (
     <div className="space-y-4">
-      {/* Personas mencionadas con descripciones */}
-      {personasList.length > 0 && (
-        <div className="rounded-xl border bg-card p-5">
-          <div className="flex items-center gap-2 mb-4">
-            <Users size={16} className="text-primary" />
-            <h3 className="text-sm font-semibold">Personas mencionadas</h3>
-          </div>
-          <div className="space-y-3">
-            {personasList.map((p, idx) => (
-              <div key={idx} className="border-l-2 border-muted pl-3">
-                <p className="font-medium text-sm">{p.nombre}</p>
-                {p.descripcion && (
-                  <p className="text-xs text-muted-foreground mt-0.5">{p.descripcion}</p>
-                )}
-              </div>
+      {keywordsList.length > 0 && (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Hash size={12} /> Keywords
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {keywordsList.map((k) => (
+              <span key={k} className="rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium">
+                {k}
+              </span>
             ))}
           </div>
         </div>
       )}
 
-      {/* Grid: Orgs, Ubicaciones, Países */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {orgList.length > 0 && (
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Building2 size={16} className="text-amber-600 dark:text-amber-400" />
-              <h3 className="text-sm font-semibold">Organizaciones</h3>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {orgList.map((o) => (
-                <span key={o} className="rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-medium">
-                  {o}
-                </span>
-              ))}
-            </div>
+      {orgList.length > 0 && (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Building2 size={12} /> Organizaciones
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {orgList.map((o) => (
+              <span key={o} className="rounded-full bg-amber-100 text-amber-800 dark:bg-amber-900/30 dark:text-amber-300 px-2.5 py-0.5 text-[11px] font-medium">
+                {o}
+              </span>
+            ))}
           </div>
-        )}
-        {ubiList.length > 0 && (
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <MapPin size={16} className="text-emerald-600 dark:text-emerald-400" />
-              <h3 className="text-sm font-semibold">Ubicaciones</h3>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {ubiList.map((u) => (
-                <span key={u} className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2.5 py-0.5 text-[11px] font-medium">
-                  {u}
-                </span>
-              ))}
-            </div>
+        </div>
+      )}
+
+      {ubiList.length > 0 && (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+            <MapPin size={12} /> Ubicaciones
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {ubiList.map((u) => (
+              <span key={u} className="rounded-full bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2.5 py-0.5 text-[11px] font-medium">
+                {u}
+              </span>
+            ))}
           </div>
-        )}
-        {paisesList.length > 0 && (
-          <div className="rounded-xl border bg-card p-5">
-            <div className="flex items-center gap-2 mb-3">
-              <Globe size={16} className="text-blue-600 dark:text-blue-400" />
-              <h3 className="text-sm font-semibold">Países</h3>
-            </div>
-            <div className="flex flex-wrap gap-1.5">
-              {paisesList.map((p) => (
-                <span key={p} className="rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2.5 py-0.5 text-[11px] font-medium">
-                  {p}
-                </span>
-              ))}
-            </div>
+        </div>
+      )}
+
+      {paisesList.length > 0 && (
+        <div>
+          <p className="text-xs font-medium text-muted-foreground mb-2 flex items-center gap-1.5">
+            <Globe size={12} /> Países
+          </p>
+          <div className="flex flex-wrap gap-1.5">
+            {paisesList.map((p) => (
+              <span key={p} className="rounded-full bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 px-2.5 py-0.5 text-[11px] font-medium">
+                {p}
+              </span>
+            ))}
           </div>
-        )}
-      </div>
+        </div>
+      )}
     </div>
   )
 }
 
-// Tab: Menciones (SECUNDARIO - puede tener ruido)
-function TabMenciones({ mentions }: { mentions: Interaccion[] }) {
-  if (mentions.length === 0) {
-    return (
-      <div className="rounded-xl border border-dashed p-12 text-center text-sm text-muted-foreground">
-        No hay menciones en esta entrada
-      </div>
-    )
-  }
-
+/* ── Otras declaraciones ────────────────────────────────────────── */
+function OtrasDeclaraciones({
+  declarations,
+  masterId,
+}: {
+  declarations: (Interaccion & { idx: number })[]
+  masterId: string
+}) {
   return (
-    <div className="space-y-4">
-      {/* Warning */}
-      <div className="flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 dark:border-amber-900/50 dark:bg-amber-950/20 p-3 text-sm text-amber-800 dark:text-amber-200">
-        <AlertTriangle size={16} />
-        Las menciones pueden contener ruido o información no relevante
-      </div>
-
-      <div className="rounded-xl border bg-card divide-y">
-        {mentions.map((m, idx) => (
-          <div key={idx} className="p-5 space-y-2">
-            <div className="flex items-center gap-2">
-              <AtSign size={14} className="text-muted-foreground shrink-0" />
-              <span className="font-medium text-sm">{m.stakeholder}</span>
-            </div>
-            <p className="text-sm text-muted-foreground pl-6">{m.content}</p>
-            {m.tema && (
-              <span className="ml-6 inline-block rounded-full bg-muted px-2.5 py-0.5 text-[11px] font-medium">
-                {m.tema}
+    <div className="space-y-2">
+      {declarations.map((d) => (
+        <Link
+          key={d.idx}
+          to={`/declaraciones/${masterId}?idx=${d.idx}`}
+          className="group flex items-start justify-between gap-3 p-3 rounded-lg hover:bg-muted/50 transition-colors"
+        >
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium">{d.stakeholder}</p>
+            <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
+              «{d.content}»
+            </p>
+            {d.tema && (
+              <span className="inline-block mt-1.5 rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium">
+                {d.tema}
               </span>
             )}
           </div>
-        ))}
-      </div>
+          <ArrowRight size={16} className="shrink-0 text-muted-foreground/40 group-hover:text-primary transition-colors mt-1" />
+        </Link>
+      ))}
     </div>
   )
 }

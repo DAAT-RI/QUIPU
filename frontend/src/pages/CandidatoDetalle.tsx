@@ -1,12 +1,13 @@
 import { useParams, Link } from 'react-router-dom'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useCandidato, useCandidatoSiblings, useHojaVida } from '@/hooks/useCandidatos'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
-import { formatDate, isRedundantCanal } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
+import type { DeclaracionView } from '@/types/database'
 import {
   ArrowLeft,
   User,
@@ -17,6 +18,8 @@ import {
   MessageSquareQuote,
   ArrowRight,
   Quote,
+  Hash,
+  Newspaper,
 } from 'lucide-react'
 
 // Human-readable labels for raw DB field names
@@ -360,60 +363,12 @@ export function CandidatoDetalle() {
           )}
 
           {activeTab === 'declaraciones' && (
-            <div className="space-y-4">
-              <div className="flex items-center gap-2.5 mb-2">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-                  <MessageSquareQuote className="h-4 w-4 text-primary" />
-                </div>
-                <h2 className="text-lg font-semibold">
-                  Declaraciones
-                  {candidato.apellido_paterno && (
-                    <span className="font-normal text-muted-foreground text-sm ml-2">
-                      menciones de &quot;{candidato.apellido_paterno}&quot;
-                    </span>
-                  )}
-                </h2>
-              </div>
-              {loadingDeclaraciones ? (
-                <LoadingSpinner />
-              ) : !declaracionesData || declaracionesData.data.length === 0 ? (
-                <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-                  No se encontraron declaraciones relacionadas
-                </div>
-              ) : (
-                <div className="space-y-3">
-                  {declaracionesData.data.map((d, i) => (
-                    <Link
-                      key={`${d.master_id}-${i}`}
-                      to={`/declaraciones/${d.master_id}`}
-                      className="group block rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
-                    >
-                      <div className="flex items-start gap-3">
-                        <Quote className="h-4 w-4 text-primary shrink-0 mt-0.5" />
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm leading-relaxed">{d.contenido}</p>
-                          <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
-                            <span className="font-medium">{d.stakeholder}</span>
-                            {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                              <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium">
-                                {d.canal}
-                              </span>
-                            )}
-                            {d.tema_interaccion && (
-                              <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
-                                {d.tema_interaccion}
-                              </span>
-                            )}
-                            {d.fecha && <span>{formatDate(d.fecha)}</span>}
-                          </div>
-                        </div>
-                        <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors mt-0.5" />
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              )}
-            </div>
+            <TabDeclaracionesMejorado
+              declaraciones={declaracionesData?.data ?? []}
+              totalCount={declaracionesData?.count ?? 0}
+              loading={loadingDeclaraciones}
+              nombreCandidato={candidato.apellido_paterno ?? candidato.nombre_completo ?? ''}
+            />
           )}
         </div>
       </div>
@@ -484,6 +439,163 @@ function LegalSection({
             : formatFieldValue(item)}
         </div>
       ))}
+    </div>
+  )
+}
+
+/* ── Tab Declaraciones Mejorado ─────────────────────────────────── */
+function TabDeclaracionesMejorado({
+  declaraciones,
+  totalCount,
+  loading,
+  nombreCandidato,
+}: {
+  declaraciones: DeclaracionView[]
+  totalCount: number
+  loading: boolean
+  nombreCandidato: string
+}) {
+  const [filtroTema, setFiltroTema] = useState<string | null>(null)
+
+  // Calcular estadísticas
+  const stats = useMemo(() => {
+    const temasMap = new Map<string, number>()
+    const canalesSet = new Set<string>()
+
+    declaraciones.forEach((d) => {
+      if (d.tema_interaccion) {
+        temasMap.set(d.tema_interaccion, (temasMap.get(d.tema_interaccion) || 0) + 1)
+      }
+      if (d.canal) {
+        canalesSet.add(d.canal)
+      }
+    })
+
+    const temasOrdenados = Array.from(temasMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+
+    return {
+      total: totalCount,
+      temasUnicos: temasMap.size,
+      canalesUnicos: canalesSet.size,
+      topTemas: temasOrdenados,
+    }
+  }, [declaraciones, totalCount])
+
+  // Filtrar declaraciones si hay filtro activo
+  const declaracionesFiltradas = useMemo(() => {
+    if (!filtroTema) return declaraciones
+    return declaraciones.filter((d) => d.tema_interaccion === filtroTema)
+  }, [declaraciones, filtroTema])
+
+  if (loading) return <LoadingSpinner />
+
+  if (declaraciones.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+        No se encontraron declaraciones de {nombreCandidato}
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center gap-2.5">
+        <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+          <MessageSquareQuote className="h-4 w-4 text-primary" />
+        </div>
+        <h2 className="text-lg font-semibold">Declaraciones en Medios</h2>
+      </div>
+
+      {/* Estadísticas */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold text-primary">{stats.total}</p>
+          <p className="text-xs text-muted-foreground mt-1">declaraciones</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold">{stats.temasUnicos}</p>
+          <p className="text-xs text-muted-foreground mt-1">temas</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-2xl font-bold">{stats.canalesUnicos}</p>
+          <p className="text-xs text-muted-foreground mt-1">fuentes</p>
+        </div>
+      </div>
+
+      {/* Temas más frecuentes (clickeables para filtrar) */}
+      {stats.topTemas.length > 0 && (
+        <div className="space-y-2">
+          <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
+            <Hash size={14} /> Temas más frecuentes
+          </p>
+          <div className="flex flex-wrap gap-2">
+            {filtroTema && (
+              <button
+                type="button"
+                onClick={() => setFiltroTema(null)}
+                className="rounded-full border border-dashed px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
+              >
+                × Quitar filtro
+              </button>
+            )}
+            {stats.topTemas.map(([tema, count]) => (
+              <button
+                key={tema}
+                type="button"
+                onClick={() => setFiltroTema(filtroTema === tema ? null : tema)}
+                className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+                  filtroTema === tema
+                    ? 'bg-primary text-primary-foreground'
+                    : 'bg-primary/10 text-primary hover:bg-primary/20'
+                }`}
+              >
+                {tema} ({count})
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Lista de declaraciones */}
+      <div className="space-y-3">
+        {filtroTema && (
+          <p className="text-sm text-muted-foreground">
+            Mostrando {declaracionesFiltradas.length} declaraciones sobre "{filtroTema}"
+          </p>
+        )}
+        {declaracionesFiltradas.map((d) => (
+          <Link
+            key={`${d.master_id}-${d.idx}`}
+            to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
+            className="group block rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+          >
+            <div className="flex items-start gap-3">
+              <Quote className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm leading-relaxed line-clamp-2">«{d.contenido}»</p>
+                <div className="mt-2 flex flex-wrap items-center gap-2 text-xs text-muted-foreground">
+                  {d.canal && (
+                    <span className="flex items-center gap-1">
+                      <Newspaper size={12} />
+                      {d.canal}
+                    </span>
+                  )}
+                  {d.tema_interaccion && (
+                    <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
+                      {d.tema_interaccion}
+                    </span>
+                  )}
+                  {d.fecha && <span>{formatDate(d.fecha)}</span>}
+                </div>
+              </div>
+              <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors mt-0.5" />
+            </div>
+          </Link>
+        ))}
+      </div>
     </div>
   )
 }
