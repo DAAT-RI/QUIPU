@@ -4,8 +4,8 @@ Script para reclasificar las categorías de promesas usando Gemini AI.
 Reemplaza las 15 categorías genéricas por las 267 categorías específicas de docs/categorias.json
 
 Uso:
-    python 004_reclassify_categories_gemini.py [--dry-run] [--batch-size N] [--limit N]
-    python 004_reclassify_categories_gemini.py --resume  # Continúa desde el último checkpoint
+    python 004_reclassify_categories_gemini.py [--limit N]  # Continúa automáticamente desde checkpoint
+    python 004_reclassify_categories_gemini.py --reset      # Empieza desde cero
 
 Requiere:
     - SUPABASE_URL y SUPABASE_SERVICE_KEY en variables de entorno
@@ -190,7 +190,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=50, help="Promesas por batch (default: 50)")
     parser.add_argument("--limit", type=int, help="Limitar número total de promesas a procesar en esta sesión")
     parser.add_argument("--delay", type=float, default=0.1, help="Delay entre llamadas a Gemini (segundos)")
-    parser.add_argument("--resume", action="store_true", help="Continuar desde el último checkpoint")
+    # --resume ya no es necesario, es el comportamiento por defecto
     parser.add_argument("--reset", action="store_true", help="Eliminar checkpoint y empezar desde cero")
     args = parser.parse_args()
 
@@ -203,17 +203,16 @@ def main():
         clear_checkpoint()
         print("Checkpoint eliminado. Empezando desde cero.\n")
 
-    # Cargar checkpoint si existe
+    # Cargar checkpoint si existe (resume es el comportamiento por defecto)
     start_after_id = 0
-    if args.resume or CHECKPOINT_PATH.exists():
-        saved = load_checkpoint()
-        if saved:
-            checkpoint_state.update(saved)
-            start_after_id = saved["last_id"]
-            print(f"[RESUME] Continuando desde ID > {start_after_id}")
-            print(f"  Ya procesadas: {saved['total_processed']}")
-            print(f"  Ya actualizadas: {saved['total_updated']}")
-            print()
+    saved = load_checkpoint()
+    if saved:
+        checkpoint_state.update(saved)
+        start_after_id = saved["last_id"]
+        print(f"[RESUME] Continuando desde ID > {start_after_id}")
+        print(f"  Ya procesadas: {saved['total_processed']}")
+        print(f"  Ya actualizadas: {saved['total_updated']}")
+        print()
 
     print(f"Categorías disponibles: {len(CATEGORIES_267)}")
     print(f"Modo: {'DRY-RUN (sin cambios)' if args.dry_run else 'PRODUCCIÓN'}")
@@ -247,7 +246,7 @@ def main():
         print(f"\n\n[INTERRUMPIDO] Guardando checkpoint...")
         save_checkpoint()
         print(f"Último ID: {checkpoint_state['last_id']}")
-        print(f"Para continuar: python {Path(__file__).name} --resume")
+        print(f"Para continuar: python {Path(__file__).name}")
         exit(0)
 
     signal.signal(signal.SIGINT, handle_interrupt)
@@ -336,7 +335,7 @@ def main():
         clear_checkpoint()
     else:
         print(f"\nQuedan {remaining_after} promesas.")
-        print(f"Para continuar: python {Path(__file__).name} --resume")
+        print(f"Para continuar: python {Path(__file__).name}")
 
     if args.dry_run:
         print("\n[DRY-RUN] No se aplicaron cambios.")
