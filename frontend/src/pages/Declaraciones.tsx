@@ -24,7 +24,6 @@ const PAGE_LIMIT = 20
 const TIPO_OPTIONS = [
   { value: 'declaration', label: 'Declaraciones' },
   { value: 'mention', label: 'Menciones' },
-  { value: '', label: 'Todos' },
 ]
 
 const TEMA_OPTIONS = QUIPU_MASTER_TEMAS.map((t) => ({ value: t, label: t }))
@@ -118,6 +117,7 @@ export function Declaraciones() {
             value={tipo}
             onChange={handleFilterChange(setTipo)}
             options={TIPO_OPTIONS}
+            placeholder="Todos"
           />
           <FilterSelect
             value={canal}
