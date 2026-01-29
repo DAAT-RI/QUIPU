@@ -100,12 +100,12 @@ function cargoPriority(cargo: string | null): number {
 }
 
 const tabs = [
+  { key: 'declaraciones', label: 'Declaraciones', icon: MessageSquareQuote },
   { key: 'resumen', label: 'Resumen', icon: User },
   { key: 'educacion', label: 'Educacion', icon: GraduationCap },
   { key: 'experiencia', label: 'Experiencia', icon: Briefcase },
   { key: 'legal', label: 'Legal', icon: Scale },
   { key: 'patrimonio', label: 'Patrimonio', icon: Wallet },
-  { key: 'declaraciones', label: 'Declaraciones', icon: MessageSquareQuote },
 ]
 
 function renderJsonArray(data: unknown[] | null | undefined, label: string) {
@@ -138,7 +138,7 @@ function renderJsonArray(data: unknown[] | null | undefined, label: string) {
 
 export function CandidatoDetalle() {
   const { id } = useParams()
-  const [activeTab, setActiveTab] = useState('resumen')
+  const [activeTab, setActiveTab] = useState('declaraciones')
 
   const {
     data: candidato,

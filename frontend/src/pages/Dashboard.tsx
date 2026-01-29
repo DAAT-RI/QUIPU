@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import {
   Building2,
@@ -11,6 +11,7 @@ import {
   Crown,
   UserCheck,
   Vote,
+  ChevronDown,
 } from 'lucide-react'
 
 import { useDashboardStats, usePromesasPorCategoria, useTopPartidos } from '@/hooks/useDashboardStats'
@@ -327,45 +328,12 @@ export function Dashboard() {
           )}
         </section>
 
-        {/* Candidatos Presidenciales - 3 sections */}
-        <section className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-                <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-              </div>
-              <h2 className="text-lg font-semibold">Candidatos Presidenciales</h2>
-            </div>
-            <Link
-              to="/candidatos?tipo=PRESIDENCIAL"
-              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-            >
-              Ver todos
-              <ArrowRight className="h-3.5 w-3.5" />
-            </Link>
-          </div>
-
-          {/* Presidentes */}
-          <CandidatoCargoSection
-            title="Presidente de la República"
-            candidatos={presidentes}
-            color="amber"
-          />
-
-          {/* 1er Vicepresidente */}
-          <CandidatoCargoSection
-            title="Primer Vicepresidente"
-            candidatos={vice1}
-            color="violet"
-          />
-
-          {/* 2do Vicepresidente */}
-          <CandidatoCargoSection
-            title="Segundo Vicepresidente"
-            candidatos={vice2}
-            color="blue"
-          />
-        </section>
+        {/* Candidatos Presidenciales */}
+        <CandidatosPresidencialesSection
+          presidentes={presidentes}
+          vice1={vice1}
+          vice2={vice2}
+        />
       </div>
 
       {/* Top Partidos */}
@@ -456,6 +424,77 @@ function StatPill({
         <p className="text-xs text-muted-foreground mt-0.5">{label}</p>
       </div>
     </Link>
+  )
+}
+
+/* ── Candidatos Presidenciales con acordeón ─────────────────────── */
+function CandidatosPresidencialesSection({
+  presidentes,
+  vice1,
+  vice2,
+}: {
+  presidentes: CandidatoCompleto[]
+  vice1: CandidatoCompleto[]
+  vice2: CandidatoCompleto[]
+}) {
+  const [showVices, setShowVices] = useState(false)
+
+  return (
+    <section className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+            <Crown className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+          </div>
+          <h2 className="text-lg font-semibold">Candidatos Presidenciales</h2>
+        </div>
+        <Link
+          to="/candidatos?tipo=PRESIDENCIAL"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+        >
+          Ver todos
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      </div>
+
+      {/* Presidentes - siempre visible */}
+      <CandidatoCargoSection
+        title="Presidente de la República"
+        candidatos={presidentes}
+        color="amber"
+      />
+
+      {/* Acordeón para Vicepresidentes */}
+      <div className="rounded-xl border bg-card overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowVices(!showVices)}
+          className="w-full flex items-center justify-between p-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+        >
+          <span className="flex items-center gap-2">
+            <Users className="h-4 w-4" />
+            Vicepresidentes ({vice1.length + vice2.length})
+          </span>
+          <ChevronDown
+            className={`h-4 w-4 transition-transform duration-200 ${showVices ? 'rotate-180' : ''}`}
+          />
+        </button>
+        {showVices && (
+          <div className="border-t p-3 space-y-4">
+            <CandidatoCargoSection
+              title="Primer Vicepresidente"
+              candidatos={vice1}
+              color="violet"
+            />
+            <CandidatoCargoSection
+              title="Segundo Vicepresidente"
+              candidatos={vice2}
+              color="blue"
+            />
+          </div>
+        )}
+      </div>
+    </section>
   )
 }
 
