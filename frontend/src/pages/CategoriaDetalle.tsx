@@ -17,6 +17,7 @@ import {
   Users,
   ChevronLeft,
   ChevronRight,
+  ChevronDown,
 } from 'lucide-react'
 
 const LIMIT = 50
@@ -28,6 +29,7 @@ export function CategoriaDetalle() {
   const { nombre } = useParams()
   const [page, setPage] = useState(0)
   const [partidoFilter, setPartidoFilter] = useState('')
+  const [topPartidosOpen, setTopPartidosOpen] = useState(false)
 
   // Obtener labels dinámicos para temas de declaraciones
   const { data: counts } = useCategoriaCounts()
@@ -177,41 +179,52 @@ export function CategoriaDetalle() {
       {/* ── PLAN CATEGORY CONTENT ── */}
       {!isDeclaracion && (
         <>
-          {/* Top partidos chart */}
+          {/* Top partidos chart - accordion */}
           {planChart.length > 0 && (
             <section>
-              <div className="flex items-center gap-2.5 mb-4">
+              <button
+                type="button"
+                onClick={() => setTopPartidosOpen((v) => !v)}
+                className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
+              >
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
                   <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
                 </div>
-                <h2 className="text-lg font-semibold">Top partidos en {config.label}</h2>
-              </div>
-              <div className="rounded-xl border bg-card divide-y">
-                {planChart.map((item, i) => {
-                  const barPct = (item.count / maxPlanCount) * 100
-                  return (
-                    <div key={item.partido} className="flex items-center gap-4 p-4">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold">
-                        {i + 1}
-                      </span>
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center justify-between mb-1">
-                          <p className="text-sm font-medium truncate">{item.partido}</p>
-                          <span className="text-sm font-bold shrink-0 ml-2 tabular-nums">
-                            {formatNumber(item.count)}
-                          </span>
-                        </div>
-                        <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-700"
-                            style={{ width: `${barPct}%`, backgroundColor: config.color }}
-                          />
+                <h2 className="text-lg font-semibold flex-1">Top partidos en {config.label}</h2>
+                <ChevronDown
+                  className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+                    topPartidosOpen ? 'rotate-0' : '-rotate-90'
+                  }`}
+                />
+              </button>
+              {topPartidosOpen && (
+                <div className="rounded-xl border bg-card divide-y mt-2">
+                  {planChart.map((item, i) => {
+                    const barPct = (item.count / maxPlanCount) * 100
+                    return (
+                      <div key={item.partido} className="flex items-center gap-4 p-4">
+                        <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold">
+                          {i + 1}
+                        </span>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center justify-between mb-1">
+                            <p className="text-sm font-medium truncate">{item.partido}</p>
+                            <span className="text-sm font-bold shrink-0 ml-2 tabular-nums">
+                              {formatNumber(item.count)}
+                            </span>
+                          </div>
+                          <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                            <div
+                              className="h-full rounded-full transition-all duration-700"
+                              style={{ width: `${barPct}%`, backgroundColor: config.color }}
+                            />
+                          </div>
                         </div>
                       </div>
-                    </div>
-                  )
-                })}
-              </div>
+                    )
+                  })}
+                </div>
+              )}
             </section>
           )}
 
