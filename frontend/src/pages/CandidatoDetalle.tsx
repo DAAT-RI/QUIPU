@@ -20,7 +20,19 @@ import {
   Quote,
   Hash,
   Newspaper,
+  BarChart3,
 } from 'lucide-react'
+import {
+  RadarChart,
+  PolarGrid,
+  PolarAngleAxis,
+  Radar,
+  ResponsiveContainer,
+  PieChart,
+  Pie,
+  Cell,
+  Tooltip,
+} from 'recharts'
 
 // Human-readable labels for raw DB field names
 const FIELD_LABELS: Record<string, string> = {
@@ -103,12 +115,25 @@ function cargoPriority(cargo: string | null): number {
 }
 
 const tabs = [
+  { key: 'perfil-mediatico', label: 'Perfil Mediático', icon: BarChart3 },
   { key: 'declaraciones', label: 'Declaraciones', icon: MessageSquareQuote },
   { key: 'resumen', label: 'Resumen', icon: User },
   { key: 'educacion', label: 'Educacion', icon: GraduationCap },
   { key: 'experiencia', label: 'Experiencia', icon: Briefcase },
   { key: 'legal', label: 'Legal', icon: Scale },
   { key: 'patrimonio', label: 'Patrimonio', icon: Wallet },
+]
+
+// Colors for pie chart
+const CHART_COLORS = [
+  'hsl(var(--primary))',
+  'hsl(221, 83%, 53%)',    // blue
+  'hsl(142, 71%, 45%)',    // green
+  'hsl(45, 93%, 47%)',     // amber
+  'hsl(0, 84%, 60%)',      // red
+  'hsl(280, 65%, 60%)',    // purple
+  'hsl(200, 95%, 50%)',    // cyan
+  'hsl(340, 82%, 52%)',    // pink
 ]
 
 function renderJsonArray(data: unknown[] | null | undefined, label: string) {
@@ -141,7 +166,7 @@ function renderJsonArray(data: unknown[] | null | undefined, label: string) {
 
 export function CandidatoDetalle() {
   const { id } = useParams()
-  const [activeTab, setActiveTab] = useState('declaraciones')
+  const [activeTab, setActiveTab] = useState('perfil-mediatico')
 
   const {
     data: candidato,
@@ -257,6 +282,16 @@ export function CandidatoDetalle() {
 
         {/* Tab Content */}
         <div className="p-6" role="tabpanel" id={`tabpanel-${activeTab}`} aria-labelledby={`tab-${activeTab}`}>
+          {activeTab === 'perfil-mediatico' && (
+            <TabPerfilMediatico
+              declaraciones={declaracionesData?.data ?? []}
+              totalCount={declaracionesData?.count ?? 0}
+              loading={loadingDeclaraciones}
+              nombreCandidato={candidato.apellido_paterno ?? candidato.nombre_completo ?? ''}
+              onVerDeclaraciones={() => setActiveTab('declaraciones')}
+            />
+          )}
+
           {activeTab === 'resumen' && (
             <div className="space-y-4">
               <div className="flex items-center gap-2.5 mb-4">
@@ -597,6 +632,223 @@ function TabDeclaracionesMejorado({
           </Link>
         ))}
       </div>
+    </div>
+  )
+}
+
+/* ── Tab Perfil Mediático ──────────────────────────────────────────── */
+function TabPerfilMediatico({
+  declaraciones,
+  totalCount,
+  loading,
+  nombreCandidato,
+  onVerDeclaraciones,
+}: {
+  declaraciones: DeclaracionView[]
+  totalCount: number
+  loading: boolean
+  nombreCandidato: string
+  onVerDeclaraciones: () => void
+}) {
+  // Calcular estadísticas de temas y canales
+  const stats = useMemo(() => {
+    const temasMap = new Map<string, number>()
+    const canalesMap = new Map<string, number>()
+
+    declaraciones.forEach((d) => {
+      if (d.tema_interaccion) {
+        // Handle multiple topics separated by semicolon
+        d.tema_interaccion.split(';').forEach((t) => {
+          const tema = t.trim()
+          if (tema) {
+            temasMap.set(tema, (temasMap.get(tema) || 0) + 1)
+          }
+        })
+      }
+      if (d.canal) {
+        canalesMap.set(d.canal, (canalesMap.get(d.canal) || 0) + 1)
+      }
+    })
+
+    // Get top topics for charts
+    const topTemas = Array.from(temasMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 8)
+      .map(([name, value]) => ({ name, value, fullMark: Math.max(...Array.from(temasMap.values())) }))
+
+    const topCanales = Array.from(canalesMap.entries())
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 6)
+      .map(([name, value]) => ({ name, value }))
+
+    return {
+      total: totalCount,
+      temasUnicos: temasMap.size,
+      canalesUnicos: canalesMap.size,
+      topTemas,
+      topCanales,
+    }
+  }, [declaraciones, totalCount])
+
+  if (loading) return <LoadingSpinner />
+
+  if (declaraciones.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+        No se encontraron declaraciones de {nombreCandidato} en medios
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-6">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2.5">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <BarChart3 className="h-4 w-4 text-primary" />
+          </div>
+          <h2 className="text-lg font-semibold">Perfil Mediático</h2>
+        </div>
+        <button
+          type="button"
+          onClick={onVerDeclaraciones}
+          className="inline-flex items-center gap-1.5 text-sm text-primary hover:underline"
+        >
+          Ver todas las declaraciones
+          <ArrowRight size={14} />
+        </button>
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-3 gap-3">
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-3xl font-bold text-primary">{stats.total}</p>
+          <p className="text-xs text-muted-foreground mt-1">declaraciones</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-3xl font-bold">{stats.temasUnicos}</p>
+          <p className="text-xs text-muted-foreground mt-1">temas diferentes</p>
+        </div>
+        <div className="rounded-xl border bg-card p-4 text-center">
+          <p className="text-3xl font-bold">{stats.canalesUnicos}</p>
+          <p className="text-xs text-muted-foreground mt-1">fuentes de medios</p>
+        </div>
+      </div>
+
+      {/* Charts Grid */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Radar Chart - Topics */}
+        {stats.topTemas.length >= 3 && (
+          <div className="rounded-xl border bg-card p-4">
+            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+              <Hash size={14} className="text-muted-foreground" />
+              Temas que más habla
+            </h3>
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <RadarChart data={stats.topTemas} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                  <PolarGrid stroke="hsl(var(--border))" />
+                  <PolarAngleAxis
+                    dataKey="name"
+                    tick={{ fontSize: 11, fill: 'hsl(var(--muted-foreground))' }}
+                    tickLine={false}
+                  />
+                  <Radar
+                    name="Menciones"
+                    dataKey="value"
+                    stroke="hsl(var(--primary))"
+                    fill="hsl(var(--primary))"
+                    fillOpacity={0.3}
+                    strokeWidth={2}
+                  />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value) => [`${value ?? 0} menciones`, '']}
+                  />
+                </RadarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+
+        {/* Pie Chart - Media Sources */}
+        {stats.topCanales.length > 0 && (
+          <div className="rounded-xl border bg-card p-4">
+            <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
+              <Newspaper size={14} className="text-muted-foreground" />
+              Distribución por fuente
+            </h3>
+            <div className="h-[280px]">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={stats.topCanales}
+                    dataKey="value"
+                    nameKey="name"
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={90}
+                    innerRadius={50}
+                    paddingAngle={2}
+                    label={({ name, percent }) => `${name} (${((percent ?? 0) * 100).toFixed(0)}%)`}
+                    labelLine={false}
+                  >
+                    {stats.topCanales.map((_, index) => (
+                      <Cell key={`cell-${index}`} fill={CHART_COLORS[index % CHART_COLORS.length]} />
+                    ))}
+                  </Pie>
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: 'hsl(var(--card))',
+                      border: '1px solid hsl(var(--border))',
+                      borderRadius: '8px',
+                      fontSize: '12px',
+                    }}
+                    formatter={(value) => [`${value ?? 0} declaraciones`, '']}
+                  />
+                </PieChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Topic Pills (for quick overview) */}
+      {stats.topTemas.length > 0 && (
+        <div className="rounded-xl border bg-card p-4">
+          <h3 className="text-sm font-semibold mb-3">Temas principales</h3>
+          <div className="flex flex-wrap gap-2">
+            {stats.topTemas.map(({ name, value }, idx) => (
+              <span
+                key={name}
+                className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium"
+                style={{
+                  backgroundColor: `${CHART_COLORS[idx % CHART_COLORS.length]}20`,
+                  color: CHART_COLORS[idx % CHART_COLORS.length],
+                }}
+              >
+                {name}
+                <span className="rounded-full bg-current/20 px-1.5 py-0.5 text-xs">{value}</span>
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* CTA to see all declarations */}
+      <button
+        type="button"
+        onClick={onVerDeclaraciones}
+        className="w-full rounded-xl border border-primary/30 bg-primary/5 p-4 text-center text-sm font-medium text-primary hover:bg-primary/10 transition-colors"
+      >
+        Ver las {stats.total} declaraciones completas →
+      </button>
     </div>
   )
 }
