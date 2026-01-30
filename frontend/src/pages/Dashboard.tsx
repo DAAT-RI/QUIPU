@@ -262,12 +262,12 @@ export function Dashboard() {
                       {decl.contenido}
                     </p>
                     <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      {decl.tema_interaccion &&
-                        decl.tema_interaccion
+                      {decl.categorias_interaccion &&
+                        decl.categorias_interaccion
                           .split(';')
-                          .map((t) => t.trim())
+                          .map((t: string) => t.trim())
                           .filter(Boolean)
-                          .map((t) => (
+                          .map((t: string) => (
                             <span key={t} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
                               {t}
                             </span>
@@ -294,13 +294,13 @@ export function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">Categorías en el feed</p>
               <div className="rounded-xl border bg-card divide-y">
                 {(() => {
-                  // Extraer categorías únicas de las declaraciones (tema_interaccion puede tener múltiples separadas por ;)
+                  // Extraer categorías únicas de las declaraciones (categorias_interaccion puede tener múltiples separadas por ;)
                   const categoryMap = new Map<string, number>()
                   recentDeclaraciones.forEach((decl) => {
-                    if (decl.tema_interaccion) {
+                    if (decl.categorias_interaccion) {
                       // Separar por ; y contar cada categoría individualmente
-                      const cats = decl.tema_interaccion.split(';').map(c => c.trim()).filter(c => c)
-                      cats.forEach(cat => {
+                      const cats = decl.categorias_interaccion.split(';').map((c: string) => c.trim()).filter((c: string) => c)
+                      cats.forEach((cat: string) => {
                         categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1)
                       })
                     }

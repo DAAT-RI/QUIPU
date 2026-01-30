@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 
@@ -6,23 +6,29 @@ export default function Login() {
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
-  const [loading, setLoading] = useState(false)
-  const { signIn } = useAuth()
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const { signIn, user, loading } = useAuth()
   const navigate = useNavigate()
+
+  // Redirect to home if already logged in
+  useEffect(() => {
+    if (user && !loading) {
+      navigate('/', { replace: true })
+    }
+  }, [user, loading, navigate])
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-    setLoading(true)
+    setIsSubmitting(true)
 
     const { error } = await signIn(email, password)
 
     if (error) {
       setError('Credenciales inválidas')
-      setLoading(false)
-    } else {
-      navigate('/')
+      setIsSubmitting(false)
     }
+    // Don't navigate here - the useEffect will handle it when user state updates
   }
 
   return (
@@ -83,11 +89,11 @@ export default function Login() {
 
           <button
             type="submit"
-            disabled={loading}
+            disabled={isSubmitting}
             className="w-full bg-parley-gold hover:bg-parley-gold/90 text-white font-medium
                        py-2 px-4 rounded-md transition-colors disabled:opacity-50"
           >
-            {loading ? 'Ingresando...' : 'Ingresar'}
+            {isSubmitting ? 'Ingresando...' : 'Ingresar'}
           </button>
         </form>
       </div>

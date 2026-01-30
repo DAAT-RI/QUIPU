@@ -663,8 +663,8 @@ function TabDeclaracionesMejorado({
     const canalesSet = new Set<string>()
 
     declaraciones.forEach((d) => {
-      if (d.tema_interaccion) {
-        temasMap.set(d.tema_interaccion, (temasMap.get(d.tema_interaccion) || 0) + 1)
+      if (d.categorias_interaccion) {
+        temasMap.set(d.categorias_interaccion, (temasMap.get(d.categorias_interaccion) || 0) + 1)
       }
       if (d.canal) {
         canalesSet.add(d.canal)
@@ -686,7 +686,7 @@ function TabDeclaracionesMejorado({
   // Filtrar declaraciones si hay filtro activo
   const declaracionesFiltradas = useMemo(() => {
     if (!filtroTema) return declaraciones
-    return declaraciones.filter((d) => d.tema_interaccion === filtroTema)
+    return declaraciones.filter((d) => d.categorias_interaccion === filtroTema)
   }, [declaraciones, filtroTema])
 
   if (loading) return <LoadingSpinner />
@@ -783,7 +783,7 @@ function TabDeclaracionesMejorado({
                       {d.canal}
                     </span>
                   )}
-                  {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
+                  {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
                     <span key={tema} className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
                       {tema}
                     </span>
@@ -820,9 +820,9 @@ function TabPerfilMediatico({
     const canalesMap = new Map<string, number>()
 
     declaraciones.forEach((d) => {
-      if (d.tema_interaccion) {
+      if (d.categorias_interaccion) {
         // Handle multiple topics separated by semicolon
-        d.tema_interaccion.split(';').forEach((t) => {
+        d.categorias_interaccion.split(';').forEach((t) => {
           const tema = t.trim()
           if (tema) {
             temasMap.set(tema, (temasMap.get(tema) || 0) + 1)

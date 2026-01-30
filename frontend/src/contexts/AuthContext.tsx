@@ -29,12 +29,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     // Safety timeout - never stay in loading state for more than 10 seconds
     const safetyTimeout = setTimeout(() => {
-      console.warn('Safety timeout triggered - forcing loading to false')
       setLoading(false)
     }, 10000)
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('getSession result:', { hasSession: !!session, hasUser: !!session?.user })
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -46,7 +44,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
         }
       } else {
-        console.log('No session/user, setting loading to false')
         setLoading(false)
       }
       clearTimeout(safetyTimeout)
@@ -57,8 +54,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', { event, hasSession: !!session, hasUser: !!session?.user })
+      async (_event, session) => {
         setSession(session)
         setUser(session?.user ?? null)
         if (session?.user) {
@@ -99,7 +95,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (data && data.current_session_id && data.current_session_id !== sessionId) {
           // Otra sesión tomó el control
-          console.log('Session conflict detected, signing out')
           await supabase.auth.signOut()
           alert('Sesión cerrada: iniciaste sesión en otro dispositivo')
         }
@@ -122,11 +117,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Error fetching usuario:', error)
       } else if (data) {
-        console.log('Usuario data:', { rol: data.rol, cliente_id: data.cliente_id })
         setClienteId(data.cliente_id)
         setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
         setIsSuperadmin(data.rol === 'superadmin')
-        console.log('isSuperadmin set to:', data.rol === 'superadmin')
       }
     } catch (error) {
       console.error('Exception in loadClienteData:', error)
@@ -156,24 +149,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    // Clear state first (don't wait for DB)
+    setUser(null)
+    setSession(null)
+    setClienteId(null)
+    setClienteNombre(null)
+    setIsSuperadmin(false)
+    setLoading(false)
+
     try {
-      if (user) {
-        await supabase
-          .from('quipu_usuarios')
-          .update({ current_session_id: null })
-          .eq('auth_user_id', user.id)
-      }
+      // Sign out from Supabase Auth first
       await supabase.auth.signOut()
-      // Clear state immediately
-      setUser(null)
-      setSession(null)
-      setClienteId(null)
-      setClienteNombre(null)
-      setIsSuperadmin(false)
+
+      // Try to clear session in DB (non-blocking, ignore errors)
+      if (user) {
+        try {
+          await supabase
+            .from('quipu_usuarios')
+            .update({ current_session_id: null })
+            .eq('auth_user_id', user.id)
+        } catch {
+          // Ignore RLS errors
+        }
+      }
     } catch (error) {
       console.error('Error signing out:', error)
-      // Force sign out even if there's an error
-      await supabase.auth.signOut()
     }
   }
 

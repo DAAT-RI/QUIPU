@@ -156,7 +156,7 @@ export interface QuipuMasterEntry {
   canal: string | null
   titulo: string | null
   resumen: string | null  // Nota: es resumen del ARTÍCULO/POST completo
-  temas: string | null
+  categorias: string | null  // Renamed from 'temas' in DB
   personas: string | null
   keywords: string | null
   organizaciones: string | null
@@ -175,7 +175,7 @@ export interface Interaccion {
   type: 'declaration' | 'mention'
   content: string
   stakeholder: string
-  tema?: string
+  categorias?: string  // Renamed from 'tema' in DB
 }
 
 // Vista: v_quipu_declaraciones (aplanada de interacciones)
@@ -184,7 +184,7 @@ export interface Declaracion {
   master_id: string
   canal: string | null
   resumen: string | null
-  temas: string | null
+  categorias: string | null  // Renamed from 'temas' in DB
   keywords: string | null
   organizaciones: string | null
   ubicaciones: string | null
@@ -192,7 +192,7 @@ export interface Declaracion {
   ruta: string | null
   contenido: string
   stakeholder: string
-  tema: string | null
+  categorias_interaccion: string | null  // Renamed from 'tema' in DB
 }
 
 // Vista v_quipu_declaraciones - Nueva estructura con todos los campos
@@ -202,7 +202,7 @@ export interface DeclaracionView {
   canal: string | null
   titulo: string | null  // Título del artículo/post
   resumen: string | null  // Resumen del ARTÍCULO (no de la declaración)
-  temas: string | null  // Temas del artículo (semicolon separated)
+  categorias: string | null  // Categorías del artículo (semicolon separated) - renamed from 'temas'
   personas: string | null  // Personas mencionadas con descripciones
   keywords: string | null
   organizaciones: string | null  // Orgs mencionadas - IMPORTANTE para gremios
@@ -215,7 +215,7 @@ export interface DeclaracionView {
   tipo: 'declaration' | 'mention'  // Tipo de interacción
   stakeholder: string  // Quién dijo/fue mencionado
   contenido: string  // LO QUE DIJO - esto es lo más importante
-  tema_interaccion: string | null  // Tema específico de esta declaración
+  categorias_interaccion: string | null  // Categoría específica de esta declaración - renamed from 'tema_interaccion'
 }
 
 // Vista: v_quipu_promesas_planes_completas
@@ -257,8 +257,8 @@ export interface DeclaracionFilters {
   tipo?: 'declaration' | 'mention'  // Default: 'declaration' (mentions tienen ruido)
   stakeholder?: string
   canal?: string
-  tema?: string
-  temaDeclaracion?: string
+  categoria?: string  // Renamed from 'tema' - filters by article category
+  categoriaDeclaracion?: string  // Renamed from 'temaDeclaracion' - filters by declaration category
   organizacion?: string  // Filtrar por organización mencionada
   producto?: string
   partido?: string  // Filter by partido name (matches organizaciones, stakeholder, or contenido)

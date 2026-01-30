@@ -53,17 +53,9 @@ export function Header() {
         </button>
         <button
           type="button"
-          onClick={async (e) => {
-            e.preventDefault()
-            console.log('Logout clicked')
-            try {
-              await signOut()
-              console.log('SignOut completed')
-              navigate('/login')
-            } catch (error) {
-              console.error('SignOut error:', error)
-              navigate('/login')
-            }
+          onClick={async () => {
+            await signOut()
+            navigate('/login')
           }}
           className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
           title="Cerrar sesión"

@@ -10,6 +10,52 @@ function removeAccents(text: string): string {
 }
 
 /**
+ * Extract significant search terms from a candidato name.
+ * Peruvian names are typically: NOMBRE1 NOMBRE2 APELLIDO_PATERNO APELLIDO_MATERNO
+ * Media often uses just apellidos: "López Aliaga", "Cerrón", "del Castillo"
+ *
+ * Strategy: Extract apellidos (words 3+ onwards) and significant name parts
+ */
+function extractSearchTerms(fullName: string): string[] {
+  const normalized = removeAccents(fullName.toLowerCase().trim())
+  const words = normalized.split(/\s+/).filter(w => w.length >= 3)
+
+  if (words.length <= 2) {
+    // Short name - use all words
+    return words
+  }
+
+  // For longer names, focus on apellidos (typically last 2 words)
+  // But also include compound apellidos like "del castillo", "de la cruz"
+  const terms = new Set<string>()
+
+  // Add individual apellidos (words 3+, skipping common first names)
+  const commonFirstNames = new Set(['jose', 'maria', 'juan', 'luis', 'carlos', 'jorge', 'pedro', 'miguel', 'rafael', 'alberto', 'cesar', 'victor', 'manuel', 'fernando', 'antonio', 'francisco', 'rosa', 'ana', 'carmen', 'luz', 'flor', 'gloria', 'patricia', 'elizabeth', 'martha', 'silvia'])
+
+  for (let i = 0; i < words.length; i++) {
+    const word = words[i]
+    // Skip very common first names for individual matching
+    if (!commonFirstNames.has(word) && word.length >= 4) {
+      terms.add(word)
+    }
+  }
+
+  // Add compound apellidos (last 2 words together)
+  if (words.length >= 2) {
+    const lastTwo = words.slice(-2).join(' ')
+    terms.add(lastTwo)
+  }
+
+  // Add last 3 words for compound surnames like "del castillo galvez"
+  if (words.length >= 3) {
+    const lastThree = words.slice(-3).join(' ')
+    terms.add(lastThree)
+  }
+
+  return Array.from(terms)
+}
+
+/**
  * Generate search variants for accent-insensitive search (Spanish).
  * Creates variants with accented vowels in common positions.
  * Limited to ~10 variants to avoid query explosion.
@@ -59,14 +105,19 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
   const { clienteId } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
-  // Extraer nombres de stakeholders del cliente
-  const clienteStakeholders = candidatosData?.map(
-    c => (c.quipu_candidatos as any)?.nombre_completo
-  ).filter(Boolean) ?? []
+  // Extraer términos de búsqueda (apellidos) de los candidatos del cliente
+  // Usamos apellidos porque los medios usan "López Aliaga" no "RAFAEL BERNARDO LOPEZ ALIAGA CAZORLA"
+  const searchTerms = candidatosData?.flatMap(c => {
+    const nombre = (c.quipu_candidatos as any)?.nombre_completo
+    return nombre ? extractSearchTerms(nombre) : []
+  }).filter(Boolean) ?? []
+
+  // Deduplicar y limitar términos
+  const uniqueTerms = [...new Set(searchTerms)].slice(0, 100)
 
   return useQuery({
     queryKey: ['declaraciones', filters, clienteId],
-    enabled: clienteId === null || clienteStakeholders.length > 0,
+    enabled: clienteId === null || uniqueTerms.length > 0,
     queryFn: async () => {
       let query = supabase
         .from('v_quipu_declaraciones')
@@ -74,13 +125,17 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
 
       // Filtro multi-tenant: solo declaraciones de candidatos del cliente
       // Master (clienteId === null) no tiene filtro, ve todo
-      if (clienteId !== null && clienteStakeholders.length > 0) {
-        const stakeholderConditions = clienteStakeholders
+      // Buscamos por APELLIDOS (ej: "lopez aliaga") no nombres completos
+      if (clienteId !== null && uniqueTerms.length > 0) {
+        const stakeholderConditions = uniqueTerms
+          .filter(term => term.length >= 5) // Solo términos significativos
           .slice(0, 50) // Limitar para performance
-          .map(name => `stakeholder.ilike.%${name}%`)
+          .map(term => `stakeholder.ilike.%${term}%`)
           .join(',')
 
-        query = query.or(stakeholderConditions)
+        if (stakeholderConditions) {
+          query = query.or(stakeholderConditions)
+        }
       }
 
       // Filtro por tipo (default: declaration) - case insensitive
@@ -99,15 +154,15 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
         query = query.eq('canal', filters.canal)
       }
 
-      // Filtro por tema del artículo
-      if (filters.tema) {
-        query = query.ilike('temas', `%${filters.tema}%`)
+      // Filtro por categoría del artículo (renamed from tema)
+      if (filters.categoria) {
+        query = query.ilike('categorias', `%${filters.categoria}%`)
       }
 
-      // Filtro por tema de la declaración específica (con soporte para tildes)
-      if (filters.temaDeclaracion) {
-        const variants = getSearchVariants(filters.temaDeclaracion)
-        query = query.or(variants.map(v => `tema_interaccion.ilike.%${v}%`).join(','))
+      // Filtro por categoría de la declaración específica (con soporte para tildes)
+      if (filters.categoriaDeclaracion) {
+        const variants = getSearchVariants(filters.categoriaDeclaracion)
+        query = query.or(variants.map(v => `categorias_interaccion.ilike.%${v}%`).join(','))
       }
 
       // Filtro por organización mencionada (IMPORTANTE para gremios) - con soporte para tildes
