@@ -66,7 +66,7 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
   return useQuery({
-    queryKey: ['declaraciones', filters, clienteId, clienteCandidatoIds],
+    queryKey: ['declaraciones', filters, clienteId, clienteCandidatoIds, isSuperadmin],
     enabled: !loading && (isSuperadmin || clienteCandidatoIds.length > 0),
     queryFn: async () => {
       // For non-superadmin users, first get aliases that map to their candidates

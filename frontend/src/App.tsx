@@ -38,8 +38,8 @@ function ScrollToTop() {
 
 function App() {
   return (
-    <AuthProvider>
-      <QueryClientProvider client={queryClient}>
+    <QueryClientProvider client={queryClient}>
+      <AuthProvider>
         <BrowserRouter>
           <ScrollToTop />
           <Routes>
@@ -77,8 +77,8 @@ function App() {
             </Route>
           </Routes>
         </BrowserRouter>
-      </QueryClientProvider>
-    </AuthProvider>
+      </AuthProvider>
+    </QueryClientProvider>
   )
 }
 

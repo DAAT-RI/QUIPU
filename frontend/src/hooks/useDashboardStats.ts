@@ -98,7 +98,7 @@ export function useDeclaracionesPorTema() {
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
   return useQuery({
-    queryKey: ['declaraciones-por-tema', clienteId, clienteCandidatoIds],
+    queryKey: ['declaraciones-por-tema', clienteId, clienteCandidatoIds, isSuperadmin],
     enabled: !loading && (isSuperadmin || clienteCandidatoIds.length > 0),
     queryFn: async () => {
       // For non-superadmin users, first get aliases that map to their candidates
@@ -172,7 +172,7 @@ export function useTopPartidosByDeclaraciones() {
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
   return useQuery({
-    queryKey: ['top-partidos-declaraciones', clienteId, clienteCandidatoIds],
+    queryKey: ['top-partidos-declaraciones', clienteId, clienteCandidatoIds, isSuperadmin],
     enabled: !loading && (isSuperadmin || clienteCandidatoIds.length > 0),
     queryFn: async () => {
       // For non-superadmin users, first get aliases that map to their candidates
