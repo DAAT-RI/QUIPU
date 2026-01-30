@@ -80,14 +80,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function loadClienteData(authUserId: string) {
     const { data } = await supabase
       .from('quipu_usuarios')
-      .select('cliente_id, is_superadmin, quipu_clientes(nombre)')
+      .select('cliente_id, rol, quipu_clientes(nombre)')
       .eq('auth_user_id', authUserId)
       .single()
 
     if (data) {
       setClienteId(data.cliente_id)
       setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
-      setIsSuperadmin(data.is_superadmin ?? false)
+      setIsSuperadmin(data.rol === 'superadmin')
     }
     setLoading(false)
   }
