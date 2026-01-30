@@ -111,9 +111,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadClienteData(authUserId: string) {
     try {
-      // Force refresh session to bust browser HTTP cache
-      await supabase.auth.refreshSession()
-
       const { data, error } = await supabase
         .from('quipu_usuarios')
         .select('cliente_id, rol, quipu_clientes(nombre)')
