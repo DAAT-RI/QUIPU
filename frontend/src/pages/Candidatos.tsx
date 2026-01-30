@@ -141,9 +141,7 @@ export function Candidatos() {
       ) : view === 'grid' ? (
         /* Grid View */
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-          {candidatos.map((c) => {
-            const apellido = c.apellido_paterno ?? c.nombre_completo?.split(' ').pop() ?? ''
-            return (
+          {candidatos.map((c) => (
               <div
                 key={c.id}
                 className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
@@ -173,15 +171,12 @@ export function Candidatos() {
                   <span>Declaraciones</span>
                 </Link>
               </div>
-            )
-          })}
+          ))}
         </div>
       ) : (
         /* List View */
         <div className="rounded-xl border bg-card divide-y">
-          {candidatos.map((c) => {
-            const apellido = c.apellido_paterno ?? c.nombre_completo?.split(' ').pop() ?? ''
-            return (
+          {candidatos.map((c) => (
               <div
                 key={c.id}
                 className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
@@ -217,8 +212,7 @@ export function Candidatos() {
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
-            )
-          })}
+          ))}
         </div>
       )}
 
