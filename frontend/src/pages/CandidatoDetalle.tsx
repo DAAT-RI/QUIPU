@@ -144,8 +144,6 @@ const CHART_COLORS = [
 // Campos a ocultar en educación y otras secciones
 const HIDDEN_FIELDS = ['titulado', 'egresado', 'bachiller', 'anio_titulo', 'anio_bachiller']
 
-// Campos a mostrar en experiencia laboral (solo estos)
-const EXPERIENCIA_FIELDS = ['nombre_entidad', 'cargo', 'anio_hasta', 'anio_desde']
 
 function renderJsonArray(data: unknown[] | null | undefined, label: string) {
   if (!data || !Array.isArray(data) || data.length === 0) {
@@ -188,8 +186,8 @@ function renderExperienciaLaboral(data: unknown[] | null | undefined) {
       {data.map((item, i) => {
         if (typeof item !== 'object' || item === null) return null
         const exp = item as Record<string, unknown>
-        const entidad = exp.nombre_entidad || exp.centro_trabajo || exp.empresa
-        const cargo = exp.cargo
+        const entidad = String(exp.nombre_entidad || exp.centro_trabajo || exp.empresa || 'Sin especificar')
+        const cargo = exp.cargo ? String(exp.cargo) : null
         const desde = exp.anio_desde
         const hasta = exp.anio_hasta
         const periodo = desde && hasta
@@ -201,8 +199,8 @@ function renderExperienciaLaboral(data: unknown[] | null | undefined) {
           : null
         return (
           <div key={i} className="p-4 text-sm">
-            <p className="font-medium">{entidad || 'Sin especificar'}</p>
-            {cargo && <p className="text-muted-foreground">{String(cargo)}</p>}
+            <p className="font-medium">{entidad}</p>
+            {cargo && <p className="text-muted-foreground">{cargo}</p>}
             {periodo && <p className="text-xs text-muted-foreground mt-1">{periodo}</p>}
           </div>
         )
