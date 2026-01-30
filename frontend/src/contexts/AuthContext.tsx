@@ -33,7 +33,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     }, 10000)
 
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    // Force network call first to bypass any stale localStorage cache
+    supabase.auth.refreshSession().then(async ({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -49,7 +50,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
       clearTimeout(safetyTimeout)
     }).catch((error) => {
-      console.error('[Auth] Error getting session:', error)
+      console.error('[Auth] Error refreshing session:', error)
       setLoading(false)
       clearTimeout(safetyTimeout)
     })
@@ -111,9 +112,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   async function loadClienteData(authUserId: string) {
     try {
-      // Force refresh session to bust any HTTP cache on F5 reload
-      await supabase.auth.refreshSession()
-
       const { data, error } = await supabase
         .from('quipu_usuarios')
         .select('cliente_id, rol, quipu_clientes(nombre)')
