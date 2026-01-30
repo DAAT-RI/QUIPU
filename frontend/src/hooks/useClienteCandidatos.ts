@@ -5,14 +5,10 @@ import { useAuth } from '@/contexts/AuthContext'
 export function useClienteCandidatos() {
   const { clienteId, loading } = useAuth()
 
-  // DEBUG: Log estado del hook
-  console.log('[useClienteCandidatos] Estado:', { clienteId, loading, enabled: !loading })
-
   return useQuery({
     queryKey: ['cliente-candidatos', clienteId],
     enabled: !loading,
     queryFn: async () => {
-      console.log('[useClienteCandidatos] queryFn ejecutando con clienteId:', clienteId)
       // Master user (sin cliente) = todos los candidatos
       if (clienteId === null) {
         const { data, error } = await supabase

@@ -34,7 +34,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 10000)
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('[Auth] Got session:', session ? `User: ${session.user.email}` : 'No session')
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -46,7 +45,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
         }
       } else {
-        console.log('[Auth] No session, setting loading=false')
         setLoading(false)
       }
       clearTimeout(safetyTimeout)
@@ -112,25 +110,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, sessionId])
 
   async function loadClienteData(authUserId: string) {
-    console.log('[Auth] Loading cliente data for:', authUserId)
     try {
-      console.log('[Auth] Ejecutando query a quipu_usuarios...')
+      // Force refresh session to bust browser HTTP cache
+      await supabase.auth.refreshSession()
+
       const { data, error } = await supabase
         .from('quipu_usuarios')
         .select('cliente_id, rol, quipu_clientes(nombre)')
         .eq('auth_user_id', authUserId)
         .single()
 
-      console.log('[Auth] Query completada. Data:', JSON.stringify(data), 'Error:', JSON.stringify(error))
-
       if (error) {
         console.error('[Auth] Error fetching usuario:', error)
       } else if (data) {
-        console.log('[Auth] Setting user data:', {
-          cliente_id: data.cliente_id,
-          rol: data.rol,
-          cliente_nombre: (data.quipu_clientes as any)?.nombre
-        })
         setClienteId(data.cliente_id)
         setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
         setIsSuperadmin(data.rol === 'superadmin')
@@ -196,7 +188,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Force refresh auth state - useful after permission changes
   async function refreshAuth() {
-    console.log('[Auth] Force refreshing auth state...')
     setLoading(true)
     try {
       const { data: { session } } = await supabase.auth.getSession()
@@ -217,14 +208,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     }
   }
-
-  // DEBUG: Log estado completo del auth context
-  console.log('[AuthContext] Estado actual:', {
-    user: user?.email ?? null,
-    clienteId,
-    isSuperadmin,
-    loading
-  })
 
   return (
     <AuthContext.Provider value={{
