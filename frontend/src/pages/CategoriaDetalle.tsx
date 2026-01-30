@@ -21,6 +21,15 @@ import {
   AtSign,
 } from 'lucide-react'
 
+const CARGO_OPTIONS = [
+  { value: '', label: 'Todos los cargos' },
+  { value: 'PRESIDENTE DE LA REPÚBLICA', label: 'Presidente' },
+  { value: 'PRIMER VICEPRESIDENTE DE LA REPÚBLICA', label: '1er Vicepresidente' },
+  { value: 'SEGUNDO VICEPRESIDENTE DE LA REPÚBLICA', label: '2do Vicepresidente' },
+  { value: 'DIPUTADO', label: 'Diputados' },
+  { value: 'SENADOR', label: 'Senadores' },
+]
+
 const LIMIT = 50
 
 // Keys de categorías de plan (para determinar si es plan o declaración)
@@ -30,6 +39,7 @@ export function CategoriaDetalle() {
   const { nombre } = useParams()
   const [page, setPage] = useState(0)
   const [partidoFilter, setPartidoFilter] = useState('')
+  const [cargoFilter, setCargoFilter] = useState('')
   const [topPartidosOpen, setTopPartidosOpen] = useState(false)
 
   // Obtener labels dinámicos para temas de declaraciones
@@ -109,6 +119,7 @@ export function CategoriaDetalle() {
   // Solo ejecutar query cuando filterLabelReady para evitar buscar con key normalizada
   const { data: declData, isLoading: loadingDecl } = useDeclaraciones({
     categoriaDeclaracion: isDeclaracion && filterLabelReady ? filterLabel : undefined,
+    cargo: cargoFilter || undefined,
     offset: 0,
     limit: 200,
   })
@@ -328,6 +339,20 @@ export function CategoriaDetalle() {
               </div>
             </section>
           )}
+
+          {/* Cargo filter */}
+          <div className="flex items-center justify-between">
+            <p className="text-sm text-muted-foreground">
+              Filtrar por cargo:
+            </p>
+            <FilterSelect
+              value={cargoFilter}
+              onChange={(v) => { setCargoFilter(v); setPage(0) }}
+              options={CARGO_OPTIONS}
+              placeholder="Todos los cargos"
+              className="min-w-[180px]"
+            />
+          </div>
 
           {/* Declarations list */}
           {loadingDecl || !filterLabelReady ? (

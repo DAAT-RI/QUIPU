@@ -105,9 +105,15 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
   const { clienteId } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
+  // Filter candidates by cargo if needed
+  const filteredCandidatos = candidatosData?.filter(c => {
+    if (!filters.cargo) return true
+    return (c.quipu_candidatos as any)?.cargo_postula === filters.cargo
+  }) ?? []
+
   // Extraer términos de búsqueda (apellidos) de los candidatos del cliente
   // Usamos apellidos porque los medios usan "López Aliaga" no "RAFAEL BERNARDO LOPEZ ALIAGA CAZORLA"
-  const searchTerms = candidatosData?.flatMap(c => {
+  const searchTerms = filteredCandidatos.flatMap(c => {
     const nombre = (c.quipu_candidatos as any)?.nombre_completo
     return nombre ? extractSearchTerms(nombre) : []
   }).filter(Boolean) ?? []

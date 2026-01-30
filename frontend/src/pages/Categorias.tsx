@@ -5,7 +5,17 @@ import { getDynamicCategoryConfig } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { formatNumber } from '@/lib/utils'
 import { Tags, ArrowRight, FileText, MessageSquareQuote, ChevronDown } from 'lucide-react'
+import { FilterSelect } from '@/components/ui/FilterSelect'
 import type { CategoryConfig } from '@/lib/constants'
+
+const CARGO_OPTIONS = [
+  { value: '', label: 'Todos los cargos' },
+  { value: 'PRESIDENTE DE LA REPÚBLICA', label: 'Presidente' },
+  { value: 'PRIMER VICEPRESIDENTE DE LA REPÚBLICA', label: '1er Vicepresidente' },
+  { value: 'SEGUNDO VICEPRESIDENTE DE LA REPÚBLICA', label: '2do Vicepresidente' },
+  { value: 'DIPUTADO', label: 'Diputados' },
+  { value: 'SENADOR', label: 'Senadores' },
+]
 
 function CategoryCard({
   cat,
@@ -59,7 +69,8 @@ function CategoryCard({
 }
 
 export function Categorias() {
-  const { data: counts, isLoading } = useCategoriaCounts()
+  const [cargoFilter, setCargoFilter] = useState('')
+  const { data: counts, isLoading } = useCategoriaCounts(cargoFilter)
   const [declOpen, setDeclOpen] = useState(true)
   const [plansOpen, setPlansOpen] = useState(true)
 
@@ -140,15 +151,31 @@ export function Categorias() {
             </div>
           </button>
           {declOpen && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {sortedDeclTemas.map((cat) => (
-                <CategoryCard
-                  key={cat.key}
-                  cat={cat}
-                  count={counts?.declarations[cat.key] || 0}
-                  total={totalDeclarations}
+            <div className="mt-4 space-y-4">
+              {/* Cargo filter */}
+              <div className="flex items-center justify-between">
+                <p className="text-sm text-muted-foreground">
+                  Filtrar por cargo:
+                </p>
+                <FilterSelect
+                  value={cargoFilter}
+                  onChange={(v) => setCargoFilter(v)}
+                  options={CARGO_OPTIONS}
+                  placeholder="Todos los cargos"
+                  className="min-w-[180px]"
                 />
-              ))}
+              </div>
+              {/* Categories grid */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {sortedDeclTemas.map((cat) => (
+                  <CategoryCard
+                    key={cat.key}
+                    cat={cat}
+                    count={counts?.declarations[cat.key] || 0}
+                    total={totalDeclarations}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </section>

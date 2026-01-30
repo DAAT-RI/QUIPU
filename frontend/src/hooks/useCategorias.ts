@@ -32,9 +32,9 @@ export interface CategoriaCounts {
  * Uses normalizeKey to strip accents for proper matching.
  * Also returns original labels for dynamic category generation.
  */
-export function useCategoriaCounts() {
+export function useCategoriaCounts(cargoFilter?: string) {
   return useQuery({
-    queryKey: ['categoria-counts-combined'],
+    queryKey: ['categoria-counts-combined', cargoFilter],
     queryFn: async () => {
       // Fetch ALL plan categories by paginating (Supabase default limit is 1000)
       const BATCH = 1000
@@ -69,6 +69,27 @@ export function useCategoriaCounts() {
         .select('interacciones')
       if (masterError) throw masterError
 
+      // Get all candidates with their cargo_postula to filter declarations
+      const { data: candidatosData, error: candidatosError } = await supabase
+        .from('v_quipu_candidatos_completos')
+        .select('nombre_completo, apellido_paterno, apellido_materno, cargo_postula')
+      if (candidatosError) throw candidatosError
+
+      // Filter candidates by cargo if needed
+      const filteredCandidatos = candidatosData.filter(c => {
+        if (!cargoFilter) return true
+        return c.cargo_postula === cargoFilter
+      })
+
+      // Create map of candidate names (for matching stakeholder in declarations)
+      const candidateNames = filteredCandidatos.map(c => {
+        return {
+          fullName: c.nombre_completo || '',
+          apellidoPaterno: c.apellido_paterno || '',
+          apellidoMaterno: c.apellido_materno || ''
+        }
+      })
+
       const declarations: Record<string, number> = {}
       const declarationLabels: Record<string, string> = {} // key -> label original
 
@@ -77,6 +98,19 @@ export function useCategoriaCounts() {
         for (const inter of entry.interacciones as Interaccion[]) {
           if (inter.type !== 'declaration') continue
           if (!inter.categorias) continue
+          
+          // Check if this declaration's stakeholder matches any filtered candidate
+          const stakeholder = inter.stakeholder || ''
+          const matchesCandidate = candidateNames.some(c => 
+            stakeholder.toLowerCase().includes(c.apellidoPaterno.toLowerCase()) ||
+            stakeholder.toLowerCase().includes(c.apellidoMaterno.toLowerCase()) ||
+            stakeholder.toLowerCase().includes(
+              (c.apellidoPaterno + ' ' + c.apellidoMaterno).toLowerCase()
+            )
+          )
+
+          if (!matchesCandidate) continue
+
           // Dividir categorías múltiples separados por ; (ej: "Derechos Humanos; Política")
           const categorias = inter.categorias.split(';').map(t => t.trim()).filter(Boolean)
           for (const categoria of categorias) {

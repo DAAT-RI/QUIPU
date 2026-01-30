@@ -262,6 +262,7 @@ export interface DeclaracionFilters {
   organizacion?: string  // Filtrar por organización mencionada
   producto?: string
   partido?: string  // Filter by partido name (matches organizaciones, stakeholder, or contenido)
+  cargo?: string  // Filter by cargo_postula of the candidate
   search?: string  // Busca en CONTENIDO (lo que dijo), NO en keywords/titulo
   offset: number
   limit: number
