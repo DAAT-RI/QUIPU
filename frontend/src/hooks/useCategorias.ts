@@ -22,6 +22,8 @@ export interface CategoriaCounts {
   declarations: Record<string, number>
   /** Mapa de key normalizada -> label original (con tildes) para temas de declaraciones */
   declarationLabels: Record<string, string>
+  /** Mapa de key normalizada -> label original (con tildes) para categorías de planes */
+  planLabels: Record<string, string>
 }
 
 /**
@@ -50,10 +52,15 @@ export function useCategoriaCounts() {
       }
 
       const plans: Record<string, number> = {}
+      const planLabels: Record<string, string> = {} // key -> label original
       for (const row of allPlanRows) {
         if (!row.categoria) continue
         const key = normalizeKey(row.categoria)
         plans[key] = (plans[key] || 0) + 1
+        // Guardar el label original (primera vez que lo vemos)
+        if (!planLabels[key]) {
+          planLabels[key] = row.categoria
+        }
       }
 
       // Fetch declaration temas from QUIPU_MASTER interacciones
@@ -83,7 +90,7 @@ export function useCategoriaCounts() {
         }
       }
 
-      return { plans, declarations, declarationLabels } as CategoriaCounts
+      return { plans, declarations, declarationLabels, planLabels } as CategoriaCounts
     },
   })
 }

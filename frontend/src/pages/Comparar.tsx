@@ -9,26 +9,19 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { BackButton } from '@/components/ui/BackButton'
-import { PLAN_CATEGORIES, QUIPU_MASTER_TEMAS } from '@/lib/constants'
+import { useCategoriaCounts } from '@/hooks/useCategorias'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
-const CATEGORIA_ELECTORAL_OPTIONS = [
-  { value: '', label: 'Todas las categorías' },
-  { value: 'PRESIDENCIAL', label: 'Presidencial' },
-  { value: 'DIPUTADOS', label: 'Diputados' },
-  { value: 'SENADORES DISTRITO ÚNICO', label: 'Senadores (D. Único)' },
-  { value: 'SENADORES DISTRITO MÚLTIPLE', label: 'Senadores (D. Múltiple)' },
+const CARGO_OPTIONS = [
+  { value: '', label: 'Elige el cargo' },
+  { value: 'PRESIDENTE DE LA REP', label: 'Presidente' },
+  { value: 'PRIMER VICEPRESIDENTE', label: '1er Vicepresidente' },
+  { value: 'SEGUNDO VICEPRESIDENTE', label: '2do Vicepresidente' },
+  { value: 'DIPUTADO', label: 'Diputados' },
+  { value: 'SENADOR', label: 'Senadores' },
 ]
 
-// Combine all temas for dropdown
-const TEMA_OPTIONS = [
-  { value: '', label: 'Todas las categorías' },
-  ...PLAN_CATEGORIES.map(c => ({ value: c.key, label: c.label })),
-  ...QUIPU_MASTER_TEMAS
-    .filter(t => !PLAN_CATEGORIES.some(c => c.label.toLowerCase() === t.toLowerCase()))
-    .map(t => ({ value: t.toLowerCase(), label: t })),
-]
 
 function CandidatoColumn({
   candidato,
@@ -194,12 +187,41 @@ export function Comparar() {
   const [searchQuery, setSearchQuery] = useState('')
   const [selectedCandidatos, setSelectedCandidatos] = useState<CandidatoCompleto[]>([])
   const [categoriaFilter, setCategoriaFilter] = useState('')
-  const [categoriaElectoral, setCategoriaElectoral] = useState('')
-  const [showSearch, setShowSearch] = useState(false)
+  const [cargoFilter, setCargoFilter] = useState('')
+  const [showAllCandidatos, setShowAllCandidatos] = useState(false)
 
-  // Get presidential candidates for the grid
-  const { data: presidentesData, isLoading: loadingPresidentes } = useCandidatosByCargo('PRESIDENTE DE LA REP', 12)
-  const presidentes = presidentesData?.data ?? []
+  // Get category counts for dynamic dropdown
+  const { data: categoriaCounts } = useCategoriaCounts()
+
+  // Generate tema options dynamically from actual DB categories
+  const temaOptions = useMemo(() => {
+    const options = [{ value: '', label: 'Todos los temas' }]
+    if (categoriaCounts) {
+      // Add plan categories sorted by count
+      const planEntries = Object.entries(categoriaCounts.plans)
+        .filter(([, count]) => count > 0)
+        .sort(([, a], [, b]) => b - a)
+      for (const [key] of planEntries) {
+        const label = categoriaCounts.planLabels[key] || key
+        options.push({ value: key, label })
+      }
+      // Add declaration temas that aren't already in plans
+      const declEntries = Object.entries(categoriaCounts.declarations)
+        .filter(([key, count]) => count > 0 && !categoriaCounts.plans[key])
+        .sort(([, a], [, b]) => b - a)
+      for (const [key] of declEntries) {
+        const label = categoriaCounts.declarationLabels[key] || key
+        options.push({ value: key, label })
+      }
+    }
+    return options
+  }, [categoriaCounts])
+
+  // Get candidates by selected cargo (or default to presidente)
+  const cargoToFetch = cargoFilter || 'PRESIDENTE DE LA REP'
+  const { data: candidatosData, isLoading: loadingCandidatos } = useCandidatosByCargo(cargoToFetch, showAllCandidatos ? 100 : 11)
+  const candidatos = candidatosData?.data ?? []
+  const totalCandidatos = candidatosData?.count ?? 0
 
   const { data: searchResults, isLoading: searchLoading } = useSearchCandidatosByName(searchQuery)
 
@@ -210,13 +232,12 @@ export function Comparar() {
   const filteredResults = (searchResults ?? []).filter((c) => {
     if (selectedIds.has(c.id)) return false
     if (firstTipo && c.tipo_eleccion !== firstTipo) return false
-    if (categoriaElectoral && c.tipo_eleccion !== categoriaElectoral) return false
     return true
   })
 
   const availableCandidatos = useMemo(() => {
-    return presidentes.filter(c => !selectedIds.has(c.id))
-  }, [presidentes, selectedIds])
+    return candidatos.filter(c => !selectedIds.has(c.id))
+  }, [candidatos, selectedIds])
 
   function addCandidato(candidato: CandidatoCompleto) {
     if (selectedCandidatos.length >= 4) return
@@ -224,7 +245,6 @@ export function Comparar() {
     if (firstTipo && candidato.tipo_eleccion !== firstTipo) return
     setSelectedCandidatos((prev) => [...prev, candidato])
     setSearchQuery('')
-    setShowSearch(false)
   }
 
   function removeCandidato(id: number) {
@@ -243,7 +263,7 @@ export function Comparar() {
   return (
     <div className="min-h-screen -m-8">
       {/* Hero Section */}
-      <section className="bg-gradient-to-r from-violet-600 to-purple-700 text-white py-12 px-8">
+      <section className="bg-gradient-to-r from-primary to-primary/80 text-white py-12 px-8">
         <div className="max-w-6xl mx-auto">
           <BackButton fallback="/" className="text-white/80 hover:text-white mb-6" />
           <h1 className="text-3xl md:text-4xl font-bold mb-3">Comparar Candidatos</h1>
@@ -268,112 +288,136 @@ export function Comparar() {
           </div>
 
           {/* Selected candidates chips */}
-          <div className="flex flex-wrap gap-3 mb-6">
-            {selectedCandidatos.map((c) => (
-              <div
-                key={c.id}
-                className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-full"
-              >
-                <CandidatoAvatar
-                  nombre={c.nombre_completo || ''}
-                  fotoUrl={c.foto_url}
-                  size="sm"
-                  className="h-6 w-6"
-                />
-                <span className="font-medium text-sm">{c.nombre_completo}</span>
-                <button
-                  onClick={() => removeCandidato(c.id)}
-                  className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
-                  aria-label={`Remover ${c.nombre_completo}`}
+          {selectedCandidatos.length > 0 && (
+            <div className="flex flex-wrap gap-3 mb-6">
+              {selectedCandidatos.map((c) => (
+                <div
+                  key={c.id}
+                  className="flex items-center gap-2 bg-primary/10 text-primary px-3 py-2 rounded-full"
                 >
-                  <X size={14} />
-                </button>
-              </div>
-            ))}
-
-            {/* Add candidate button */}
-            {selectedCandidatos.length < 4 && (
-              <button
-                onClick={() => setShowSearch(!showSearch)}
-                className="flex items-center gap-2 border-2 border-dashed border-muted-foreground/30 text-muted-foreground px-3 py-2 rounded-full hover:border-primary hover:text-primary transition-colors"
-              >
-                <Plus size={16} />
-                <span className="text-sm">Agregar candidato</span>
-              </button>
-            )}
-          </div>
-
-          {/* Search dropdown */}
-          {showSearch && (
-            <div className="mb-6 max-w-md">
-              <div className="flex gap-2 mb-2">
-                <SearchInput
-                  value={searchQuery}
-                  onChange={setSearchQuery}
-                  placeholder="Buscar por nombre..."
-                  className="flex-1"
-                />
-                <FilterSelect
-                  value={categoriaElectoral}
-                  onChange={setCategoriaElectoral}
-                  options={CATEGORIA_ELECTORAL_OPTIONS}
-                  placeholder="Categoría"
-                />
-              </div>
-              {searchQuery.length >= 2 && (
-                <div className="rounded-xl border bg-card shadow-lg max-h-60 overflow-y-auto">
-                  {searchLoading ? (
-                    <div className="p-4"><LoadingSpinner /></div>
-                  ) : filteredResults.length === 0 ? (
-                    <div className="p-4 text-sm text-muted-foreground">No se encontraron candidatos</div>
-                  ) : (
-                    <div className="divide-y">
-                      {filteredResults.slice(0, 8).map((c) => (
-                        <button
-                          key={c.id}
-                          type="button"
-                          onClick={() => addCandidato(c)}
-                          className="w-full flex items-center gap-3 p-3 text-left hover:bg-muted/30 transition-colors"
-                        >
-                          <CandidatoAvatar nombre={c.nombre_completo || ''} fotoUrl={c.foto_url} size="sm" />
-                          <div className="min-w-0 flex-1">
-                            <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
-                            <p className="text-xs text-muted-foreground">{c.partido_nombre}</p>
-                          </div>
-                        </button>
-                      ))}
-                    </div>
-                  )}
+                  <CandidatoAvatar
+                    nombre={c.nombre_completo || ''}
+                    fotoUrl={c.foto_url}
+                    size="sm"
+                    className="h-6 w-6"
+                  />
+                  <span className="font-medium text-sm">{c.nombre_completo}</span>
+                  <button
+                    onClick={() => removeCandidato(c.id)}
+                    className="hover:bg-primary/20 rounded-full p-0.5 transition-colors"
+                    aria-label={`Remover ${c.nombre_completo}`}
+                  >
+                    <X size={14} />
+                  </button>
                 </div>
-              )}
+              ))}
             </div>
           )}
 
-          {/* Candidate grid */}
-          {!showSearch && selectedCandidatos.length < 4 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
-              {loadingPresidentes ? (
-                <div className="col-span-full"><LoadingSpinner /></div>
-              ) : (
-                availableCandidatos.slice(0, 12).map((c) => (
-                  <button
-                    key={c.id}
-                    onClick={() => addCandidato(c)}
-                    disabled={selectedCandidatos.length >= 4}
-                    className="p-3 border rounded-xl hover:border-primary hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
-                  >
-                    <CandidatoAvatar
-                      nombre={c.nombre_completo || ''}
-                      fotoUrl={c.foto_url}
-                      size="lg"
-                      className="mx-auto mb-2"
-                    />
-                    <div className="text-sm font-medium text-foreground truncate">{c.nombre_completo}</div>
-                    <div className="text-xs text-muted-foreground truncate">{c.partido_nombre}</div>
-                  </button>
-                ))
+          {/* Selection controls - only show if less than 4 selected */}
+          {selectedCandidatos.length < 4 && (
+            <>
+              {/* Step 1: Cargo selector */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  1. Elige el cargo
+                </label>
+                <FilterSelect
+                  value={cargoFilter}
+                  onChange={(v) => {
+                    setCargoFilter(v)
+                    setShowAllCandidatos(false)
+                  }}
+                  options={CARGO_OPTIONS}
+                  placeholder="Elige el cargo"
+                  className="max-w-xs"
+                />
+              </div>
+
+              {/* Step 2: Search by name */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-foreground mb-2">
+                  2. Buscar por nombre
+                </label>
+                <SearchInput
+                  value={searchQuery}
+                  onChange={setSearchQuery}
+                  placeholder="Buscar candidato por nombre..."
+                  className="max-w-md"
+                />
+                {searchQuery.length >= 2 && (
+                  <div className="mt-2 rounded-xl border bg-card shadow-lg max-h-60 overflow-y-auto max-w-md">
+                    {searchLoading ? (
+                      <div className="p-4"><LoadingSpinner /></div>
+                    ) : filteredResults.length === 0 ? (
+                      <div className="p-4 text-sm text-muted-foreground">No se encontraron candidatos</div>
+                    ) : (
+                      <div className="divide-y">
+                        {filteredResults.slice(0, 8).map((c) => (
+                          <button
+                            key={c.id}
+                            type="button"
+                            onClick={() => addCandidato(c)}
+                            className="w-full flex items-center gap-3 p-3 text-left hover:bg-muted/30 transition-colors"
+                          >
+                            <CandidatoAvatar nombre={c.nombre_completo || ''} fotoUrl={c.foto_url} size="sm" />
+                            <div className="min-w-0 flex-1">
+                              <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
+                              <p className="text-xs text-muted-foreground">{c.partido_nombre}</p>
+                            </div>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Candidate grid */}
+              {searchQuery.length < 2 && (
+                <>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    O selecciona de la lista ({cargoFilter ? CARGO_OPTIONS.find(o => o.value === cargoFilter)?.label : 'Presidente'}):
+                  </p>
+                  <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
+                    {loadingCandidatos ? (
+                      <div className="col-span-full"><LoadingSpinner /></div>
+                    ) : (
+                      <>
+                        {availableCandidatos.slice(0, showAllCandidatos ? 100 : 11).map((c) => (
+                          <button
+                            key={c.id}
+                            onClick={() => addCandidato(c)}
+                            disabled={selectedCandidatos.length >= 4}
+                            className="p-3 border rounded-xl hover:border-primary hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
+                          >
+                            <CandidatoAvatar
+                              nombre={c.nombre_completo || ''}
+                              fotoUrl={c.foto_url}
+                              size="lg"
+                              className="mx-auto mb-2"
+                            />
+                            <div className="text-sm font-medium text-foreground truncate">{c.nombre_completo}</div>
+                            <div className="text-xs text-muted-foreground truncate">{c.partido_nombre}</div>
+                          </button>
+                        ))}
+                        {/* Ver más button */}
+                        {!showAllCandidatos && totalCandidatos > 11 && (
+                          <button
+                            onClick={() => setShowAllCandidatos(true)}
+                            className="p-3 border-2 border-dashed rounded-xl hover:border-primary hover:bg-primary/5 transition-colors text-center flex flex-col items-center justify-center"
+                          >
+                            <Plus className="h-8 w-8 text-muted-foreground mb-1" />
+                            <span className="text-sm text-muted-foreground">Ver más</span>
+                            <span className="text-xs text-muted-foreground">+{totalCandidatos - 11}</span>
+                          </button>
+                        )}
+                      </>
+                    )}
+                  </div>
+                </>
               )}
-            </div>
+            </>
           )}
         </div>
       </section>
@@ -386,7 +430,7 @@ export function Comparar() {
             <FilterSelect
               value={categoriaFilter}
               onChange={setCategoriaFilter}
-              options={TEMA_OPTIONS}
+              options={temaOptions}
               placeholder="Todas las categorías"
               className="min-w-[200px]"
             />
@@ -408,7 +452,7 @@ export function Comparar() {
           ) : (
             <>
               {/* Section header */}
-              <div className="bg-gradient-to-r from-violet-50 to-purple-50 dark:from-violet-950/20 dark:to-purple-950/20 rounded-xl p-6 border mb-6">
+              <div className="bg-gradient-to-r from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/5 rounded-xl p-6 border mb-6">
                 <h3 className="text-xl font-bold text-foreground mb-1">
                   Comparación de Propuestas y Declaraciones
                 </h3>

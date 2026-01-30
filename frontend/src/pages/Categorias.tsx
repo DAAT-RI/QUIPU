@@ -1,7 +1,7 @@
 import { useMemo, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useCategoriaCounts } from '@/hooks/useCategorias'
-import { PLAN_CATEGORIES, getDynamicCategoryConfig } from '@/lib/constants'
+import { getDynamicCategoryConfig } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { formatNumber } from '@/lib/utils'
 import { Tags, ArrowRight, FileText, MessageSquareQuote, ChevronDown } from 'lucide-react'
@@ -73,11 +73,17 @@ export function Categorias() {
     return Object.values(counts.declarations).reduce((s, c) => s + c, 0)
   }, [counts])
 
+  // Generar categorías de planes dinámicamente basado en los datos
   const sortedPlanCats = useMemo(() => {
-    if (!counts) return PLAN_CATEGORIES
-    return [...PLAN_CATEGORIES].sort(
-      (a, b) => (counts.plans[b.key] || 0) - (counts.plans[a.key] || 0)
-    )
+    if (!counts) return []
+    // Crear configs dinámicos para todas las categorías encontradas en planes
+    return Object.entries(counts.plans)
+      .filter(([, count]) => count > 0)
+      .sort(([, a], [, b]) => b - a)
+      .map(([key], index) => {
+        const label = counts.planLabels[key] || key
+        return getDynamicCategoryConfig(label, index, 'plan')
+      })
   }, [counts])
 
   // Generar temas de declaraciones dinámicamente basado en los datos
@@ -161,7 +167,7 @@ export function Categorias() {
           <div className="flex-1 min-w-0">
             <h2 className="text-lg font-semibold">Planes de Gobierno</h2>
             <p className="text-xs text-muted-foreground">
-              {formatNumber(totalPlans)} propuestas en 15 categorias
+              {formatNumber(totalPlans)} propuestas en {sortedPlanCats.length} categorías
             </p>
           </div>
           <ChevronDown
