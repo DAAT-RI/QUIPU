@@ -254,7 +254,7 @@ export function CategoriaDetalle() {
           </div>
 
           {/* Promesas list */}
-          {loadingPlan ? (
+          {loadingPlan || !filterLabelReady ? (
             <LoadingSpinner />
           ) : promesas.length === 0 ? (
             <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
@@ -329,7 +329,7 @@ export function CategoriaDetalle() {
           )}
 
           {/* Declarations list */}
-          {loadingDecl ? (
+          {loadingDecl || !filterLabelReady ? (
             <LoadingSpinner />
           ) : paginatedDecl.length === 0 ? (
             <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
