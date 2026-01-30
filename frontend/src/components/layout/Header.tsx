@@ -52,11 +52,20 @@ export function Header() {
           {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
         <button
-          onClick={async () => {
-            await signOut()
-            navigate('/login')
+          type="button"
+          onClick={async (e) => {
+            e.preventDefault()
+            console.log('Logout clicked')
+            try {
+              await signOut()
+              console.log('SignOut completed')
+              navigate('/login')
+            } catch (error) {
+              console.error('SignOut error:', error)
+              navigate('/login')
+            }
           }}
-          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
+          className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700 cursor-pointer"
           title="Cerrar sesión"
         >
           <LogOut className="w-5 h-5" />
