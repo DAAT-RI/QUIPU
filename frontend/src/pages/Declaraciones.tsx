@@ -30,13 +30,14 @@ const TEMA_OPTIONS = QUIPU_MASTER_TEMAS.map((t) => ({ value: t, label: t }))
 export function Declaraciones() {
   const [searchParams] = useSearchParams()
   const stakeholderFromUrl = searchParams.get('stakeholder') || ''
+  const temaFromUrl = searchParams.get('tema') || ''
 
   // Default: solo declarations (mentions tienen mucho ruido)
   const [tipo, setTipo] = useState<string>('declaration')
   const [search, setSearch] = useState('')
   const [stakeholder, setStakeholder] = useState(stakeholderFromUrl)
   const [canal, setCanal] = useState('')
-  const [tema, setTema] = useState('')
+  const [tema, setTema] = useState(temaFromUrl)
   const [organizacion, setOrganizacion] = useState('')
   const [producto, setProducto] = useState('')
   const [page, setPage] = useState(0)
@@ -46,6 +47,12 @@ export function Declaraciones() {
     setStakeholder(stakeholderFromUrl)
     setPage(0)
   }, [stakeholderFromUrl])
+
+  // Sync tema with URL param
+  useEffect(() => {
+    setTema(temaFromUrl)
+    setPage(0)
+  }, [temaFromUrl])
 
   // Obtener canales y organizaciones dinámicamente
   const { data: canalesData } = useCanales()
@@ -61,7 +68,7 @@ export function Declaraciones() {
     search: search || undefined,
     stakeholder: stakeholder || undefined,
     canal: canal || undefined,
-    tema: tema || undefined,
+    temaDeclaracion: tema || undefined, // Filter by tema_interaccion (declaration topic)
     organizacion: organizacion || undefined,
     producto: producto || undefined,
     offset,

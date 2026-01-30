@@ -4,7 +4,7 @@ import { usePartido } from '@/hooks/usePartidos'
 import { usePromesasByPartido } from '@/hooks/usePromesas'
 import { useCandidatos } from '@/hooks/useCandidatos'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
-import { CATEGORY_CONFIG, PLAN_CATEGORIES } from '@/lib/constants'
+import { CATEGORY_CONFIG } from '@/lib/constants'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { FilterSelect } from '@/components/ui/FilterSelect'
@@ -134,10 +134,13 @@ export function PartidoDetalle() {
   }, [allPromesas])
   const maxCount = chartData[0]?.count || 1
 
-  const categoriaOptions = PLAN_CATEGORIES.map((c) => ({
-    value: c.key,
-    label: c.label,
-  }))
+  // Solo mostrar categorías que tienen propuestas para este partido
+  const categoriaOptions = useMemo(() => {
+    return chartData.map((c) => ({
+      value: c.categoria,
+      label: c.label,
+    }))
+  }, [chartData])
 
   if (loadingPartido) return <LoadingSpinner />
   if (errorPartido) return <ErrorState onRetry={() => window.location.reload()} />

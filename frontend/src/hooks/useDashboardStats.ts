@@ -71,6 +71,47 @@ export function useTopPartidos() {
   })
 }
 
+/**
+ * Hook para contar temas de declaraciones (tema_interaccion de v_quipu_declaraciones)
+ * Usado para "Temas Más Discutidos" en el Dashboard
+ */
+export function useDeclaracionesPorTema() {
+  return useQuery({
+    queryKey: ['declaraciones-por-tema'],
+    queryFn: async () => {
+      // Get all tema_interaccion from QUIPU_MASTER
+      const { data, error } = await supabase
+        .from('QUIPU_MASTER')
+        .select('interacciones')
+
+      if (error) throw error
+
+      // Count topics from all interactions
+      const counts: Record<string, number> = {}
+      for (const entry of data || []) {
+        const interacciones = entry.interacciones as Array<{ type?: string; tema?: string }> | null
+        if (!interacciones) continue
+
+        for (const i of interacciones) {
+          // Only count declarations (not mentions)
+          if (i.type !== 'declaration') continue
+          if (!i.tema) continue
+
+          // tema can have multiple topics separated by ;
+          const temas = i.tema.split(';').map(t => t.trim()).filter(t => t)
+          for (const tema of temas) {
+            counts[tema] = (counts[tema] || 0) + 1
+          }
+        }
+      }
+
+      return Object.entries(counts)
+        .map(([tema, count]) => ({ tema, count }))
+        .sort((a, b) => b.count - a.count)
+    },
+  })
+}
+
 export function useTopPartidosByDeclaraciones() {
   return useQuery({
     queryKey: ['top-partidos-declaraciones'],
@@ -89,6 +130,32 @@ export function useTopPartidosByDeclaraciones() {
 
       // Build a map of search terms to partido_id
       const searchTermsToPartido = new Map<string, number>()
+
+      // Add partido names and presidential candidates as search terms
+      for (const partido of partidos) {
+        if (partido.nombre_oficial) {
+          searchTermsToPartido.set(partido.nombre_oficial.toLowerCase(), partido.id)
+          // Also add significant parts of partido name (words >= 4 chars)
+          const parts = partido.nombre_oficial.toLowerCase().split(/[\s,]+/)
+          for (const part of parts) {
+            if (part.length >= 4) {
+              searchTermsToPartido.set(part, partido.id)
+            }
+          }
+        }
+        if (partido.candidato_presidencial) {
+          searchTermsToPartido.set(partido.candidato_presidencial.toLowerCase(), partido.id)
+          // Add parts of presidential candidate name
+          const parts = partido.candidato_presidencial.toLowerCase().split(' ')
+          for (const part of parts) {
+            if (part.length >= 4) {
+              searchTermsToPartido.set(part, partido.id)
+            }
+          }
+        }
+      }
+
+      // Add all candidatos as search terms
       for (const candidato of candidatos) {
         if (!candidato.partido_id) continue
         // Add full name

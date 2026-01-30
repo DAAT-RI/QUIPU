@@ -15,18 +15,18 @@ import {
   AtSign,
 } from 'lucide-react'
 
-import { useDashboardStats, usePromesasPorCategoria, useTopPartidosByDeclaraciones } from '@/hooks/useDashboardStats'
+import { useDashboardStats, useDeclaracionesPorTema, useTopPartidosByDeclaraciones } from '@/hooks/useDashboardStats'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { useCandidatoCountByTipo, useCandidatosByCargo } from '@/hooks/useCandidatos'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { CATEGORIES_LIST, getDynamicCategoryConfig } from '@/lib/constants'
+import { getDynamicCategoryConfig } from '@/lib/constants'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
 export function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
-  const { data: porCategoria, isLoading: catLoading } = usePromesasPorCategoria()
+  const { data: porTema, isLoading: catLoading } = useDeclaracionesPorTema()
   const { data: topPartidos, isLoading: partidosLoading } = useTopPartidosByDeclaraciones()
   const { data: declaracionesResult, isLoading: declLoading } = useDeclaraciones({
     offset: 0,
@@ -47,22 +47,22 @@ export function Dashboard() {
   const vice1 = vice1Data?.data ?? []
   const vice2 = vice2Data?.data ?? []
 
-  // Build topic cards — top 6 categories sorted by count, with percentage
+  // Build topic cards — top 6 topics from declarations, sorted by count
   const topicCards = useMemo(() => {
-    if (!porCategoria) return []
-    const total = porCategoria.reduce((s, c) => s + c.count, 0)
-    return porCategoria.slice(0, 6).map((item, index) => {
-      const cfg = getDynamicCategoryConfig(item.categoria, index, 'plan')
+    if (!porTema) return []
+    const total = porTema.reduce((s, c) => s + c.count, 0)
+    return porTema.slice(0, 6).map((item, index) => {
+      const cfg = getDynamicCategoryConfig(item.tema, index, 'declaracion')
       return {
         key: cfg.key,
-        label: cfg.label,
+        label: item.tema, // Keep original tema label for filtering
         icon: cfg.icon,
         color: cfg.color,
         count: item.count,
         pct: total > 0 ? (item.count / total) * 100 : 0,
       }
     })
-  }, [porCategoria])
+  }, [porTema])
 
   // Build partido ranking by declarations
   const partidoRanking = useMemo(() => {
@@ -96,10 +96,10 @@ export function Dashboard() {
             <h2 className="text-lg font-semibold">Temas Más Discutidos</h2>
           </div>
           <Link
-            to="/categorias"
+            to="/declaraciones"
             className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
           >
-            Ver las {CATEGORIES_LIST.length} categorías
+            Ver todas las declaraciones
             <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
@@ -112,7 +112,7 @@ export function Dashboard() {
               return (
                 <Link
                   key={topic.key}
-                  to={`/categorias/${topic.key}`}
+                  to={`/declaraciones?tema=${encodeURIComponent(topic.label)}`}
                   className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30 text-center"
                 >
                   <div
