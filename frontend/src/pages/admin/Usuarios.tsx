@@ -32,7 +32,7 @@ export default function Usuarios() {
 
     const handleUpdate = (id: string, updates: any) => {
         updateUsuario.mutate({ id, updates })
-        setEditingId(null)
+        // Don't close edit mode automatically so user can change both fields if needed
     }
 
     const getRoleStyle = (rol: string) => {
@@ -145,13 +145,26 @@ export default function Usuarios() {
                                         <div className="text-sm text-muted-foreground">{usuario.email}</div>
                                     </td>
                                     <td className="px-4 py-3">
-                                        {usuario.cliente ? (
-                                            <span className="flex items-center gap-1.5 text-sm">
-                                                <Building2 className="h-3.5 w-3.5" />
-                                                {usuario.cliente.nombre}
-                                            </span>
+                                        {editingId === usuario.id ? (
+                                            <select
+                                                defaultValue={usuario.cliente_id ?? ''}
+                                                onChange={(e) => handleUpdate(usuario.id, { cliente_id: e.target.value ? Number(e.target.value) : null })}
+                                                className="w-full px-2 py-1 border rounded text-sm bg-background"
+                                            >
+                                                <option value="">Global</option>
+                                                {clientes?.map(c => (
+                                                    <option key={c.id} value={c.id}>{c.nombre}</option>
+                                                ))}
+                                            </select>
                                         ) : (
-                                            <span className="text-sm text-muted-foreground">Global</span>
+                                            usuario.cliente ? (
+                                                <span className="flex items-center gap-1.5 text-sm">
+                                                    <Building2 className="h-3.5 w-3.5" />
+                                                    {usuario.cliente.nombre}
+                                                </span>
+                                            ) : (
+                                                <span className="text-sm text-muted-foreground">Global</span>
+                                            )
                                         )}
                                     </td>
                                     <td className="px-4 py-3 text-center">
@@ -159,7 +172,7 @@ export default function Usuarios() {
                                             <select
                                                 defaultValue={usuario.rol}
                                                 onChange={(e) => handleUpdate(usuario.id, { rol: e.target.value })}
-                                                className="px-2 py-1 border rounded text-sm"
+                                                className="px-2 py-1 border rounded text-sm bg-background"
                                             >
                                                 {ROLES.map(r => (
                                                     <option key={r.value} value={r.value}>{r.label}</option>
