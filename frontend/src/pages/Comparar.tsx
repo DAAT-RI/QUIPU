@@ -19,6 +19,7 @@ const CARGO_OPTIONS = [
   { value: 'SEGUNDO VICEPRESIDENTE DE LA REPÚBLICA', label: '2do Vicepresidente' },
   { value: 'DIPUTADO', label: 'Diputados' },
   { value: 'SENADOR', label: 'Senadores' },
+  { value: 'REPRESENTANTE ANTE EL PARLAMENTO ANDINO', label: 'Parlamento Andino' },
 ]
 
 

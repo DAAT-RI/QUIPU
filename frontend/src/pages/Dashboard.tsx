@@ -13,6 +13,7 @@ import {
   ChevronDown,
   Quote,
   AtSign,
+  Globe,
 } from 'lucide-react'
 
 import { useDashboardStats, useDeclaracionesPorTema, useTopPartidosByDeclaraciones } from '@/hooks/useDashboardStats'
@@ -427,6 +428,22 @@ export function Dashboard() {
                     {formatNumber(cargoCounts['SENADORES DISTRITO MÚLTIPLE'] || 0)}
                   </p>
                   <p className="text-xs text-muted-foreground">Senadores (D.Múltiple)</p>
+                </div>
+              </div>
+            </Link>
+            <Link
+              to="/candidatos?tipo=PARLAMENTO_ANDINO"
+              className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-cyan-500/10">
+                  <Globe className="h-5 w-5 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold tracking-tight">
+                    {formatNumber(cargoCounts['PARLAMENTO_ANDINO'] || 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Parlamento Andino</p>
                 </div>
               </div>
             </Link>

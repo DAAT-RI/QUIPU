@@ -20,8 +20,9 @@ export function useCandidatos(filters: CandidatoFilters) {
       if (filters.partido_id) {
         query = query.eq('partido_id', filters.partido_id)
       }
-      // Skip departamento filter for PRESIDENCIAL (national position, not regional)
-      if (filters.departamento && filters.tipo_eleccion !== 'PRESIDENCIAL') {
+      // Skip departamento filter for national positions (PRESIDENCIAL, PARLAMENTO_ANDINO)
+      const isNational = filters.tipo_eleccion === 'PRESIDENCIAL' || filters.tipo_eleccion === 'PARLAMENTO_ANDINO'
+      if (filters.departamento && !isNational) {
         query = query.eq('departamento', filters.departamento)
       }
 

@@ -17,6 +17,7 @@ const TIPO_ELECCION_OPTIONS = [
   { value: 'DIPUTADOS', label: 'Diputados' },
   { value: 'SENADORES DISTRITO ÚNICO', label: 'Senadores (Distrito Único)' },
   { value: 'SENADORES DISTRITO MÚLTIPLE', label: 'Senadores (Distrito Múltiple)' },
+  { value: 'PARLAMENTO_ANDINO', label: 'Parlamento Andino' },
 ]
 
 const DEPARTAMENTO_OPTIONS = [
@@ -71,10 +72,12 @@ export function Candidatos() {
     }
   }
 
-  // Clear departamento when PRESIDENCIAL is selected (national position)
+  // Clear departamento when national position is selected (PRESIDENCIAL or PARLAMENTO_ANDINO)
+  const isNationalPosition = (tipo: string) => tipo === 'PRESIDENCIAL' || tipo === 'PARLAMENTO_ANDINO'
+
   function handleTipoEleccionChange(value: string) {
     setTipoEleccion(value)
-    if (value === 'PRESIDENCIAL') {
+    if (isNationalPosition(value)) {
       setDepartamento('')
     }
     setPage(0)
@@ -111,11 +114,11 @@ export function Candidatos() {
             placeholder="Tipo de Elección"
           />
           <FilterSelect
-            value={tipoEleccion === 'PRESIDENCIAL' ? '' : departamento}
+            value={isNationalPosition(tipoEleccion) ? '' : departamento}
             onChange={handleFilterChange(setDepartamento)}
             options={DEPARTAMENTO_OPTIONS}
             placeholder="Departamento"
-            disabled={tipoEleccion === 'PRESIDENCIAL'}
+            disabled={isNationalPosition(tipoEleccion)}
           />
           <FilterSelect
             value={partidoId}
