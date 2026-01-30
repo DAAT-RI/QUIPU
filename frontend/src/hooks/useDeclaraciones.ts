@@ -86,14 +86,20 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
 
       // Filtro multi-tenant: solo declaraciones de candidatos del cliente
       // Uses aliases table for accurate stakeholder matching
-      if (clienteId !== null && aliasNormalized.length > 0) {
-        const stakeholderConditions = aliasNormalized
-          .slice(0, 100) // Limitar para performance
-          .map(alias => `stakeholder.ilike.%${alias}%`)
-          .join(',')
+      if (clienteId !== null) {
+        if (aliasNormalized.length > 0) {
+          const stakeholderConditions = aliasNormalized
+            .slice(0, 100) // Limitar para performance
+            .map(alias => `stakeholder.ilike.%${alias}%`)
+            .join(',')
 
-        if (stakeholderConditions) {
-          query = query.or(stakeholderConditions)
+          if (stakeholderConditions) {
+            query = query.or(stakeholderConditions)
+          }
+        } else {
+          // If client has no aliases mapped, they should see NOTHING
+          // Prevent data leak by forcing an impossible condition
+          query = query.eq('id', -1)
         }
       }
 

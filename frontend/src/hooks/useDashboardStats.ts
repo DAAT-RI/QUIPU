@@ -132,7 +132,9 @@ export function useDeclaracionesPorTema() {
           if (!i.categorias) continue
 
           // MULTI-TENANT: Si no es superadmin, filtrar por aliases
-          if (clienteId !== null && aliasNormalized.length > 0) {
+          if (clienteId !== null) {
+            if (aliasNormalized.length === 0) continue // Security: No aliases = No access to anything
+
             const stakeholderNorm = normalizeForMatch(i.stakeholder || '')
             const matchesCliente = aliasNormalized.some(
               alias => stakeholderNorm.includes(alias) || alias.includes(stakeholderNorm)
@@ -259,8 +261,10 @@ export function useTopPartidosByDeclaraciones() {
 
           const stakeholder = normalizeForMatch(i.stakeholder)
 
-          // MULTI-TENANT: Si no es superadmin, filtrar por aliases
-          if (clienteId !== null && aliasNormalized.length > 0) {
+          // MULTI-TENANT filtering
+          if (clienteId !== null) {
+            if (aliasNormalized.length === 0) continue // Security: No aliases = No access
+
             const matchesCliente = aliasNormalized.some(
               alias => stakeholder.includes(alias) || alias.includes(stakeholder)
             )
