@@ -141,6 +141,12 @@ const CHART_COLORS = [
   'hsl(340, 82%, 52%)',    // pink
 ]
 
+// Campos a ocultar en educación y otras secciones
+const HIDDEN_FIELDS = ['titulado', 'egresado', 'bachiller', 'anio_titulo', 'anio_bachiller']
+
+// Campos a mostrar en experiencia laboral (solo estos)
+const EXPERIENCIA_FIELDS = ['nombre_entidad', 'cargo', 'anio_hasta', 'anio_desde']
+
 function renderJsonArray(data: unknown[] | null | undefined, label: string) {
   if (!data || !Array.isArray(data) || data.length === 0) {
     return (
@@ -155,7 +161,7 @@ function renderJsonArray(data: unknown[] | null | undefined, label: string) {
         <div key={i} className="p-4 text-sm">
           {typeof item === 'object' && item !== null
             ? Object.entries(item as Record<string, unknown>)
-                .filter(([k]) => k !== 'titulado')
+                .filter(([k]) => !HIDDEN_FIELDS.includes(k.toLowerCase()))
                 .map(([k, v]) => (
                 <p key={k}>
                   <span className="font-medium text-muted-foreground">{formatFieldLabel(k)}:</span>{' '}
@@ -165,6 +171,42 @@ function renderJsonArray(data: unknown[] | null | undefined, label: string) {
             : formatFieldValue(item)}
         </div>
       ))}
+    </div>
+  )
+}
+
+function renderExperienciaLaboral(data: unknown[] | null | undefined) {
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+        Sin registros de experiencia laboral
+      </div>
+    )
+  }
+  return (
+    <div className="rounded-xl border bg-card divide-y">
+      {data.map((item, i) => {
+        if (typeof item !== 'object' || item === null) return null
+        const exp = item as Record<string, unknown>
+        const entidad = exp.nombre_entidad || exp.centro_trabajo || exp.empresa
+        const cargo = exp.cargo
+        const desde = exp.anio_desde
+        const hasta = exp.anio_hasta
+        const periodo = desde && hasta
+          ? `${formatFieldValue(desde)} - ${formatFieldValue(hasta)}`
+          : hasta
+          ? `Hasta ${formatFieldValue(hasta)}`
+          : desde
+          ? `Desde ${formatFieldValue(desde)}`
+          : null
+        return (
+          <div key={i} className="p-4 text-sm">
+            <p className="font-medium">{entidad || 'Sin especificar'}</p>
+            {cargo && <p className="text-muted-foreground">{String(cargo)}</p>}
+            {periodo && <p className="text-xs text-muted-foreground mt-1">{periodo}</p>}
+          </div>
+        )
+      })}
     </div>
   )
 }
@@ -420,7 +462,7 @@ export function CandidatoDetalle() {
               ) : (
                 <>
                   <SectionHeader icon={Briefcase} color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" title="Experiencia Laboral" />
-                  {renderJsonArray(hojaVida?.experiencia_laboral, 'experiencia laboral')}
+                  {renderExperienciaLaboral(hojaVida?.experiencia_laboral)}
                   <SectionHeader icon={Briefcase} color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" title="Cargos Partidarios" />
                   {renderJsonArray(hojaVida?.cargos_partidarios, 'cargos partidarios')}
                   <SectionHeader icon={Briefcase} color="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400" title="Cargos de Eleccion Popular" />
