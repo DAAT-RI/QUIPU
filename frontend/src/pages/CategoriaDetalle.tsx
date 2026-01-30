@@ -38,6 +38,7 @@ export function CategoriaDetalle() {
   const { nombre } = useParams()
   const [page, setPage] = useState(0)
   const [partidoFilter, setPartidoFilter] = useState('')
+  const [stakeholderFilter, setStakeholderFilter] = useState('')
   const [topPartidosOpen, setTopPartidosOpen] = useState(false)
 
   // Obtener labels dinámicos para temas de declaraciones
@@ -136,13 +137,21 @@ export function CategoriaDetalle() {
       .slice(0, 10)
   }, [isDeclaracion, declarations])
 
+  // Filter by stakeholder if selected
+  const filteredDeclarations = useMemo(() => {
+    if (!stakeholderFilter) return declarations
+    return declarations.filter((d) => d.stakeholder === stakeholderFilter)
+  }, [declarations, stakeholderFilter])
+
   const paginatedDecl = useMemo(() => {
     const start = page * LIMIT
-    return declarations.slice(start, start + LIMIT)
-  }, [declarations, page])
+    return filteredDeclarations.slice(start, start + LIMIT)
+  }, [filteredDeclarations, page])
 
   // --- Common ---
-  const totalCount = isDeclaracion ? declCount : (planData?.count ?? 0)
+  // For declarations, use filtered count when stakeholder filter is active
+  const filteredDeclCount = stakeholderFilter ? filteredDeclarations.length : declCount
+  const totalCount = isDeclaracion ? filteredDeclCount : (planData?.count ?? 0)
   const totalPages = Math.ceil(totalCount / LIMIT)
   const promesas = planData?.data ?? []
   const maxPlanCount = planChart[0]?.count || 1
@@ -299,21 +308,52 @@ export function CategoriaDetalle() {
       {/* ── DECLARATION TEMA CONTENT ── */}
       {isDeclaracion && (
         <>
-          {/* Top stakeholders chart */}
+          {/* Top stakeholders chart - clickeable to filter */}
           {stakeholderChart.length > 0 && (
             <section>
-              <div className="flex items-center gap-2.5 mb-4">
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-                  <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2.5">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                    <Users className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                  </div>
+                  <h2 className="text-lg font-semibold">Principales actores en {config.label}</h2>
                 </div>
-                <h2 className="text-lg font-semibold">Principales actores en {config.label}</h2>
+                {stakeholderFilter && (
+                  <button
+                    type="button"
+                    onClick={() => { setStakeholderFilter(''); setPage(0); }}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    × Quitar filtro
+                  </button>
+                )}
               </div>
+              <p className="text-xs text-muted-foreground mb-3">
+                Haz clic en un actor para filtrar las declaraciones
+              </p>
               <div className="rounded-xl border bg-card divide-y">
                 {stakeholderChart.map((item, i) => {
                   const barPct = (item.count / maxStakeholder) * 100
+                  const isSelected = stakeholderFilter === item.name
                   return (
-                    <div key={item.name} className="flex items-center gap-4 p-4">
-                      <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-xs font-bold">
+                    <button
+                      key={item.name}
+                      type="button"
+                      onClick={() => {
+                        setStakeholderFilter(isSelected ? '' : item.name)
+                        setPage(0)
+                      }}
+                      className={`w-full flex items-center gap-4 p-4 text-left transition-colors ${
+                        isSelected
+                          ? 'bg-amber-500/10'
+                          : 'hover:bg-muted/30'
+                      }`}
+                    >
+                      <span className={`flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                        isSelected
+                          ? 'bg-amber-500 text-white'
+                          : 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
+                      }`}>
                         {i + 1}
                       </span>
                       <div className="flex-1 min-w-0">
@@ -330,7 +370,7 @@ export function CategoriaDetalle() {
                           />
                         </div>
                       </div>
-                    </div>
+                    </button>
                   )
                 })}
               </div>
@@ -338,6 +378,13 @@ export function CategoriaDetalle() {
           )}
 
           {/* Declarations list */}
+          {stakeholderFilter && (
+            <div className="flex items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 dark:bg-amber-950/30 dark:border-amber-800 p-3">
+              <span className="text-sm">
+                Mostrando {formatNumber(filteredDeclCount)} declaraciones de <strong>{stakeholderFilter}</strong>
+              </span>
+            </div>
+          )}
           {loadingDecl || !filterLabelReady ? (
             <LoadingSpinner />
           ) : paginatedDecl.length === 0 ? (
