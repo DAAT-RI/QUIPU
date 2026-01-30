@@ -66,14 +66,15 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
 
   return useQuery({
     queryKey: ['declaraciones', filters, clienteId],
-    enabled: !!clienteId && clienteStakeholders.length > 0,
+    enabled: clienteId === null || clienteStakeholders.length > 0,
     queryFn: async () => {
       let query = supabase
         .from('v_quipu_declaraciones')
         .select('*', { count: 'exact' })
 
       // Filtro multi-tenant: solo declaraciones de candidatos del cliente
-      if (clienteStakeholders.length > 0) {
+      // Master (clienteId === null) no tiene filtro, ve todo
+      if (clienteId !== null && clienteStakeholders.length > 0) {
         const stakeholderConditions = clienteStakeholders
           .slice(0, 50) // Limitar para performance
           .map(name => `stakeholder.ilike.%${name}%`)
