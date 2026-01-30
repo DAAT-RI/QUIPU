@@ -59,7 +59,7 @@ function getSearchVariants(text: string): string[] {
  * - Uses quipu_stakeholder_aliases for accurate stakeholder matching
  */
 export function useDeclaraciones(filters: DeclaracionFilters) {
-  const { clienteId } = useAuth()
+  const { clienteId, loading } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
   // Get candidato IDs for this client
@@ -67,7 +67,8 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
 
   return useQuery({
     queryKey: ['declaraciones', filters, clienteId, clienteCandidatoIds],
-    enabled: clienteId === null || clienteCandidatoIds.length > 0,
+    // Solo habilitar cuando auth terminó de cargar Y (es superadmin O hay candidatos)
+    enabled: !loading && (clienteId === null || clienteCandidatoIds.length > 0),
     queryFn: async () => {
       // For non-master users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []

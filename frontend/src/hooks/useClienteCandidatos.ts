@@ -3,10 +3,11 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function useClienteCandidatos() {
-  const { clienteId } = useAuth()
+  const { clienteId, loading } = useAuth()
 
   return useQuery({
     queryKey: ['cliente-candidatos', clienteId],
+    enabled: !loading,
     queryFn: async () => {
       // Master user (sin cliente) = todos los candidatos
       if (clienteId === null) {
@@ -34,6 +35,5 @@ export function useClienteCandidatos() {
       if (error) throw error
       return data ?? []
     },
-    enabled: true,
   })
 }

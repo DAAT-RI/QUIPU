@@ -91,7 +91,7 @@ export function useTopPartidos() {
  * MULTI-TENANT: Uses quipu_stakeholder_aliases for accurate filtering
  */
 export function useDeclaracionesPorTema() {
-  const { clienteId } = useAuth()
+  const { clienteId, loading } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
   // Get candidato IDs for this client
@@ -99,8 +99,8 @@ export function useDeclaracionesPorTema() {
 
   return useQuery({
     queryKey: ['declaraciones-por-tema', clienteId, clienteCandidatoIds],
-    // Solo habilitar si es superadmin (clienteId === null) o hay candidatos cargados
-    enabled: clienteId === null || clienteCandidatoIds.length > 0,
+    // Solo habilitar cuando auth terminó de cargar Y (es superadmin O hay candidatos)
+    enabled: !loading && (clienteId === null || clienteCandidatoIds.length > 0),
     queryFn: async () => {
       // For non-master users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
@@ -166,7 +166,7 @@ export function useDeclaracionesPorTema() {
  * MULTI-TENANT: Uses quipu_stakeholder_aliases for accurate filtering
  */
 export function useTopPartidosByDeclaraciones() {
-  const { clienteId } = useAuth()
+  const { clienteId, loading } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
   // Get candidato IDs for this client
@@ -174,7 +174,8 @@ export function useTopPartidosByDeclaraciones() {
 
   return useQuery({
     queryKey: ['top-partidos-declaraciones', clienteId, clienteCandidatoIds],
-    enabled: clienteId === null || clienteCandidatoIds.length > 0,
+    // Solo habilitar cuando auth terminó de cargar Y (es superadmin O hay candidatos)
+    enabled: !loading && (clienteId === null || clienteCandidatoIds.length > 0),
     queryFn: async () => {
       // For non-master users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
