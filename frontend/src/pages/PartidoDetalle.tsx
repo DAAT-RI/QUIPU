@@ -93,9 +93,9 @@ export function PartidoDetalle() {
       // Use individual declaration tema first, then fall back to entry-level temas
       const temas: string[] = []
       if (d.tema_interaccion) {
-        temas.push(d.tema_interaccion)
+        temas.push(...d.tema_interaccion.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
       } else if (d.temas) {
-        temas.push(...d.temas.split(';').map((t) => t.trim()).filter(Boolean))
+        temas.push(...d.temas.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
       }
       if (temas.length === 0) temas.push('Sin tema')
       for (const t of temas) {
