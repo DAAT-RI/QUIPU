@@ -15,7 +15,7 @@ import {
   AtSign,
 } from 'lucide-react'
 
-import { useDashboardStats, usePromesasPorCategoria, useTopPartidos } from '@/hooks/useDashboardStats'
+import { useDashboardStats, usePromesasPorCategoria, useTopPartidosByDeclaraciones } from '@/hooks/useDashboardStats'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { useCandidatoCountByTipo, useCandidatosByCargo } from '@/hooks/useCandidatos'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
@@ -27,7 +27,7 @@ import type { CandidatoCompleto } from '@/types/database'
 export function Dashboard() {
   const { data: stats, isLoading: statsLoading } = useDashboardStats()
   const { data: porCategoria, isLoading: catLoading } = usePromesasPorCategoria()
-  const { data: topPartidos, isLoading: partidosLoading } = useTopPartidos()
+  const { data: topPartidos, isLoading: partidosLoading } = useTopPartidosByDeclaraciones()
   const { data: declaracionesResult, isLoading: declLoading } = useDeclaraciones({
     offset: 0,
     limit: 5,
@@ -64,15 +64,15 @@ export function Dashboard() {
     })
   }, [porCategoria])
 
-  // Build partido ranking
+  // Build partido ranking by declarations
   const partidoRanking = useMemo(() => {
     if (!topPartidos) return []
     return topPartidos.slice(0, 5).map((p, i) => ({
       rank: i + 1,
+      id: p.id,
       nombre: p.nombre_oficial,
       candidato: p.candidato_presidencial,
-      promesas: p.total_promesas,
-      candidatos: p.total_candidatos,
+      declaraciones: p.total_declaraciones,
     }))
   }, [topPartidos])
 
@@ -163,12 +163,12 @@ export function Dashboard() {
         ) : (
           <div className="rounded-xl border bg-card divide-y">
             {partidoRanking.map((p) => {
-              const maxPromesas = partidoRanking[0]?.promesas || 1
-              const barPct = (p.promesas / maxPromesas) * 100
+              const maxDecl = partidoRanking[0]?.declaraciones || 1
+              const barPct = (p.declaraciones / maxDecl) * 100
               return (
                 <Link
                   key={p.rank}
-                  to="/partidos"
+                  to={`/partidos/${p.id}`}
                   className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
                 >
                   <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold">
@@ -178,7 +178,7 @@ export function Dashboard() {
                     <div className="flex items-center justify-between mb-1">
                       <p className="text-sm font-medium truncate">{p.nombre}</p>
                       <span className="text-sm font-bold shrink-0 ml-2 tabular-nums">
-                        {formatNumber(p.promesas)} <span className="text-xs font-normal text-muted-foreground">declaraciones</span>
+                        {formatNumber(p.declaraciones)} <span className="text-xs font-normal text-muted-foreground">declaraciones</span>
                       </span>
                     </div>
                     <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
