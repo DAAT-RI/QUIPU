@@ -4,7 +4,7 @@ import { usePromesas } from '@/hooks/usePromesas'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { usePartidos } from '@/hooks/usePartidos'
 import { useCategoriaCounts } from '@/hooks/useCategorias'
-import { CATEGORY_CONFIG, PLAN_CATEGORIES, getDynamicCategoryConfig } from '@/lib/constants'
+import { CATEGORY_CONFIG, getDynamicCategoryConfig } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { BackButton } from '@/components/ui/BackButton'
@@ -32,8 +32,21 @@ const CARGO_OPTIONS = [
 
 const LIMIT = 50
 
-// Keys de categorías de plan (para determinar si es plan o declaración)
-const PLAN_KEYS = new Set(PLAN_CATEGORIES.map(c => c.key))
+/**
+ * Parse URL parameter to extract source type and category key.
+ * URL format: p_<key> for plans, d_<key> for declarations
+ */
+function parseUrlParam(param: string | undefined): { source: 'plan' | 'declaracion', key: string } {
+  if (!param) return { source: 'plan', key: '' }
+  if (param.startsWith('p_')) {
+    return { source: 'plan', key: param.slice(2) }
+  }
+  if (param.startsWith('d_')) {
+    return { source: 'declaracion', key: param.slice(2) }
+  }
+  // Fallback for legacy URLs without prefix (assume plan for backward compat)
+  return { source: 'plan', key: param }
+}
 
 export function CategoriaDetalle() {
   const { nombre } = useParams()
@@ -42,42 +55,45 @@ export function CategoriaDetalle() {
   const [cargoFilter, setCargoFilter] = useState('')
   const [topPartidosOpen, setTopPartidosOpen] = useState(false)
 
+  // Parse URL parameter to get source type and actual key
+  const { source, key: categoryKey } = useMemo(() => parseUrlParam(nombre), [nombre])
+
   // Obtener labels dinámicos para temas de declaraciones
   const { data: counts } = useCategoriaCounts()
 
-  // Determinar si es categoría de plan o declaración
-  const isPlanCategory = PLAN_KEYS.has(nombre || '')
-  const isDeclaracion = !isPlanCategory
+  // Determinar si es categoría de plan o declaración based on URL prefix
+  const isPlanCategory = source === 'plan'
+  const isDeclaracion = source === 'declaracion'
 
   // Obtener config: usar CATEGORY_CONFIG si existe, sino generar dinámico
   const config = useMemo(() => {
-    if (CATEGORY_CONFIG[nombre || '']) {
-      return CATEGORY_CONFIG[nombre || '']
+    if (CATEGORY_CONFIG[categoryKey]) {
+      return CATEGORY_CONFIG[categoryKey]
     }
     // Para temas dinámicos de declaraciones, usar el label original
-    const label = counts?.declarationLabels[nombre || ''] || nombre || ''
+    const label = counts?.declarationLabels[categoryKey] || categoryKey
     return getDynamicCategoryConfig(label, 0)
-  }, [nombre, counts])
+  }, [categoryKey, counts])
 
   // Obtener el label correcto para filtrar (puede ser diferente de config.label mientras counts carga)
   // Para planes: usar planLabels[key] || CATEGORY_CONFIG[key].label (disponible inmediatamente)
   // Para declaraciones: usar declarationLabels[key] (necesita esperar a counts)
   const filterLabel = useMemo(() => {
-    if (!nombre) return ''
+    if (!categoryKey) return ''
     if (isPlanCategory) {
       // Para planes, CATEGORY_CONFIG tiene el label original
-      return counts?.planLabels[nombre] || CATEGORY_CONFIG[nombre]?.label || nombre
+      return counts?.planLabels[categoryKey] || CATEGORY_CONFIG[categoryKey]?.label || categoryKey
     }
     // Para declaraciones, necesitamos counts para obtener el label original
-    return counts?.declarationLabels[nombre] || ''
-  }, [nombre, isPlanCategory, counts])
+    return counts?.declarationLabels[categoryKey] || ''
+  }, [categoryKey, isPlanCategory, counts])
 
   // Indicar si el filterLabel está listo para hacer queries
   // Para planes: siempre listo (CATEGORY_CONFIG tiene el label)
   // Para declaraciones: solo cuando counts ha cargado
   const filterLabelReady = isPlanCategory
-    ? !!CATEGORY_CONFIG[nombre || '']?.label || !!counts?.planLabels[nombre || '']
-    : !!counts?.declarationLabels[nombre || '']
+    ? !!CATEGORY_CONFIG[categoryKey]?.label || !!counts?.planLabels[categoryKey]
+    : !!counts?.declarationLabels[categoryKey]
 
   // Get partidos for filter dropdown
   const { data: partidos } = usePartidos()
@@ -154,14 +170,14 @@ export function CategoriaDetalle() {
   // Validar que la categoría existe: para planes debe estar en CATEGORY_CONFIG,
   // para declaraciones se genera dinámicamente
   const categoryExists = isPlanCategory
-    ? !!CATEGORY_CONFIG[nombre || '']
+    ? !!CATEGORY_CONFIG[categoryKey]
     : true // Las declaraciones se generan dinámicamente
 
   if (!categoryExists) {
     return (
       <div className="space-y-4">
         <BackButton fallback="/categorias" label="Volver a categorias" />
-        <EmptyState message={`Categoria "${nombre}" no encontrada`} />
+        <EmptyState message={`Categoria "${categoryKey}" no encontrada`} />
       </div>
     )
   }
@@ -188,11 +204,10 @@ export function CategoriaDetalle() {
               <p className="text-sm text-muted-foreground">
                 {formatNumber(totalCount)} {isDeclaracion ? 'declaraciones' : 'propuestas'}
               </p>
-              <span className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${
-                isDeclaracion
-                  ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
-                  : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
-              }`}>
+              <span className={`rounded-md px-2 py-0.5 text-[11px] font-medium ${isDeclaracion
+                ? 'bg-amber-500/10 text-amber-700 dark:text-amber-400'
+                : 'bg-indigo-500/10 text-indigo-700 dark:text-indigo-400'
+                }`}>
                 {isDeclaracion ? 'Medios' : 'Plan de Gobierno'}
               </span>
             </div>
@@ -212,9 +227,8 @@ export function CategoriaDetalle() {
                 className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-violet-500 px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${topPartidosOpen ? 'bg-violet-50/50 dark:bg-violet-950/20 border-violet-200/50 dark:border-violet-800/30' : 'bg-card hover:border-violet-300/50'}`}
               >
                 <ChevronDown
-                  className={`h-5 w-5 text-violet-500 transition-transform duration-200 ${
-                    topPartidosOpen ? 'rotate-0' : '-rotate-90'
-                  }`}
+                  className={`h-5 w-5 text-violet-500 transition-transform duration-200 ${topPartidosOpen ? 'rotate-0' : '-rotate-90'
+                    }`}
                 />
                 <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
                   <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />

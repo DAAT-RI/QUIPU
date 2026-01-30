@@ -12,6 +12,7 @@ interface AuthContextType {
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
+  refreshAuth: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined)
@@ -171,6 +172,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       // Sign out from Supabase Auth first
       await supabase.auth.signOut()
 
+      // Clear local storage to prevent stale cache issues
+      localStorage.removeItem('sb-pjhnmjcwliqhjntcgood-auth-token')
+
       // Try to clear session in DB (non-blocking, ignore errors)
       if (user) {
         try {
@@ -187,9 +191,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // Force refresh auth state - useful after permission changes
+  async function refreshAuth() {
+    console.log('[Auth] Force refreshing auth state...')
+    setLoading(true)
+    try {
+      const { data: { session } } = await supabase.auth.getSession()
+      if (session?.user) {
+        setUser(session.user)
+        setSession(session)
+        await loadClienteData(session.user.id)
+      } else {
+        setUser(null)
+        setSession(null)
+        setClienteId(null)
+        setClienteNombre(null)
+        setIsSuperadmin(false)
+      }
+    } catch (error) {
+      console.error('[Auth] Error refreshing auth:', error)
+    } finally {
+      setLoading(false)
+    }
+  }
+
   return (
     <AuthContext.Provider value={{
-      user, session, clienteId, clienteNombre, isSuperadmin, loading, signIn, signOut
+      user, session, clienteId, clienteNombre, isSuperadmin, loading, signIn, signOut, refreshAuth
     }}>
       {children}
     </AuthContext.Provider>

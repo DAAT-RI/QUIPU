@@ -21,16 +21,20 @@ function CategoryCard({
   cat,
   count,
   total,
+  source,
 }: {
   cat: CategoryConfig
   count: number
   total: number
+  source: 'plan' | 'declaracion'
 }) {
+  // Prefix key with source type to avoid collisions
+  const urlKey = source === 'plan' ? `p_${cat.key}` : `d_${cat.key}`
   const pct = total > 0 ? (count / total) * 100 : 0
   const Icon = cat.icon
   return (
     <Link
-      to={`/categorias/${cat.key}`}
+      to={`/categorias/${urlKey}`}
       className="group flex items-center gap-4 rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
     >
       <div
@@ -173,6 +177,7 @@ export function Categorias() {
                     cat={cat}
                     count={counts?.declarations[cat.key] || 0}
                     total={totalDeclarations}
+                    source="declaracion"
                   />
                 ))}
               </div>
@@ -211,6 +216,7 @@ export function Categorias() {
                 cat={cat}
                 count={counts?.plans[cat.key] || 0}
                 total={totalPlans}
+                source="plan"
               />
             ))}
           </div>
