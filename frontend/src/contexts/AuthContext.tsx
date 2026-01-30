@@ -217,6 +217,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }
 
+  // DEBUG: Log estado completo del auth context
+  console.log('[AuthContext] Estado actual:', {
+    user: user?.email ?? null,
+    clienteId,
+    isSuperadmin,
+    loading
+  })
+
   return (
     <AuthContext.Provider value={{
       user, session, clienteId, clienteNombre, isSuperadmin, loading, signIn, signOut, refreshAuth

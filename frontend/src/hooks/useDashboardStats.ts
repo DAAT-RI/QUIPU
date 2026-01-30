@@ -97,11 +97,22 @@ export function useDeclaracionesPorTema() {
   // Get candidato IDs for this client
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
+  const isEnabled = !loading && (clienteId === null || clienteCandidatoIds.length > 0)
+
+  // DEBUG: Log estado del hook
+  console.log('[useDeclaracionesPorTema] Estado:', {
+    clienteId,
+    loading,
+    candidatosCount: clienteCandidatoIds.length,
+    enabled: isEnabled
+  })
+
   return useQuery({
     queryKey: ['declaraciones-por-tema', clienteId, clienteCandidatoIds],
     // Solo habilitar cuando auth terminó de cargar Y (es superadmin O hay candidatos)
-    enabled: !loading && (clienteId === null || clienteCandidatoIds.length > 0),
+    enabled: isEnabled,
     queryFn: async () => {
+      console.log('[useDeclaracionesPorTema] queryFn ejecutando')
       // For non-master users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
       if (clienteId !== null && clienteCandidatoIds.length > 0) {
@@ -172,11 +183,22 @@ export function useTopPartidosByDeclaraciones() {
   // Get candidato IDs for this client
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
+  const isEnabled = !loading && (clienteId === null || clienteCandidatoIds.length > 0)
+
+  // DEBUG: Log estado del hook
+  console.log('[useTopPartidosByDeclaraciones] Estado:', {
+    clienteId,
+    loading,
+    candidatosCount: clienteCandidatoIds.length,
+    enabled: isEnabled
+  })
+
   return useQuery({
     queryKey: ['top-partidos-declaraciones', clienteId, clienteCandidatoIds],
     // Solo habilitar cuando auth terminó de cargar Y (es superadmin O hay candidatos)
-    enabled: !loading && (clienteId === null || clienteCandidatoIds.length > 0),
+    enabled: isEnabled,
     queryFn: async () => {
+      console.log('[useTopPartidosByDeclaraciones] queryFn ejecutando')
       // For non-master users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
       if (clienteId !== null && clienteCandidatoIds.length > 0) {
