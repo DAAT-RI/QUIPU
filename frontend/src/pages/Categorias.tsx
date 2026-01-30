@@ -124,6 +124,11 @@ export function Categorias() {
             onClick={() => setDeclOpen((v) => !v)}
             className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
           >
+            <ChevronDown
+              className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+                declOpen ? 'rotate-0' : '-rotate-90'
+              }`}
+            />
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
               <MessageSquareQuote className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </div>
@@ -133,11 +138,6 @@ export function Categorias() {
                 {formatNumber(totalDeclarations)} declaraciones por tema
               </p>
             </div>
-            <ChevronDown
-              className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
-                declOpen ? 'rotate-0' : '-rotate-90'
-              }`}
-            />
           </button>
           {declOpen && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
@@ -161,6 +161,11 @@ export function Categorias() {
           onClick={() => setPlansOpen((v) => !v)}
           className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
         >
+          <ChevronDown
+            className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+              plansOpen ? 'rotate-0' : '-rotate-90'
+            }`}
+          />
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
             <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
           </div>
@@ -170,11 +175,6 @@ export function Categorias() {
               {formatNumber(totalPlans)} propuestas en {sortedPlanCats.length} categorías
             </p>
           </div>
-          <ChevronDown
-            className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
-              plansOpen ? 'rotate-0' : '-rotate-90'
-            }`}
-          />
         </button>
         {plansOpen && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">

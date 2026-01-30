@@ -256,18 +256,16 @@ function CollapsibleSection({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full flex items-center justify-between p-4 text-sm font-medium hover:bg-muted/30 transition-colors"
+        className="w-full flex items-center gap-2 p-4 text-sm font-medium hover:bg-muted/30 transition-colors"
       >
-        <span className="flex items-center gap-2">
-          <Icon size={16} className="text-muted-foreground" />
-          {title}
-          {count !== undefined && count > 0 && (
-            <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
-              {count}
-            </span>
-          )}
-        </span>
         {isOpen ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+        <Icon size={16} className="text-muted-foreground" />
+        <span className="flex-1 text-left">{title}</span>
+        {count !== undefined && count > 0 && (
+          <span className="rounded-full bg-muted px-2 py-0.5 text-xs">
+            {count}
+          </span>
+        )}
       </button>
       {isOpen && (
         <div className="border-t p-4">

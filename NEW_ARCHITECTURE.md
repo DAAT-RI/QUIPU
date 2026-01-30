@@ -1,5 +1,29 @@
 # Nueva Arquitectura de Datos - Quipu
 
+> **Última actualización:** Enero 2026
+> **Estado del proyecto:** ~45% implementado
+
+---
+
+## Resumen Ejecutivo
+
+| Categoría | Estado | Progreso |
+|-----------|--------|----------|
+| Schema base | ✅ Deployado | 100% |
+| Datos de promesas | ✅ 22,358 registros | 100% |
+| Datos de candidatos | ✅ 6,438 registros | 100% |
+| Hojas de vida | ✅ 8,116 registros (expandida) | 100% |
+| Categorías | ✅ 247 categorías dinámicas | 100% |
+| Multi-tenancy tables | ⏳ Diseñadas, sin deployar | 0% |
+| Declaraciones normalizadas | ⏳ Diseñadas, sin sync | 0% |
+| Búsqueda semántica en declaraciones | ⏳ Schema listo, sin embeddings | 0% |
+| Coherencia promesa↔declaración | ⏳ Schema listo, sin links | 0% |
+| RLS policies | ⏳ Diseñadas, sin deployar | 0% |
+| Frontend dashboard | ✅ Funcional (sin auth) | 90% |
+| Auth + multi-tenant UI | ⏳ No implementado | 0% |
+
+---
+
 ## Modelo de Negocio
 
 Quipu es **SaaS multi-tenant**:
@@ -22,41 +46,89 @@ APESEG contrata:
 
 ---
 
-## Problema: Arquitectura Actual
+## Estado Actual de Base de Datos
 
-### Tablas Existentes
+### Tablas Desplegadas (Producción) ✅
+
+| Tabla | Registros | Notas |
+|-------|-----------|-------|
+| `quipu_partidos` | 35 | Completa |
+| `quipu_candidatos` | ~6,438 | Completa |
+| `quipu_hojas_vida` | 8,116 | **Expandida a 50+ campos** |
+| `quipu_promesas_planes` | 22,358 | Con embeddings vector(1536) |
+| `quipu_categorias_promesas` | 247 | **Migrado de 15 a 247 categorías** |
+| `QUIPU_MASTER` | Variable | Inmutable, pipeline externo |
+
+### Vistas Desplegadas ✅
+
+```sql
+v_quipu_promesas_planes_completas  -- promesas + partido + categoría
+v_quipu_resumen_partidos           -- stats por partido
+v_quipu_candidatos_completos       -- candidatos + partido
+v_quipu_candidatos_unicos          -- deduplicado por DNI (85 tenían duplicados)
+```
+
+### Migraciones Aplicadas
 
 ```
-quipu_partidos (35)
-quipu_candidatos (~6,400)
-quipu_hojas_vida
-quipu_promesas_planes (~22,000) ← tiene embeddings
-quipu_categorias_promesas (15)
-QUIPU_MASTER (inmutable, viene de pipeline externo)
+frontend/migrations/
+├── 001_schema_supabase.sql              ✅ Schema base
+├── 004_reclassify_categories_gemini.py  ✅ Migración 15→247 categorías
+├── 005_update_categorias_247.sql        ✅ Actualización categorías
+├── 007_add_hojas_vida_columns.sql       ✅ Nuevos campos HV
+└── 007_update_hojas_vida.py             ✅ Datos JNE 2026
 ```
-
-### Limitaciones
-
-| Gap | Impacto | Ejemplo |
-|-----|---------|---------|
-| **Sin vínculo declaración → candidato** | No puedo filtrar "qué dijo Forsyth" | `stakeholder` es texto libre |
-| **Temas no normalizados** | No puedo filtrar "todo sobre pensiones" | `tema` tiene variantes: "AFP", "pensiones", "jubilación" |
-| **Organizaciones como texto** | Gremios no pueden filtrar menciones | "APESEG" aparece en texto, no hay FK |
-| **Sin embeddings en declaraciones** | Búsqueda semántica solo en promesas | Usuario busca "reforma tributaria" y no encuentra declaraciones relacionadas |
-| **Sin link promesa ↔ declaración** | No puedo verificar coherencia | Objetivo clave del producto |
 
 ---
 
-## Solución: Tablas de Normalización
+## Expansión de `quipu_hojas_vida` (Nuevo)
 
-### Principio de Diseño
+La tabla fue significativamente ampliada respecto al plan original:
 
-> **QUIPU_MASTER es inmutable** - no lo tocamos.
-> Creamos tablas auxiliares que extraen, normalizan y vinculan.
+```sql
+-- Campos de estado
+estado_hv VARCHAR(50),
+porcentaje_completitud DECIMAL,
+fecha_termino_registro TIMESTAMPTZ,
+
+-- Verificaciones (JSONB) - validaciones del JNE
+verificaciones JSONB,  -- {sunedu, sunarp, minedu_tec, infogob, rop}
+
+-- Indicadores booleanos (JSONB)
+indicadores JSONB,     -- 15 booleanos:
+                       -- tiene_experiencia_laboral
+                       -- tiene_educacion_universitaria
+                       -- tiene_educacion_tecnica
+                       -- tiene_sentencias
+                       -- etc.
+
+-- Datos adicionales del JNE
+cargos_postula TEXT,
+titularidades TEXT,
+declaraciones_juradas JSONB,
+carne_extranjeria VARCHAR(50),
+ubigeo_nacimiento VARCHAR(10),
+ubigeo_domicilio VARCHAR(10)
+```
 
 ---
 
-## Nuevas Tablas
+## Tablas Pendientes (Fase 3)
+
+### Migraciones Definidas (Sin Deployar)
+
+```
+fase3/migrations/
+├── 001_quipu_clientes.sql           ⏳ Multi-tenant (clientes, usuarios, cliente_candidatos)
+├── 002_quipu_temas.sql              ⏳ Catálogo normalizado (~40 temas seedeados)
+├── 003_quipu_organizaciones.sql     ⏳ Gremios/empresas (15 orgs seedeadas)
+├── 004_quipu_declaraciones.sql      ⏳ Declaraciones flattened + embeddings
+├── 005_quipu_coherencia.sql         ⏳ Promesa↔declaración + funciones
+├── 006_quipu_views.sql              ⏳ 5 vistas client-filtered
+└── 007_quipu_rls.sql                ⏳ Row Level Security policies
+```
+
+---
 
 ### 0. Modelo Multi-Tenant (Clientes)
 
@@ -75,33 +147,6 @@ CREATE TABLE quipu_clientes (
 );
 ```
 
-#### `quipu_cliente_candidatos` - Candidatos que sigue cada cliente
-
-```sql
-CREATE TABLE quipu_cliente_candidatos (
-    cliente_id INTEGER REFERENCES quipu_clientes(id),
-    candidato_id INTEGER REFERENCES quipu_candidatos(id),
-    added_at TIMESTAMPTZ DEFAULT NOW(),
-    PRIMARY KEY (cliente_id, candidato_id)
-);
-```
-
-**Beneficio:** Cliente paga por 15 candidatos → solo ve esos 15.
-
-#### `quipu_cliente_temas` - Temas prioritarios del cliente
-
-```sql
-CREATE TABLE quipu_cliente_temas (
-    cliente_id INTEGER REFERENCES quipu_clientes(id),
-    tema_id INTEGER REFERENCES quipu_temas(id),
-    prioridad INTEGER DEFAULT 1,      -- 1=alta, 2=media, 3=baja
-    alertas_activas BOOLEAN DEFAULT TRUE,
-    PRIMARY KEY (cliente_id, tema_id)
-);
-```
-
-**Beneficio:** APESEG prioriza "pensiones" → dashboard ordena por relevancia.
-
 #### `quipu_usuarios` - Usuarios de cada cliente
 
 ```sql
@@ -116,11 +161,32 @@ CREATE TABLE quipu_usuarios (
 );
 ```
 
+#### `quipu_cliente_candidatos` - Candidatos por cliente
+
+```sql
+CREATE TABLE quipu_cliente_candidatos (
+    cliente_id INTEGER REFERENCES quipu_clientes(id),
+    candidato_id INTEGER REFERENCES quipu_candidatos(id),
+    added_at TIMESTAMPTZ DEFAULT NOW(),
+    PRIMARY KEY (cliente_id, candidato_id)
+);
+```
+
+#### `quipu_cliente_temas` - Temas prioritarios del cliente
+
+```sql
+CREATE TABLE quipu_cliente_temas (
+    cliente_id INTEGER REFERENCES quipu_clientes(id),
+    tema_id INTEGER REFERENCES quipu_temas(id),
+    prioridad INTEGER DEFAULT 1,      -- 1=alta, 2=media, 3=baja
+    alertas_activas BOOLEAN DEFAULT TRUE,
+    PRIMARY KEY (cliente_id, tema_id)
+);
+```
+
 ---
 
 ### 1. `quipu_temas` - Catálogo Normalizado
-
-**Por qué:** Permite filtrar declaraciones por sector/tema de interés del usuario.
 
 ```sql
 CREATE TABLE quipu_temas (
@@ -128,7 +194,7 @@ CREATE TABLE quipu_temas (
     nombre VARCHAR(100) NOT NULL UNIQUE,
     nombre_normalizado VARCHAR(100),  -- 'pensiones' (sin tildes, lowercase)
     categoria VARCHAR(50),            -- 'economia', 'social', 'seguridad'
-    sector VARCHAR(100),              -- 'seguros', 'mineria', 'salud' (para gremios)
+    sector VARCHAR(100),              -- 'seguros', 'mineria', 'salud'
     keywords TEXT[],                  -- ['AFP', 'ONP', 'jubilación', 'retiro']
     descripcion TEXT,
     color VARCHAR(20),
@@ -136,16 +202,11 @@ CREATE TABLE quipu_temas (
 );
 ```
 
-**Beneficio:**
-- Gremio de seguros filtra `sector = 'seguros'`
-- Encuentra declaraciones sobre "AFP", "pensiones", "sistema previsional"
-- Keywords permiten mapeo automático desde texto libre
+**Seed incluido:** ~40 temas con keywords para auto-mapping.
 
 ---
 
 ### 2. `quipu_organizaciones` - Entidades Mencionadas
-
-**Por qué:** Gremios quieren saber cuándo los mencionan (o a su sector).
 
 ```sql
 CREATE TABLE quipu_organizaciones (
@@ -159,15 +220,11 @@ CREATE TABLE quipu_organizaciones (
 );
 ```
 
-**Beneficio:**
-- APESEG ve todas las declaraciones donde mencionan seguros/aseguradoras
-- Alertas cuando un candidato habla de su sector
+**Seed incluido:** 15 gremios principales (APESEG, CONFIEP, SNI, SNMPE, etc.)
 
 ---
 
-### 3. `quipu_declaraciones` - Interacciones Aplanadas y Enriquecidas
-
-**Por qué:** Extrae cada declaración de MASTER con vínculos reales a candidatos y temas.
+### 3. `quipu_declaraciones` - Interacciones Normalizadas
 
 ```sql
 CREATE TABLE quipu_declaraciones (
@@ -181,7 +238,7 @@ CREATE TABLE quipu_declaraciones (
     stakeholder_raw VARCHAR(200),     -- Texto original para debug
     tema_raw VARCHAR(200),
 
-    -- VÍNCULOS NORMALIZADOS (el valor real)
+    -- VÍNCULOS NORMALIZADOS
     candidato_id INTEGER REFERENCES quipu_candidatos(id),
     tema_id INTEGER REFERENCES quipu_temas(id),
 
@@ -193,13 +250,11 @@ CREATE TABLE quipu_declaraciones (
     canal VARCHAR(100),               -- Fuente: 'RPP', 'Facebook', etc.
     url_fuente TEXT,
 
-    -- Metadata
     created_at TIMESTAMPTZ DEFAULT NOW(),
-
     UNIQUE (master_id, indice_interaccion)
 );
 
--- Índices para filtrado rápido
+-- Índices
 CREATE INDEX idx_decl_candidato ON quipu_declaraciones(candidato_id);
 CREATE INDEX idx_decl_tema ON quipu_declaraciones(tema_id);
 CREATE INDEX idx_decl_fecha ON quipu_declaraciones(fecha DESC);
@@ -207,36 +262,9 @@ CREATE INDEX idx_decl_embedding ON quipu_declaraciones
     USING hnsw (embedding vector_cosine_ops);
 ```
 
-**Beneficios:**
-- `WHERE candidato_id = 123` → todas las declaraciones de Forsyth
-- `WHERE tema_id = 5` → todo sobre pensiones
-- Búsqueda semántica: "reforma del sistema previsional" encuentra declaraciones relacionadas
-- Timeline por candidato para detectar cambios de postura
-
 ---
 
-### 4. `quipu_declaracion_organizaciones` - Many-to-Many
-
-**Por qué:** Una declaración puede mencionar múltiples organizaciones.
-
-```sql
-CREATE TABLE quipu_declaracion_organizaciones (
-    declaracion_id INTEGER REFERENCES quipu_declaraciones(id),
-    organizacion_id INTEGER REFERENCES quipu_organizaciones(id),
-    tipo_mencion VARCHAR(30),         -- 'neutral', 'positiva', 'critica'
-    PRIMARY KEY (declaracion_id, organizacion_id)
-);
-```
-
-**Beneficio:**
-- CONFIEP ve declaraciones donde los critican vs apoyan
-- Dashboard de sentimiento por organización
-
----
-
-### 5. `quipu_promesa_declaracion` - Verificación de Coherencia
-
-**Por qué:** Objetivo clave del producto - contrastar plan vs lo que dicen.
+### 4. `quipu_promesa_declaracion` - Verificación de Coherencia
 
 ```sql
 CREATE TABLE quipu_promesa_declaracion (
@@ -244,10 +272,10 @@ CREATE TABLE quipu_promesa_declaracion (
     promesa_id INTEGER REFERENCES quipu_promesas_planes(id),
     declaracion_id INTEGER REFERENCES quipu_declaraciones(id),
 
-    similarity REAL,                  -- Score de similitud semántica (0-1)
+    similarity REAL,                  -- Score 0-1
     coherencia VARCHAR(20),           -- 'confirma', 'contradice', 'amplia', 'matiza'
 
-    verificado_por VARCHAR(100),      -- NULL = automático, o nombre de analista
+    verificado_por VARCHAR(100),      -- NULL = automático
     notas TEXT,
     created_at TIMESTAMPTZ DEFAULT NOW(),
 
@@ -255,23 +283,94 @@ CREATE TABLE quipu_promesa_declaracion (
 );
 ```
 
-**Beneficio:**
-- Periodista ve: "En su plan dice X, pero en RPP dijo Y"
-- Score automático de coherencia por candidato
-- Fact-checking estructurado
+---
+
+## Frontend Implementado ✅
+
+### Hooks de Datos (src/hooks/)
+
+| Hook | Función | Estado |
+|------|---------|--------|
+| `useCandidatos.ts` | Fetch candidatos con filtros | ✅ |
+| `useCategorias.ts` | Fetch 247 categorías + conteo | ✅ |
+| `useDashboardStats.ts` | Stats del dashboard + useDeclaracionesPorTema | ✅ |
+| `useDeclaraciones.ts` | Fetch declaraciones + filtros + normalización acentos | ✅ |
+| `usePartidos.ts` | Fetch partidos | ✅ |
+| `usePromesas.ts` | Fetch promesas con búsqueda | ✅ |
+| `useSearch.ts` | Búsqueda semántica | ✅ |
+| `useStakeholderCandidato.ts` | Mapeo stakeholder→candidato | ✅ |
+
+### Páginas (src/pages/)
+
+| Página | Función | Estado |
+|--------|---------|--------|
+| `Dashboard.tsx` | Stats generales | ✅ |
+| `Declaraciones.tsx` | Listado con filtros dinámicos | ✅ |
+| `DeclaracionDetalle.tsx` | Detalle de declaración | ✅ |
+| `Candidatos.tsx` | Listado de candidatos | ✅ |
+| `CandidatoDetalle.tsx` | Timeline de candidato | ✅ |
+| `Categorias.tsx` / `CategoriaDetalle.tsx` | Por categoría | ✅ |
+| `Partidos.tsx` / `PartidoDetalle.tsx` | Por partido | ✅ |
+| `BuscarPromesas.tsx` | Búsqueda semántica | ✅ |
+| `Comparar.tsx` | Comparación candidatos | ✅ |
+| `MapaElectoral.tsx` | Distribución geográfica | ✅ |
+
+### Types (src/types/database.ts)
+
+```typescript
+✅ Partido, CategoriaPromesa, Promesa, Candidato
+✅ HojaVida (expandido con verificaciones, indicadores)
+✅ QuipuMasterEntry, Interaccion { type, content, stakeholder, tema }
+✅ Declaracion, DeclaracionView
+✅ PromesaCompleta, ResumenPartido, CandidatoCompleto
+✅ DeclaracionFilters, CandidatoFilters, PromesaFilters
+✅ SearchResult
+```
 
 ---
 
-## Diagrama Final
+## Arquitectura Actual vs Planeada
+
+### Flujo Actual (Sin multi-tenancy)
+
+```
+QUIPU_MASTER (inmutable)
+    ↓
+v_quipu_declaraciones (Vista que flatten interacciones)
+    ↓
+Frontend hooks (useDeclaraciones, useDashboardStats)
+    ↓
+React components (sin filtro por cliente)
+```
+
+### Flujo Planeado (Multi-tenant completo)
+
+```
+QUIPU_MASTER (inmutable)
+    ↓ (sync script)
+quipu_declaraciones (tabla física con embeddings + FKs)
+    ↓
+RLS filtra por cliente
+    ↓
+v_quipu_cliente_declaraciones (Vista filtrada)
+    ↓
+Frontend hooks + Auth
+    ↓
+React components (datos del usuario autenticado)
+```
+
+---
+
+## Diagrama de Arquitectura
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
-│                        CAPA MULTI-TENANT                        │
+│                     CAPA MULTI-TENANT (⏳)                       │
 │                                                                 │
 │  ┌──────────────┐    ┌────────────────────┐    ┌─────────────┐ │
 │  │   quipu_     │───►│ quipu_cliente_     │◄───│   quipu_    │ │
 │  │   clientes   │    │    candidatos      │    │ candidatos  │ │
-│  └──────┬───────┘    └────────────────────┘    └─────────────┘ │
+│  └──────┬───────┘    └────────────────────┘    └──────✅──────┘ │
 │         │                                                       │
 │         │            ┌────────────────────┐    ┌─────────────┐ │
 │         └───────────►│ quipu_cliente_     │◄───│   quipu_    │ │
@@ -286,216 +385,57 @@ CREATE TABLE quipu_promesa_declaracion (
 │                        CAPA DE DATOS                            │
 │                                                                 │
 │                    ┌─────────────────────┐                      │
-│                    │    QUIPU_MASTER     │ (inmutable)          │
+│                    │    QUIPU_MASTER     │ ✅ (inmutable)       │
 │                    │    (pipeline ext)   │                      │
 │                    └──────────┬──────────┘                      │
-│                               │ sync                            │
+│                               │ sync ⏳                         │
 │                               ▼                                 │
 │  ┌──────────────┐  ┌─────────────────────┐  ┌──────────────┐   │
 │  │   quipu_     │◄─│  quipu_declaraciones │─►│   quipu_     │   │
 │  │  candidatos  │  │   (con embeddings)  │  │    temas     │   │
+│  │      ✅      │  │        ⏳           │  │      ⏳      │   │
 │  └──────────────┘  └──────────┬──────────┘  └──────────────┘   │
 │         │                     │                     │           │
 │         ▼                     ▼                     ▼           │
 │  ┌──────────────┐  ┌─────────────────────┐  ┌──────────────┐   │
 │  │   quipu_     │  │ quipu_promesa_      │  │   quipu_     │   │
-│  │  partidos    │  │   declaracion       │  │organizaciones│   │
-│  └──────────────┘  │   (coherencia)      │  └──────────────┘   │
-│         │          └─────────────────────┘                      │
+│  │  partidos ✅ │  │   declaracion ⏳    │  │organizaciones│   │
+│  └──────────────┘  │   (coherencia)      │  │      ⏳      │   │
+│         │          └─────────────────────┘  └──────────────┘   │
 │         ▼                     ▲                                 │
 │  ┌──────────────┐             │                                 │
 │  │   quipu_     │─────────────┘                                 │
-│  │  promesas    │                                               │
+│  │  promesas ✅ │                                               │
 │  └──────────────┘                                               │
 └─────────────────────────────────────────────────────────────────┘
-```
 
-### Flujo de Datos
-
-```
-1. QUIPU_MASTER recibe declaración
-         │
-         ▼
-2. Sync extrae → quipu_declaraciones (con candidato_id, tema_id)
-         │
-         ▼
-3. Usuario de Cliente X hace login
-         │
-         ▼
-4. Dashboard filtra:
-   - Solo candidatos en quipu_cliente_candidatos WHERE cliente_id = X
-   - Solo temas en quipu_cliente_temas WHERE cliente_id = X
+Leyenda: ✅ = Deployado | ⏳ = Definido, sin deployar
 ```
 
 ---
 
-## Queries Habilitadas (Filtradas por Cliente)
-
-### Dashboard Principal del Cliente
+## Vistas Planeadas (fase3/migrations/006)
 
 ```sql
--- Declaraciones de MIS candidatos sobre MIS temas
-SELECT
-    d.*,
-    c.nombre_completo,
-    c.partido_nombre,
-    t.nombre as tema,
-    ct.prioridad as tema_prioridad
-FROM quipu_declaraciones d
-JOIN quipu_candidatos c ON d.candidato_id = c.id
-JOIN quipu_temas t ON d.tema_id = t.id
--- FILTRO POR CLIENTE
-JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
-JOIN quipu_cliente_temas ct ON ct.tema_id = d.tema_id
-WHERE cc.cliente_id = $cliente_id
-  AND ct.cliente_id = $cliente_id
-ORDER BY d.fecha DESC, ct.prioridad ASC;
-```
-
-### Vista: Declaraciones del Cliente (simplifica queries)
-
-```sql
-CREATE VIEW v_quipu_cliente_declaraciones AS
-SELECT
-    d.*,
-    c.nombre_completo as candidato,
-    c.partido_nombre as partido,
-    t.nombre as tema,
-    t.sector,
-    cc.cliente_id
-FROM quipu_declaraciones d
-JOIN quipu_candidatos c ON d.candidato_id = c.id
-JOIN quipu_temas t ON d.tema_id = t.id
-JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
-JOIN quipu_cliente_temas ct ON ct.tema_id = d.tema_id AND ct.cliente_id = cc.cliente_id;
-
--- Uso simple:
-SELECT * FROM v_quipu_cliente_declaraciones
-WHERE cliente_id = $cliente_id
-ORDER BY fecha DESC;
-```
-
-### Verificar Coherencia (Solo mis candidatos)
-
-```sql
-SELECT
-    c.nombre_completo as candidato,
-    p.texto_original as promesa,
-    d.contenido as declaracion,
-    pd.coherencia,
-    pd.similarity
-FROM quipu_promesa_declaracion pd
-JOIN quipu_promesas_planes p ON pd.promesa_id = p.id
-JOIN quipu_declaraciones d ON pd.declaracion_id = d.id
-JOIN quipu_candidatos c ON d.candidato_id = c.id
--- FILTRO POR CLIENTE
-JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
-WHERE cc.cliente_id = $cliente_id
-  AND pd.coherencia = 'contradice'
-ORDER BY pd.similarity DESC;
-```
-
-### Timeline de un Candidato (que sigo)
-
-```sql
-SELECT
-    d.fecha,
-    d.contenido,
-    d.canal,
-    t.nombre as tema
-FROM quipu_declaraciones d
-JOIN quipu_temas t ON d.tema_id = t.id
-JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
-WHERE cc.cliente_id = $cliente_id
-  AND d.candidato_id = $candidato_id
-ORDER BY d.fecha DESC;
-```
-
-### Búsqueda Semántica (Solo en mis candidatos/temas)
-
-```sql
-SELECT
-    d.contenido,
-    c.nombre_completo,
-    t.nombre as tema,
-    1 - (d.embedding <=> $query_embedding) as similarity
-FROM quipu_declaraciones d
-JOIN quipu_candidatos c ON d.candidato_id = c.id
-JOIN quipu_temas t ON d.tema_id = t.id
--- FILTRO POR CLIENTE
-JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
-JOIN quipu_cliente_temas ct ON ct.tema_id = d.tema_id AND ct.cliente_id = cc.cliente_id
-WHERE cc.cliente_id = $cliente_id
-  AND d.embedding IS NOT NULL
-ORDER BY d.embedding <=> $query_embedding
-LIMIT 20;
-```
-
-### Stats del Dashboard por Cliente
-
-```sql
-SELECT
-    COUNT(DISTINCT d.candidato_id) as candidatos_activos,
-    COUNT(d.id) as total_declaraciones,
-    COUNT(DISTINCT d.tema_id) as temas_cubiertos,
-    COUNT(CASE WHEN d.fecha > NOW() - INTERVAL '7 days' THEN 1 END) as declaraciones_semana
-FROM quipu_declaraciones d
-JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
-JOIN quipu_cliente_temas ct ON ct.tema_id = d.tema_id AND ct.cliente_id = cc.cliente_id
-WHERE cc.cliente_id = $cliente_id;
+⏳ v_quipu_declaraciones_completas   -- declaraciones + candidato + partido + tema
+⏳ v_quipu_cliente_declaraciones     -- filtered by cliente + prioridad
+⏳ v_quipu_cliente_candidatos_stats  -- stats de candidatos por cliente
+⏳ v_quipu_cliente_temas_stats       -- stats de temas por cliente
+⏳ v_quipu_cliente_dashboard         -- dashboard stats por cliente
+⏳ v_quipu_cliente_coherencia        -- coherencia promesas/declaraciones
 ```
 
 ---
 
-## Pipeline de Sincronización
-
-Cuando llega un registro nuevo a QUIPU_MASTER:
-
-1. **Extraer** cada interacción del array `interacciones`
-2. **Resolver candidato**: buscar `stakeholder` en `quipu_candidatos.nombre_completo`
-3. **Resolver tema**: mapear `tema` a `quipu_temas` (fuzzy match o keywords)
-4. **Generar embedding** del `contenido`
-5. **Buscar promesas similares** y crear links en `quipu_promesa_declaracion`
-6. **Extraer organizaciones** mencionadas en el contenido
-
----
-
-## Migración Propuesta
-
-```
-migrations/
-├── 007_create_quipu_clientes.sql           -- Clientes + usuarios
-├── 008_create_quipu_temas.sql              -- Catálogo de temas
-├── 009_create_quipu_organizaciones.sql     -- Gremios/empresas
-├── 010_create_quipu_declaraciones.sql      -- Declaraciones normalizadas
-├── 011_create_cliente_relaciones.sql       -- cliente_candidatos, cliente_temas
-├── 012_create_quipu_promesa_declaracion.sql
-├── 013_create_views.sql                    -- v_quipu_cliente_declaraciones
-├── 014_setup_rls_policies.sql              -- Row Level Security
-└── 015_sync_master_to_declaraciones.py     -- Script de sincronización
-```
-
----
-
-## Resumen de Beneficios
-
-| Antes | Después |
-|-------|---------|
-| Sin modelo de clientes | Multi-tenant con suscripciones |
-| Usuario ve todo | Usuario ve solo sus candidatos/temas |
-| Declaraciones en JSON anidado | Tabla plana con FKs |
-| Stakeholder = texto libre | `candidato_id` → consultas directas |
-| Tema = texto inconsistente | `tema_id` → filtro por prioridad del cliente |
-| Sin búsqueda semántica en declaraciones | Embeddings + HNSW index |
-| Sin link promesa ↔ declaración | Tabla de coherencia |
-| Organizaciones perdidas en texto | Tabla normalizada + menciones |
-
----
-
-## Row Level Security (RLS) - Supabase
+## RLS Policies Planeadas (fase3/migrations/007)
 
 ```sql
--- Política: usuarios solo ven datos de su cliente
+-- Función helper
+CREATE FUNCTION get_current_cliente_id() RETURNS INTEGER AS $$
+    SELECT cliente_id FROM quipu_usuarios WHERE auth_user_id = auth.uid()
+$$ LANGUAGE SQL SECURITY DEFINER;
+
+-- Política por tabla
 ALTER TABLE quipu_declaraciones ENABLE ROW LEVEL SECURITY;
 
 CREATE POLICY "Cliente ve sus declaraciones"
@@ -503,14 +443,161 @@ ON quipu_declaraciones FOR SELECT
 USING (
     candidato_id IN (
         SELECT candidato_id FROM quipu_cliente_candidatos
-        WHERE cliente_id = (
-            SELECT cliente_id FROM quipu_usuarios
-            WHERE auth_user_id = auth.uid()
-        )
+        WHERE cliente_id = get_current_cliente_id()
     )
 );
 ```
 
 ---
 
-*Documento generado para justificar la evolución de arquitectura de datos de Quipu.*
+## Pipeline de Sincronización (Pendiente)
+
+Cuando llega un registro nuevo a QUIPU_MASTER:
+
+1. **Extraer** cada interacción del array `interacciones`
+2. **Resolver candidato**: buscar `stakeholder` en `quipu_candidatos.nombre_completo`
+3. **Resolver tema**: mapear `tema` a `quipu_temas` (fuzzy match + keywords)
+4. **Generar embedding** del `contenido` (vector 1536)
+5. **Buscar promesas similares** y crear links en `quipu_promesa_declaracion`
+6. **Extraer organizaciones** mencionadas en el contenido
+
+---
+
+## Próximos Pasos (Orden de Ejecución)
+
+### Fase 3.1: Capa de Datos (sin multi-tenancy)
+
+**Objetivo:** Normalizar declaraciones y habilitar búsqueda semántica. Funciona independiente de clientes.
+
+```bash
+# 1. Crear tablas de normalización
+psql -f fase3/migrations/002_quipu_temas.sql         # Catálogo de ~40 temas
+psql -f fase3/migrations/003_quipu_organizaciones.sql # 15 gremios seedeados
+psql -f fase3/migrations/004_quipu_declaraciones.sql  # Tabla principal + índices
+psql -f fase3/migrations/005_quipu_coherencia.sql     # Links promesa↔declaración
+```
+
+```bash
+# 2. Poblar datos
+python sync_master_to_declaraciones.py   # Extrae interacciones de QUIPU_MASTER
+```
+
+**Resultado:**
+- `quipu_declaraciones` con `candidato_id`, `tema_id` resueltos
+- Embeddings generados para búsqueda semántica
+- Links de coherencia promesa↔declaración creados
+- Dashboard actual puede usar datos normalizados (sin filtro por cliente)
+
+---
+
+### Fase 3.2: Capa Multi-Tenant
+
+**Objetivo:** Segmentar datos por cliente. Requiere Fase 3.1 completada.
+
+```bash
+# 1. Crear tablas de clientes
+psql -f fase3/migrations/001_quipu_clientes.sql  # clientes, usuarios, cliente_candidatos
+
+# 2. Crear vistas filtradas
+psql -f fase3/migrations/006_quipu_views.sql     # v_quipu_cliente_*
+
+# 3. Activar seguridad
+psql -f fase3/migrations/007_quipu_rls.sql       # Row Level Security
+```
+
+**Resultado:**
+- Tabla `quipu_clientes` con suscripciones
+- Tablas `quipu_cliente_candidatos` y `quipu_cliente_temas`
+- RLS policies activas (usuarios solo ven sus datos)
+
+---
+
+### Fase 3.3: Cliente de Demostración
+
+**Objetivo:** Validar que multi-tenancy funciona end-to-end.
+
+1. Crear cliente APESEG:
+   - 15 candidatos asignados
+   - 5 temas prioritarios (seguros, AFP, pensiones, salud, regulación)
+2. Crear usuario de prueba vinculado a APESEG
+3. Verificar que RLS filtra correctamente
+4. Probar vistas `v_quipu_cliente_*`
+
+---
+
+### Fase 3.4: Frontend con Auth
+
+**Objetivo:** UI que respeta multi-tenancy.
+
+1. Implementar login con Supabase Auth
+2. Modificar hooks para usar vistas filtradas
+3. Dashboard personalizado por cliente
+4. Admin panel para gestionar candidatos/temas por cliente
+5. Sistema de alertas y notificaciones
+
+---
+
+## Cambios Respecto al Plan Original
+
+| Aspecto | Plan Original | Estado Actual |
+|---------|---------------|---------------|
+| Categorías | 15 fijas | **247 dinámicas** ✅ |
+| Hojas de vida | ~20 campos | **50+ campos** con verificaciones JNE ✅ |
+| Deduplicación | No planeado | Vista `v_quipu_candidatos_unicos` ✅ |
+| Verificaciones JNE | No planeado | JSONB {sunedu, sunarp, minedu_tec, infogob, rop} ✅ |
+| Indicadores candidato | No planeado | 15 booleanos en JSONB ✅ |
+| Multi-tenancy | Planeado | Diseñado en fase3/, sin deployar ⏳ |
+| Declaraciones normalizadas | Planeado | Diseñado, sin sync ⏳ |
+| Embeddings declaraciones | Planeado | Schema listo, sin datos ⏳ |
+
+---
+
+## Queries de Ejemplo (Futuro Multi-Tenant)
+
+### Dashboard Principal del Cliente
+
+```sql
+SELECT d.*, c.nombre_completo, c.partido_nombre, t.nombre as tema
+FROM quipu_declaraciones d
+JOIN quipu_candidatos c ON d.candidato_id = c.id
+JOIN quipu_temas t ON d.tema_id = t.id
+JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
+JOIN quipu_cliente_temas ct ON ct.tema_id = d.tema_id
+WHERE cc.cliente_id = $cliente_id AND ct.cliente_id = $cliente_id
+ORDER BY d.fecha DESC, ct.prioridad ASC;
+```
+
+### Búsqueda Semántica Filtrada
+
+```sql
+SELECT d.contenido, c.nombre_completo, t.nombre as tema,
+       1 - (d.embedding <=> $query_embedding) as similarity
+FROM quipu_declaraciones d
+JOIN quipu_candidatos c ON d.candidato_id = c.id
+JOIN quipu_temas t ON d.tema_id = t.id
+JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
+WHERE cc.cliente_id = $cliente_id AND d.embedding IS NOT NULL
+ORDER BY d.embedding <=> $query_embedding
+LIMIT 20;
+```
+
+---
+
+## Beneficios de la Arquitectura
+
+| Antes | Después |
+|-------|---------|
+| Sin modelo de clientes | Multi-tenant con suscripciones |
+| Usuario ve todo | Usuario ve solo sus candidatos/temas |
+| Declaraciones en JSON anidado | Tabla plana con FKs |
+| Stakeholder = texto libre | `candidato_id` → consultas directas |
+| Tema = texto inconsistente | `tema_id` → filtro por prioridad |
+| Sin búsqueda semántica en declaraciones | Embeddings + HNSW index |
+| Sin link promesa ↔ declaración | Tabla de coherencia |
+| Organizaciones en texto | Tabla normalizada + menciones |
+| 15 categorías fijas | **247 categorías dinámicas** |
+| Hojas de vida básicas | **50+ campos con verificaciones JNE** |
+
+---
+
+*Documento actualizado Enero 2026 para reflejar el estado real de implementación de Quipu.*

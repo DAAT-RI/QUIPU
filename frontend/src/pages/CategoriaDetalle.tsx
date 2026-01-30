@@ -199,15 +199,15 @@ export function CategoriaDetalle() {
                 onClick={() => setTopPartidosOpen((v) => !v)}
                 className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-violet-500 px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${topPartidosOpen ? 'bg-violet-50/50 dark:bg-violet-950/20 border-violet-200/50 dark:border-violet-800/30' : 'bg-card hover:border-violet-300/50'}`}
               >
-                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-                  <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-                </div>
-                <h2 className="text-lg font-semibold flex-1">Top partidos en {config.label}</h2>
                 <ChevronDown
                   className={`h-5 w-5 text-violet-500 transition-transform duration-200 ${
                     topPartidosOpen ? 'rotate-0' : '-rotate-90'
                   }`}
                 />
+                <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+                  <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+                </div>
+                <h2 className="text-lg font-semibold flex-1">Top partidos en {config.label}</h2>
               </button>
               {topPartidosOpen && (
                 <div className="rounded-xl border bg-card divide-y mt-2">

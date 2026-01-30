@@ -119,9 +119,11 @@ function CandidatoColumn({
             </div>
             {declaraciones.length === 0 ? (
               <p className="text-sm text-muted-foreground italic py-2">
-                {categoriaFilter
-                  ? `Sin declaraciones sobre "${categoriaFilter}"`
-                  : 'Sin declaraciones'}
+                {textFilter
+                  ? `Sin declaraciones con la palabra "${textFilter}"`
+                  : categoriaFilter
+                    ? `Sin declaraciones sobre "${categoriaFilter}"`
+                    : 'Sin declaraciones'}
               </p>
             ) : (
               <>
