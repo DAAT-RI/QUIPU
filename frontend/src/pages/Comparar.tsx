@@ -61,7 +61,7 @@ function CandidatoColumn({
   const { data: declResult, isLoading: loadingDecl } = useDeclaraciones({
     stakeholder: apellido,
     tipo: 'declaration',
-    temaDeclaracion: categoriaFilter || undefined,
+    categoriaDeclaracion: categoriaFilter || undefined,
     offset: 0,
     limit: 50,
   })

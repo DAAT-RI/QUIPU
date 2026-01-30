@@ -1036,11 +1036,11 @@ function TabPerfilMediatico({
       </div>
 
       {/* Topic Pills (for quick overview) */}
-      {stats.topTemas.length > 0 && (
+      {stats.topCategorias.length > 0 && (
         <div className="rounded-xl border bg-card p-4">
           <h3 className="text-sm font-semibold mb-3">Categorías principales</h3>
           <div className="flex flex-wrap gap-2">
-            {stats.topTemas.map(({ name, value }, idx) => (
+            {stats.topCategorias.map(({ name, value }: { name: string; value: number }, idx: number) => (
               <span
                 key={name}
                 className="inline-flex items-center gap-1.5 rounded-full px-3 py-1.5 text-sm font-medium"

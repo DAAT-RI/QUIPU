@@ -21,14 +21,6 @@ import {
   AtSign,
 } from 'lucide-react'
 
-const TIPO_ELECCION_OPTIONS = [
-  { value: '', label: 'Todos los tipos' },
-  { value: 'PRESIDENCIAL', label: 'Presidencial' },
-  { value: 'DIPUTADOS', label: 'Diputados' },
-  { value: 'SENADORES', label: 'Senadores' },
-  { value: 'PARLAMENTO_ANDINO', label: 'Parlamento Andino' },
-]
-
 const LIMIT = 50
 
 // Keys de categorías de plan (para determinar si es plan o declaración)
@@ -117,7 +109,7 @@ export function CategoriaDetalle() {
   // Usar filterLabel (el label original con tildes) para filtrar
   // Solo ejecutar query cuando filterLabelReady para evitar buscar con key normalizada
   const { data: declData, isLoading: loadingDecl } = useDeclaraciones({
-    temaDeclaracion: isDeclaracion && filterLabelReady ? filterLabel : undefined,
+    categoriaDeclaracion: isDeclaracion && filterLabelReady ? filterLabel : undefined,
     offset: 0,
     limit: 200,
   })

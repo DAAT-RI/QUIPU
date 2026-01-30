@@ -28,7 +28,7 @@ const TIPO_OPTIONS = [
 ]
 
 export function Declaraciones() {
-  const [searchParams, setSearchParams] = useSearchParams()
+  const [searchParams] = useSearchParams()
   const navigate = useNavigate()
   const location = useLocation()
   const stakeholderFromUrl = searchParams.get('stakeholder') || ''

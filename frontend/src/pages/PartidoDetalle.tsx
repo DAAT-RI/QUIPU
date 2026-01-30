@@ -186,8 +186,8 @@ export function PartidoDetalle() {
         </div>
       </div>
 
-      {/* Declaraciones por Tema — progress bars */}
-      {temaChartData.length > 0 && (
+      {/* Declaraciones por Categoría — progress bars */}
+      {categoriaChartData.length > 0 && (
         <section>
           <button
             type="button"
@@ -205,7 +205,7 @@ export function PartidoDetalle() {
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-semibold">Declaraciones por Categoría</h2>
               <p className="text-xs text-muted-foreground">
-                {formatNumber(partidoDeclaraciones.length)} declaraciones en {temaChartData.length} categorías
+                {formatNumber(partidoDeclaraciones.length)} declaraciones en {categoriaChartData.length} categorías
               </p>
             </div>
           </button>
