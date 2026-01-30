@@ -4,6 +4,7 @@ import { useQuery } from '@tanstack/react-query'
 import { MapPin, Users, X, ArrowRight, Map } from 'lucide-react'
 
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatNumber, cn } from '@/lib/utils'
 import { supabase } from '@/lib/supabase'
 
@@ -98,6 +99,9 @@ export function MapaElectoral() {
 
   return (
     <div className="space-y-8">
+      {/* Back button */}
+      <BackButton fallback="/" />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">

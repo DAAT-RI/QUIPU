@@ -1,0 +1,136 @@
+# Documento de Feedback - Aplicación Electoral
+
+**Fecha de revisión:** 29 de enero de 2026  
+**Estado:** Pendiente de implementación  
+**Prioridad general:** Por definir
+
+---
+
+## Resumen Ejecutivo
+
+Este documento consolida el feedback recibido organizado por módulo/hoja de la aplicación. Se identifican **25 issues** distribuidos en 7 secciones, incluyendo problemas de UX, funcionalidad, consistencia de datos y mejoras generales.
+
+---
+
+## 1. Dashboard
+
+| # | Tipo | Descripción | Prioridad |
+|---|------|-------------|-----------|
+| 1.1 | UI/Orden | Reorganizar el orden de los componentes según la siguiente secuencia: | |
+| | | 1. Temas más discutidos | |
+| | | 2. Top partido por declaraciones (renombrar desde "propuestas") | |
+| | | 3. Declaraciones más recientes | |
+| | | 4. Estadística general | |
+| 1.2 | Contenido | En "Top partido por propuestas": cambiar nombre a "Top partido por declaraciones" y mostrar declaraciones de los temas en lugar de propuestas | |
+| 1.3 | Contenido | En la tarjeta de cantidad de candidatos donde dice "Presidencial", agregar aclaración: "(incluye vicepresidentes)" | |
+
+---
+
+## 2. Declaraciones
+
+| # | Tipo | Descripción | Prioridad |
+|---|------|-------------|-----------|
+| 2.1 | Navegación | Al hacer clic en una declaración, debe redirigir a la página/ficha de esa declaración (consistente con el comportamiento del Dashboard) | |
+
+---
+
+## 3. Buscar Promesas
+
+| # | Tipo | Descripción | Prioridad |
+|---|------|-------------|-----------|
+| 3.1 | Navegación | Al hacer clic en una declaración, debe llevar a la ficha de la declaración (consistente con Dashboard) | |
+| 3.2 | UX/Navegación | Al entrar a una declaración, no hay forma de regresar a la búsqueda anterior. **Solución sugerida:** Agregar botón "Volver" o breadcrumb | |
+| 3.3 | Contenido | Revisar: ¿Por qué dice "Prensa"? Aclarar o corregir etiqueta | |
+| 3.4 | Bug/UX | Al borrar la búsqueda y quedar con menos de 3 caracteres, la pantalla cambia y se pierde la selección actual. **Comportamiento esperado:** Mantener estado hasta nueva búsqueda válida | |
+
+---
+
+## 4. Candidatos
+
+| # | Tipo | Descripción | Prioridad |
+|---|------|-------------|-----------|
+| 4.1 | Contenido | Cambiar la palabra "Resumen" por "Bio" | |
+
+---
+
+## 5. Partidos
+
+| # | Tipo | Descripción | Prioridad |
+|---|------|-------------|-----------|
+| 5.1 | Navegación | Al entrar a una categoría, no se puede volver al punto anterior; redirige a "Categorías" completo en lugar del estado previo | |
+| 5.2 | Bug/Datos | Límite de 100 propuestas (aparente límite de Supabase). **Caso específico:** Perú Libre muestra 241 por categoría pero solo 100 en vista libre | |
+| 5.3 | Bug/Datos | FUERZA Y LIBERTAD: Muestra solo 1 categoría y 1895 propuestas en general, pero solo 100 en la vista de propuestas. **Requiere investigación** | |
+| 5.4 | Bug/Datos | Revisar "Propuestas por categoría" en general: muestra información incompleta | |
+| 5.5 | Feature | Separar "Declaraciones" de "Menciones" en vistas diferentes o claramente diferenciadas | |
+
+---
+
+## 6. Comparar
+
+| # | Tipo | Descripción | Prioridad |
+|---|------|-------------|-----------|
+| 6.1 | UX | El flujo actual no explica que primero se deben elegir candidatos. **Acción:** Rediseñar la distribución de frames para hacerlo más intuitivo | |
+| 6.2 | Bug | El botón "Ver más" no funciona | |
+| 6.3 | Contenido | Cambiar etiqueta "En medios" por "En medios y RRSS" | |
+| 6.4 | Feature | Agregar opción de filtrar por categoría electoral con un dropdown | |
+| 6.5 | UX/Diseño | Replicar el UX de la sección de comparar de [quipu-electoral.netlify.app](https://quipu-electoral.netlify.app/#). **Nota:** Solicitan ser más gráficos (ver web completa C:\Entornos\Quipu\QUIPU MAQUETA V0) | |
+
+---
+
+## 7. Issues Generales (Cross-cutting)
+
+| # | Tipo | Descripción | Prioridad |
+|---|------|-------------|-----------|
+| 7.1 | Feature | Crear sección de "Favoritos" para que usuarios guarden elementos de interés | |
+| 7.2 | UI/Accesibilidad | Los acordeones deben tener un color diferenciado (más oscuro o claro según el tema) para mejor identificación visual | |
+| 7.3 | Navegación | Problema sistémico: Al entrar a un sitio profundo (nested view), el botón de retroceso no devuelve al punto anterior sino al host/raíz de la sección | |
+
+---
+
+## Anexo: Clasificación por Tipo de Issue
+
+### Bugs (requieren corrección inmediata)
+- 3.4 - Pérdida de selección al borrar búsqueda
+- 5.2 - Límite de 100 registros de Supabase
+- 5.3 - Datos inconsistentes en FUERZA Y LIBERTAD
+- 5.4 - Información incompleta en propuestas por categoría
+- 6.2 - Botón "Ver más" no funciona
+
+### Navegación (afectan flujo de usuario)
+- 2.1 - Click en declaración no redirige
+- 3.1 - Click en declaración no redirige
+- 3.2 - Sin opción de retorno desde ficha
+- 5.1 - Navegación incorrecta desde categorías
+- 7.3 - Retorno a host en lugar de vista previa
+
+### UX/Diseño
+- 1.1 - Reordenamiento de Dashboard
+- 6.1 - Flujo de comparación no intuitivo
+- 6.5 - Rediseño basado en referencia externa
+- 7.2 - Diferenciación visual de acordeones
+
+### Contenido/Etiquetas
+- 1.2 - Renombrar "propuestas" a "declaraciones"
+- 1.3 - Aclaración sobre vicepresidentes
+- 3.3 - Etiqueta "Prensa" confusa
+- 4.1 - Cambiar "Resumen" por "Bio"
+- 6.3 - Cambiar "En medios" por "En medios y RRSS"
+
+### Nuevas Features
+- 5.5 - Separar declaraciones de menciones
+- 6.4 - Filtro por categoría electoral
+- 7.1 - Sección de favoritos
+
+---
+
+## Próximos Pasos
+
+1. [ ] Asignar prioridades a cada issue (Alta/Media/Baja)
+2. [ ] Estimar esfuerzo de desarrollo
+3. [ ] Definir sprint/release target
+4. [ ] Asignar responsables
+5. [ ] Investigar issues de datos (5.2, 5.3, 5.4) - posible problema de paginación en Supabase
+
+---
+
+*Documento generado para revisión del equipo de desarrollo*

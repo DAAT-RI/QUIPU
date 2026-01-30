@@ -110,7 +110,12 @@ export function getDynamicCategoryConfig(label: string, index: number = 0): Cate
 export const SOURCE_CONFIG = {
   twitter: { label: 'Twitter/X', color: '#1DA1F2' },
   facebook: { label: 'Facebook', color: '#1877F2' },
+  instagram: { label: 'Instagram', color: '#E4405F' },
+  tiktok: { label: 'TikTok', color: '#000000' },
+  youtube: { label: 'YouTube', color: '#FF0000' },
   prensa: { label: 'Prensa', color: '#6B7280' },
+  tv: { label: 'TV', color: '#7C3AED' },
+  radio: { label: 'Radio', color: '#F59E0B' },
   plan: { label: 'Plan de Gobierno', color: '#10B981' },
   otro: { label: 'Otro', color: '#9CA3AF' },
 } as const

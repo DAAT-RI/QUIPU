@@ -6,10 +6,10 @@ import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatDate } from '@/lib/utils'
 import type { DeclaracionView } from '@/types/database'
 import {
-  ArrowLeft,
   User,
   GraduationCap,
   Briefcase,
@@ -122,7 +122,7 @@ function cargoPriority(cargo: string | null): number {
 const tabs = [
   { key: 'perfil-mediatico', label: 'Perfil Mediático', icon: BarChart3 },
   { key: 'declaraciones', label: 'Declaraciones', icon: MessageSquareQuote },
-  { key: 'resumen', label: 'Resumen', icon: User },
+  { key: 'resumen', label: 'Bio', icon: User },
   { key: 'educacion', label: 'Educacion', icon: GraduationCap },
   { key: 'experiencia', label: 'Experiencia', icon: Briefcase },
   { key: 'legal', label: 'Legal', icon: Scale },
@@ -237,13 +237,7 @@ export function CandidatoDetalle() {
   return (
     <div className="space-y-8">
       {/* Back link */}
-      <Link
-        to="/candidatos"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Volver a candidatos
-      </Link>
+      <BackButton fallback="/candidatos" label="Volver a candidatos" />
 
       {/* Header Card */}
       <div className="rounded-xl border bg-card p-6">

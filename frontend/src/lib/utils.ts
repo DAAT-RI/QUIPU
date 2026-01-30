@@ -39,10 +39,30 @@ export function getInitials(name: string): string {
     .toUpperCase()
 }
 
-export function sourceFromUrl(url: string | null): 'twitter' | 'facebook' | 'prensa' | 'plan' | 'otro' {
+export function sourceFromUrl(url: string | null): 'twitter' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'tv' | 'radio' | 'prensa' | 'plan' | 'otro' {
   if (!url) return 'otro'
   if (url.includes('twitter.com') || url.includes('x.com')) return 'twitter'
   if (url.includes('facebook.com') || url.includes('fb.com')) return 'facebook'
+  if (url.includes('instagram.com')) return 'instagram'
+  if (url.includes('tiktok.com')) return 'tiktok'
+  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube'
+  return 'prensa'
+}
+
+/** Detects source type from canal name (more comprehensive detection) */
+export function sourceFromCanal(canal: string | null): 'twitter' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'tv' | 'radio' | 'prensa' | 'otro' {
+  if (!canal) return 'otro'
+  const c = canal.toLowerCase()
+  // Social media
+  if (c.includes('twitter') || c.includes(' x ') || c === 'x' || c.endsWith('/x')) return 'twitter'
+  if (c.includes('facebook') || c.includes('fb')) return 'facebook'
+  if (c.includes('instagram') || c.includes('ig')) return 'instagram'
+  if (c.includes('tiktok')) return 'tiktok'
+  if (c.includes('youtube')) return 'youtube'
+  // Traditional media
+  if (c.includes('tv') || c.includes('canal') || c.includes('america') || c.includes('latina') || c.includes('willax') || c.includes('atv') || c.includes('panamericana')) return 'tv'
+  if (c.includes('radio') || c.includes('rpp') || c.includes('exitosa') || c.includes('capital')) return 'radio'
+  // Default to prensa for other news sources
   return 'prensa'
 }
 

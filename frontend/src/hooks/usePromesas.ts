@@ -34,9 +34,9 @@ export function usePromesas(filters: PromesaFilters) {
   })
 }
 
-export function usePromesasByPartido(partidoId: number | undefined, categoria?: string) {
+export function usePromesasByPartido(partidoId: number | undefined, categoria?: string, limit = 2000) {
   return useQuery({
-    queryKey: ['promesas-partido', partidoId, categoria],
+    queryKey: ['promesas-partido', partidoId, categoria, limit],
     enabled: !!partidoId,
     queryFn: async () => {
       let query = supabase
@@ -46,7 +46,7 @@ export function usePromesasByPartido(partidoId: number | undefined, categoria?: 
       if (categoria) {
         query = query.eq('categoria', categoria)
       }
-      query = query.order('categoria').limit(100)
+      query = query.order('categoria').limit(limit)
       const { data, error, count } = await query
       if (error) throw error
       return { data: data ?? [], count: count ?? 0 }
@@ -58,9 +58,9 @@ export function usePromesasByPartido(partidoId: number | undefined, categoria?: 
  * Search promesas by text content for a specific partido
  * Used in Comparar page to filter promesas by tema/search
  */
-export function useSearchPromesasByPartido(partidoId: number | undefined, search: string) {
+export function useSearchPromesasByPartido(partidoId: number | undefined, search: string, limit = 2000) {
   return useQuery({
-    queryKey: ['promesas-partido-search', partidoId, search],
+    queryKey: ['promesas-partido-search', partidoId, search, limit],
     enabled: !!partidoId && search.length >= 2,
     queryFn: async () => {
       const { data, error } = await supabase
@@ -69,7 +69,7 @@ export function useSearchPromesasByPartido(partidoId: number | undefined, search
         .eq('partido_id', partidoId!)
         .or(`texto_original.ilike.%${search}%,resumen.ilike.%${search}%,categoria.ilike.%${search}%`)
         .order('categoria')
-        .limit(100)
+        .limit(limit)
       if (error) throw error
       return data
     },

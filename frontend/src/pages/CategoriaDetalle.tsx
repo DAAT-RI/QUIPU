@@ -7,10 +7,10 @@ import { useCategoriaCounts } from '@/hooks/useCategorias'
 import { CATEGORY_CONFIG, PLAN_CATEGORIES, getDynamicCategoryConfig } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { BackButton } from '@/components/ui/BackButton'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import {
-  ArrowLeft,
   ArrowRight,
   Building2,
   Quote,
@@ -124,13 +124,7 @@ export function CategoriaDetalle() {
   if (!categoryExists) {
     return (
       <div className="space-y-4">
-        <Link
-          to="/categorias"
-          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          Volver a categorias
-        </Link>
+        <BackButton fallback="/categorias" label="Volver a categorias" />
         <EmptyState message={`Categoria "${nombre}" no encontrada`} />
       </div>
     )
@@ -141,13 +135,7 @@ export function CategoriaDetalle() {
   return (
     <div className="space-y-8">
       {/* Back link */}
-      <Link
-        to="/categorias"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Volver a categorias
-      </Link>
+      <BackButton fallback="/categorias" label="Volver a categorias" />
 
       {/* Header Card */}
       <div className="rounded-xl border bg-card p-6">

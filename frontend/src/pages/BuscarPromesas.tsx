@@ -9,8 +9,9 @@ import { FilterSelect } from '@/components/ui/FilterSelect'
 import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { SourceBadge } from '@/components/ui/SourceBadge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { BackButton } from '@/components/ui/BackButton'
 import { PLAN_CATEGORIES } from '@/lib/constants'
-import { formatDate } from '@/lib/utils'
+import { formatDate, sourceFromCanal } from '@/lib/utils'
 
 export function BuscarPromesas() {
   const [query, setQuery] = useState('')
@@ -51,6 +52,8 @@ export function BuscarPromesas() {
   }))
 
   const hasQuery = query.length >= 3
+  const hasFilters = categoria !== '' || partidoId !== ''
+  const showResults = hasQuery || hasFilters // Show results view if we have query OR filters
   const promesas = promesasResult?.data ?? []
   const promesasCount = promesasResult?.count ?? 0
   const declaraciones = declaracionesResult?.data ?? []
@@ -58,17 +61,17 @@ export function BuscarPromesas() {
 
   // Keep focus when transitioning from hero to results
   useEffect(() => {
-    if (hasQuery && !prevHasQuery.current) {
+    if (showResults && !prevHasQuery.current) {
       // Just transitioned to results view, restore focus
       setTimeout(() => {
         inputRef.current?.focus()
       }, 0)
     }
-    prevHasQuery.current = hasQuery
-  }, [hasQuery])
+    prevHasQuery.current = showResults
+  }, [showResults])
 
-  // Hero layout when no query entered
-  if (!hasQuery) {
+  // Hero layout when no query entered and no filters active
+  if (!showResults) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh]">
         <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6">
@@ -99,6 +102,9 @@ export function BuscarPromesas() {
   // Results layout - Two columns
   return (
     <div className="space-y-6">
+      {/* Back button */}
+      <BackButton fallback="/" />
+
       {/* Search bar + filters */}
       <div className="rounded-xl border bg-card p-4">
         <div className="flex flex-col sm:flex-row gap-3">
@@ -163,15 +169,7 @@ export function BuscarPromesas() {
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1">
                     {d.canal && (
-                      <SourceBadge
-                        source={
-                          d.canal.toLowerCase().includes('twitter') || d.canal.toLowerCase().includes('x')
-                            ? 'twitter'
-                            : d.canal.toLowerCase().includes('facebook')
-                              ? 'facebook'
-                              : 'prensa'
-                        }
-                      />
+                      <SourceBadge source={sourceFromCanal(d.canal)} />
                     )}
                     {d.fecha && (
                       <span className="text-[10px] text-muted-foreground">

@@ -9,6 +9,7 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { BackButton } from '@/components/ui/BackButton'
 import { PLAN_CATEGORIES, QUIPU_MASTER_TEMAS } from '@/lib/constants'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
@@ -17,6 +18,14 @@ const SOURCE_OPTIONS = [
   { value: '', label: 'Ambos' },
   { value: 'plan', label: 'Plan de Gobierno' },
   { value: 'declaraciones', label: 'Declaraciones' },
+]
+
+const CATEGORIA_ELECTORAL_OPTIONS = [
+  { value: '', label: 'Todas las categorías' },
+  { value: 'PRESIDENCIAL', label: 'Presidencial' },
+  { value: 'DIPUTADOS', label: 'Diputados' },
+  { value: 'SENADORES DISTRITO ÚNICO', label: 'Senadores (D. Único)' },
+  { value: 'SENADORES DISTRITO MÚLTIPLE', label: 'Senadores (D. Múltiple)' },
 ]
 
 // Combine all temas for dropdown
@@ -38,6 +47,9 @@ function CandidatoColumn({
   categoriaFilter: string
   sourceFilter: string
 }) {
+  const [expandedDecl, setExpandedDecl] = useState(false)
+  const [expandedPromesas, setExpandedPromesas] = useState(false)
+
   const showPlanes = sourceFilter === '' || sourceFilter === 'plan'
   const showDeclaraciones = sourceFilter === '' || sourceFilter === 'declaraciones'
 
@@ -100,7 +112,7 @@ function CandidatoColumn({
           <div>
             <div className="flex items-center justify-center gap-1 text-muted-foreground mb-0.5">
               <MessageSquareQuote size={12} />
-              <span>En Medios</span>
+              <span>En Medios y RRSS</span>
             </div>
             <p className="font-bold text-sm tabular-nums">{formatNumber(declCount)}</p>
           </div>
@@ -126,7 +138,7 @@ function CandidatoColumn({
             <div className="flex items-center gap-1.5">
               <MessageSquareQuote size={14} className="text-amber-600 dark:text-amber-400" />
               <p className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                En Medios
+                En Medios y RRSS
               </p>
             </div>
             {declaraciones.length === 0 ? (
@@ -134,7 +146,7 @@ function CandidatoColumn({
                 {temaSearch ? `Sin declaraciones sobre "${temaSearch}"` : 'Sin declaraciones encontradas'}
               </p>
             ) : (
-              declaraciones.slice(0, 5).map((d, i) => (
+              (expandedDecl ? declaraciones : declaraciones.slice(0, 5)).map((d, i) => (
                 <div
                   key={`${d.master_id}-${i}`}
                   className="rounded-lg border border-amber-200/50 dark:border-amber-800/30 p-2.5 text-xs leading-relaxed bg-amber-50/30 dark:bg-amber-950/20"
@@ -163,9 +175,13 @@ function CandidatoColumn({
               ))
             )}
             {declaraciones.length > 5 && (
-              <p className="text-[10px] text-muted-foreground text-center">
-                +{declaraciones.length - 5} más
-              </p>
+              <button
+                type="button"
+                onClick={() => setExpandedDecl(!expandedDecl)}
+                className="text-[10px] text-primary hover:underline text-center w-full py-1"
+              >
+                {expandedDecl ? 'Ver menos' : `+${declaraciones.length - 5} más`}
+              </button>
             )}
           </div>
         )}
@@ -184,7 +200,7 @@ function CandidatoColumn({
                 {temaSearch ? `Sin propuestas sobre "${temaSearch}"` : 'Sin propuestas en esta categoría'}
               </p>
             ) : (
-              promesasList.slice(0, 5).map((p) => (
+              (expandedPromesas ? promesasList : promesasList.slice(0, 5)).map((p) => (
                 <div
                   key={p.id}
                   className="rounded-lg border p-2.5 text-xs leading-relaxed bg-indigo-50/30 dark:bg-indigo-950/20 border-indigo-200/50 dark:border-indigo-800/30"
@@ -197,9 +213,13 @@ function CandidatoColumn({
               ))
             )}
             {promesasList.length > 5 && (
-              <p className="text-[10px] text-muted-foreground text-center">
-                +{promesasList.length - 5} más
-              </p>
+              <button
+                type="button"
+                onClick={() => setExpandedPromesas(!expandedPromesas)}
+                className="text-[10px] text-primary hover:underline text-center w-full py-1"
+              >
+                {expandedPromesas ? 'Ver menos' : `+${promesasList.length - 5} más`}
+              </button>
             )}
           </div>
         )}
@@ -214,6 +234,7 @@ export function Comparar() {
   const [temaSearch, setTemaSearch] = useState('')
   const [categoriaFilter, setCategoriaFilter] = useState('')
   const [sourceFilter, setSourceFilter] = useState('')
+  const [categoriaElectoral, setCategoriaElectoral] = useState('')
 
   const { data: searchResults, isLoading: searchLoading } = useSearchCandidatosByName(searchQuery)
 
@@ -224,6 +245,8 @@ export function Comparar() {
     if (selectedIds.has(c.id)) return false
     // If we have selections, only show candidates with same tipo_eleccion
     if (firstTipo && c.tipo_eleccion !== firstTipo) return false
+    // Filter by categoria electoral dropdown
+    if (categoriaElectoral && c.tipo_eleccion !== categoriaElectoral) return false
     return true
   })
 
@@ -251,6 +274,9 @@ export function Comparar() {
 
   return (
     <div className="space-y-8">
+      {/* Back button */}
+      <BackButton fallback="/" />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -300,13 +326,19 @@ export function Comparar() {
 
       {/* Candidate search */}
       <div className="rounded-xl border bg-card p-4">
-        <div className="relative">
-          <SearchInput
-            value={searchQuery}
-            onChange={setSearchQuery}
-            placeholder="Buscar por nombre, partido o cargo..."
-            className="max-w-md"
-          />
+        <div className="space-y-3">
+          <div className="flex items-center gap-2 text-sm font-medium">
+            <Search className="h-4 w-4 text-muted-foreground" />
+            <span>Paso 1: Selecciona candidatos para comparar</span>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <SearchInput
+                value={searchQuery}
+                onChange={setSearchQuery}
+                placeholder="Buscar por nombre..."
+                className="w-full"
+              />
           {/* Search dropdown */}
           {searchQuery.length >= 2 && (
             <div className="absolute z-20 mt-1 w-full max-w-md rounded-xl border bg-card shadow-lg max-h-60 overflow-y-auto">
@@ -343,6 +375,26 @@ export function Comparar() {
                 </div>
               )}
             </div>
+          )}
+            </div>
+            <FilterSelect
+              value={categoriaElectoral}
+              onChange={(v) => {
+                setCategoriaElectoral(v)
+                // Clear selected candidates when changing category filter
+                if (v && selectedCandidatos.length > 0 && selectedCandidatos[0]?.tipo_eleccion !== v) {
+                  setSelectedCandidatos([])
+                }
+              }}
+              options={CATEGORIA_ELECTORAL_OPTIONS}
+              placeholder="Categoría electoral"
+              disabled={selectedCandidatos.length > 0}
+            />
+          </div>
+          {selectedCandidatos.length > 0 && categoriaElectoral && (
+            <p className="text-xs text-muted-foreground">
+              Filtro bloqueado mientras hay candidatos seleccionados
+            </p>
           )}
         </div>
 
@@ -406,8 +458,8 @@ export function Comparar() {
       {/* Prompt when no candidates selected */}
       {selectedCandidatos.length === 0 && (
         <EmptyState
-          message="Busca y selecciona candidatos para comparar sus propuestas y declaraciones"
-          icon={Search}
+          message="Usa el buscador de arriba para seleccionar hasta 4 candidatos y comparar sus posiciones"
+          icon={GitCompare}
         />
       )}
 

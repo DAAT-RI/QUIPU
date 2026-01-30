@@ -86,112 +86,119 @@ export function Dashboard() {
         </p>
       </div>
 
-      {/* Stats Strip */}
-      {statsLoading ? (
-        <LoadingSpinner />
-      ) : (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-          <StatPill
-            label="Partidos"
-            value={formatNumber(stats?.totalPartidos)}
-            icon={Building2}
-            href="/partidos"
-          />
-          <StatPill
-            label="Promesas"
-            value={formatNumber(stats?.totalPromesas)}
-            icon={FileText}
-            href="/buscar"
-          />
-          <StatPill
-            label="Candidatos"
-            value={formatNumber(stats?.totalCandidatos)}
-            icon={Users}
-            href="/candidatos"
-          />
-          <StatPill
-            label="Declaraciones"
-            value={formatNumber(declaracionesResult?.count ?? 0)}
-            icon={MessageSquareQuote}
-            href="/declaraciones"
-          />
-        </div>
-      )}
-
-      {/* Candidatos por Cargo — prominent navigation to reduce noise */}
+      {/* Temas Más Discutidos */}
       <section>
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
-            <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <TrendingUp className="h-4 w-4 text-primary" />
+            </div>
+            <h2 className="text-lg font-semibold">Temas Más Discutidos</h2>
           </div>
-          <h2 className="text-lg font-semibold">Candidatos por Cargo</h2>
-        </div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
           <Link
-            to="/candidatos?tipo=PRESIDENCIAL"
-            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
+            to="/categorias"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
           >
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
-                <Crown className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold tracking-tight">
-                  {formatNumber(cargoCounts['PRESIDENCIAL'] || 0)}
-                </p>
-                <p className="text-sm text-muted-foreground">Presidencial</p>
-              </div>
-            </div>
-          </Link>
-          <Link
-            to="/candidatos?tipo=DIPUTADOS"
-            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
-                <UserCheck className="h-6 w-6 text-violet-600 dark:text-violet-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold tracking-tight">
-                  {formatNumber(cargoCounts['DIPUTADOS'] || 0)}
-                </p>
-                <p className="text-sm text-muted-foreground">Diputados</p>
-              </div>
-            </div>
-          </Link>
-          <Link
-            to="/candidatos?tipo=SENADORES%20DISTRITO%20%C3%9ANICO"
-            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
-                <Vote className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold tracking-tight">
-                  {formatNumber(cargoCounts['SENADORES DISTRITO ÚNICO'] || 0)}
-                </p>
-                <p className="text-sm text-muted-foreground">Senadores (D.Único)</p>
-              </div>
-            </div>
-          </Link>
-          <Link
-            to="/candidatos?tipo=SENADORES%20DISTRITO%20M%C3%9ALTIPLE"
-            className="group rounded-xl border bg-card p-5 transition-all hover:shadow-sm hover:border-primary/30"
-          >
-            <div className="flex items-center gap-3">
-              <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
-                <Vote className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div>
-                <p className="text-2xl font-bold tracking-tight">
-                  {formatNumber(cargoCounts['SENADORES DISTRITO MÚLTIPLE'] || 0)}
-                </p>
-                <p className="text-sm text-muted-foreground">Senadores (D.Múltiple)</p>
-              </div>
-            </div>
+            Ver las {CATEGORIES_LIST.length} categorías
+            <ArrowRight className="h-3.5 w-3.5" />
           </Link>
         </div>
+        {catLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {topicCards.map((topic) => {
+              const Icon = topic.icon
+              return (
+                <Link
+                  key={topic.key}
+                  to={`/categorias/${topic.key}`}
+                  className="group flex flex-col items-center gap-2 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30 text-center"
+                >
+                  <div
+                    className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
+                    style={{ backgroundColor: topic.color + '14' }}
+                  >
+                    <Icon className="h-5 w-5" style={{ color: topic.color }} />
+                  </div>
+                  <div className="min-w-0 w-full">
+                    <p className="text-sm font-medium truncate">{topic.label}</p>
+                    <p className="text-lg font-bold" style={{ color: topic.color }}>{topic.count}</p>
+                    <div className="mt-1 h-1 w-full rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full transition-all duration-500"
+                        style={{
+                          width: `${topic.pct}%`,
+                          backgroundColor: topic.color,
+                        }}
+                      />
+                    </div>
+                  </div>
+                </Link>
+              )
+            })}
+          </div>
+        )}
+      </section>
+
+      {/* Top Partidos por Declaraciones */}
+      <section>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
+              <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
+            </div>
+            <h2 className="text-lg font-semibold">Top Partidos por Declaraciones</h2>
+          </div>
+          <Link
+            to="/partidos"
+            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
+          >
+            Ver todos
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </div>
+        {partidosLoading ? (
+          <LoadingSpinner />
+        ) : (
+          <div className="rounded-xl border bg-card divide-y">
+            {partidoRanking.map((p) => {
+              const maxPromesas = partidoRanking[0]?.promesas || 1
+              const barPct = (p.promesas / maxPromesas) * 100
+              return (
+                <Link
+                  key={p.rank}
+                  to="/partidos"
+                  className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
+                >
+                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold">
+                    {p.rank}
+                  </span>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between mb-1">
+                      <p className="text-sm font-medium truncate">{p.nombre}</p>
+                      <span className="text-sm font-bold shrink-0 ml-2 tabular-nums">
+                        {formatNumber(p.promesas)} <span className="text-xs font-normal text-muted-foreground">declaraciones</span>
+                      </span>
+                    </div>
+                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
+                      <div
+                        className="h-full rounded-full bg-violet-500 transition-all duration-700"
+                        style={{ width: `${barPct}%` }}
+                      />
+                    </div>
+                    {p.candidato && (
+                      <p className="text-xs text-muted-foreground mt-1 truncate">
+                        {p.candidato}
+                      </p>
+                    )}
+                  </div>
+                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                </Link>
+              )
+            })}
+          </div>
+        )}
       </section>
 
       {/* Declaraciones Recientes — two columns: feed + categories */}
@@ -326,71 +333,91 @@ export function Dashboard() {
         )}
       </section>
 
-      {/* Two-column: Topics + Candidates */}
+      {/* Two-column: Candidatos por Cargo + Candidatos Presidenciales */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-        {/* Temas Mas Discutidos */}
+        {/* Candidatos por Cargo */}
         <section>
-          <div className="flex items-center gap-2.5 mb-4">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <TrendingUp className="h-4 w-4 text-primary" />
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
+                <Users className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h2 className="text-lg font-semibold">Candidatos por Cargo</h2>
             </div>
-            <h2 className="text-lg font-semibold">Temas Mas Discutidos</h2>
-          </div>
-          {catLoading ? (
-            <LoadingSpinner />
-          ) : (
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-              {topicCards.map((topic) => {
-                const Icon = topic.icon
-                return (
-                  <Link
-                    key={topic.key}
-                    to={`/categorias/${topic.key}`}
-                    className="group flex items-center gap-3 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
-                  >
-                    <div
-                      className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg"
-                      style={{ backgroundColor: topic.color + '14' }}
-                    >
-                      <Icon className="h-5 w-5" style={{ color: topic.color }} />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center justify-between">
-                        <p className="text-sm font-medium truncate">{topic.label}</p>
-                        <div className="flex items-center gap-2 shrink-0 ml-2">
-                          <span className="text-sm font-bold">{topic.count}</span>
-                          <ArrowRight className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-primary transition-colors" />
-                        </div>
-                      </div>
-                      <div className="mt-1.5 flex items-center gap-2">
-                        <div className="h-1 flex-1 rounded-full bg-muted overflow-hidden">
-                          <div
-                            className="h-full rounded-full transition-all duration-500"
-                            style={{
-                              width: `${topic.pct}%`,
-                              backgroundColor: topic.color,
-                            }}
-                          />
-                        </div>
-                        <span className="text-[10px] text-muted-foreground w-14 text-right">
-                          {topic.pct.toFixed(1)}% del total
-                        </span>
-                      </div>
-                    </div>
-                  </Link>
-                )
-              })}
-            </div>
-          )}
-          {!catLoading && (
             <Link
-              to="/categorias"
-              className="mt-3 inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+              to="/candidatos"
+              className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
             >
-              Ver las {CATEGORIES_LIST.length} categorias
+              Ver todos
               <ArrowRight className="h-3.5 w-3.5" />
             </Link>
-          )}
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <Link
+              to="/candidatos?tipo=PRESIDENCIAL"
+              className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
+                  <Crown className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold tracking-tight">
+                    {formatNumber(cargoCounts['PRESIDENCIAL'] || 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Presidencial</p>
+                </div>
+              </div>
+            </Link>
+            <Link
+              to="/candidatos?tipo=DIPUTADOS"
+              className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">
+                  <UserCheck className="h-5 w-5 text-violet-600 dark:text-violet-400" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold tracking-tight">
+                    {formatNumber(cargoCounts['DIPUTADOS'] || 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Diputados</p>
+                </div>
+              </div>
+            </Link>
+            <Link
+              to="/candidatos?tipo=SENADORES%20DISTRITO%20%C3%9ANICO"
+              className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-emerald-500/10">
+                  <Vote className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold tracking-tight">
+                    {formatNumber(cargoCounts['SENADORES DISTRITO ÚNICO'] || 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Senadores (D.Único)</p>
+                </div>
+              </div>
+            </Link>
+            <Link
+              to="/candidatos?tipo=SENADORES%20DISTRITO%20M%C3%9ALTIPLE"
+              className="group rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
+            >
+              <div className="flex items-center gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-blue-500/10">
+                  <Vote className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                </div>
+                <div>
+                  <p className="text-xl font-bold tracking-tight">
+                    {formatNumber(cargoCounts['SENADORES DISTRITO MÚLTIPLE'] || 0)}
+                  </p>
+                  <p className="text-xs text-muted-foreground">Senadores (D.Múltiple)</p>
+                </div>
+              </div>
+            </Link>
+          </div>
         </section>
 
         {/* Candidatos Presidenciales */}
@@ -401,62 +428,42 @@ export function Dashboard() {
         />
       </div>
 
-      {/* Top Partidos */}
+      {/* Estadística General - Stats Strip */}
       <section>
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-violet-500/10">
-              <Building2 className="h-4 w-4 text-violet-600 dark:text-violet-400" />
-            </div>
-            <h2 className="text-lg font-semibold">Top Partidos por Propuestas</h2>
+        <div className="flex items-center gap-2.5 mb-4">
+          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+            <TrendingUp className="h-4 w-4 text-primary" />
           </div>
-          <Link
-            to="/partidos"
-            className="text-sm text-muted-foreground hover:text-foreground transition-colors flex items-center gap-1"
-          >
-            Ver todos
-            <ArrowRight className="h-3.5 w-3.5" />
-          </Link>
+          <h2 className="text-lg font-semibold">Estadística General</h2>
         </div>
-        {partidosLoading ? (
+        {statsLoading ? (
           <LoadingSpinner />
         ) : (
-          <div className="rounded-xl border bg-card divide-y">
-            {partidoRanking.map((p) => {
-              const maxPromesas = partidoRanking[0]?.promesas || 1
-              const barPct = (p.promesas / maxPromesas) * 100
-              return (
-                <Link
-                  key={p.rank}
-                  to="/partidos"
-                  className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
-                >
-                  <span className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-violet-500/10 text-violet-600 dark:text-violet-400 text-xs font-bold">
-                    {p.rank}
-                  </span>
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center justify-between mb-1">
-                      <p className="text-sm font-medium truncate">{p.nombre}</p>
-                      <span className="text-sm font-bold shrink-0 ml-2 tabular-nums">
-                        {formatNumber(p.promesas)} <span className="text-xs font-normal text-muted-foreground">promesas</span>
-                      </span>
-                    </div>
-                    <div className="h-1.5 w-full rounded-full bg-muted overflow-hidden">
-                      <div
-                        className="h-full rounded-full bg-violet-500 transition-all duration-700"
-                        style={{ width: `${barPct}%` }}
-                      />
-                    </div>
-                    {p.candidato && (
-                      <p className="text-xs text-muted-foreground mt-1 truncate">
-                        {p.candidato}
-                      </p>
-                    )}
-                  </div>
-                  <ArrowRight className="h-4 w-4 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-                </Link>
-              )
-            })}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+            <StatPill
+              label="Partidos"
+              value={formatNumber(stats?.totalPartidos)}
+              icon={Building2}
+              href="/partidos"
+            />
+            <StatPill
+              label="Promesas"
+              value={formatNumber(stats?.totalPromesas)}
+              icon={FileText}
+              href="/buscar"
+            />
+            <StatPill
+              label="Candidatos"
+              value={formatNumber(stats?.totalCandidatos)}
+              icon={Users}
+              href="/candidatos"
+            />
+            <StatPill
+              label="Declaraciones"
+              value={formatNumber(declaracionesResult?.count ?? 0)}
+              icon={MessageSquareQuote}
+              href="/declaraciones"
+            />
           </div>
         )}
       </section>

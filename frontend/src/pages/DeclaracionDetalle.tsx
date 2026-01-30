@@ -4,9 +4,9 @@ import { useDeclaracionEntry } from '@/hooks/useDeclaraciones'
 import { useStakeholderCandidato } from '@/hooks/useStakeholderCandidato'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { ErrorState } from '@/components/ui/ErrorState'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatDate } from '@/lib/utils'
 import {
-  ArrowLeft,
   ExternalLink,
   Quote,
   ChevronDown,
@@ -63,13 +63,7 @@ export function DeclaracionDetalle() {
   return (
     <div className="space-y-6 max-w-3xl mx-auto">
       {/* Back link */}
-      <Link
-        to="/declaraciones"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Volver a declaraciones
-      </Link>
+      <BackButton fallback="/declaraciones" label="Volver a declaraciones" />
 
       {/* Hero: LA DECLARACIÓN */}
       <HeroDeclaracion

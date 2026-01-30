@@ -12,9 +12,9 @@ import { Badge } from '@/components/ui/Badge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import {
-  ArrowLeft,
   ArrowRight,
   Users,
   FileText,
@@ -23,6 +23,7 @@ import {
   ChevronDown,
   MessageSquareQuote,
   ExternalLink,
+  AtSign,
 } from 'lucide-react'
 
 export function PartidoDetalle() {
@@ -30,6 +31,7 @@ export function PartidoDetalle() {
   const [categoriaFilter, setCategoriaFilter] = useState('')
   const [temasOpen, setTemasOpen] = useState(true)
   const [declaracionesOpen, setDeclaracionesOpen] = useState(true)
+  const [mencionesOpen, setMencionesOpen] = useState(false)
   const [candidatosOpen, setCandidatosOpen] = useState(true)
   const [categoriasOpen, setCategoriasOpen] = useState(false)
   const [propuestasOpen, setPropuestasOpen] = useState(false)
@@ -64,11 +66,11 @@ export function PartidoDetalle() {
     limit: 500,
   })
 
-  const partidoDeclaraciones = useMemo(() => {
-    if (!declData?.data || !partido) return []
+  const { declaraciones: partidoDeclaraciones, menciones: partidoMenciones } = useMemo(() => {
+    if (!declData?.data || !partido) return { declaraciones: [], menciones: [] }
     const nombre = partido.nombre_oficial.toLowerCase()
     const candidato = partido.candidato_presidencial?.toLowerCase()
-    return declData.data.filter((d) => {
+    const filtered = declData.data.filter((d) => {
       const canalLower = d.canal?.toLowerCase() || ''
       const canalMatch =
         canalLower.includes(nombre) || nombre.includes(canalLower)
@@ -77,6 +79,10 @@ export function PartidoDetalle() {
         : false
       return canalMatch || stakeholderMatch
     })
+    // Separar declaraciones de menciones
+    const declaraciones = filtered.filter((d) => d.tipo === 'declaration')
+    const menciones = filtered.filter((d) => d.tipo === 'mention')
+    return { declaraciones, menciones }
   }, [declData, partido])
 
   // Build tema chart: group declarations by tema
@@ -140,13 +146,7 @@ export function PartidoDetalle() {
   return (
     <div className="space-y-8">
       {/* Back link */}
-      <Link
-        to="/partidos"
-        className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
-      >
-        <ArrowLeft className="h-4 w-4" />
-        Volver a partidos
-      </Link>
+      <BackButton fallback="/partidos" label="Volver a partidos" />
 
       {/* Header Card */}
       <div className="rounded-xl border bg-card p-6">
@@ -159,10 +159,15 @@ export function PartidoDetalle() {
             {partido.candidato_presidencial && (
               <p className="text-sm text-primary mt-1">{partido.candidato_presidencial}</p>
             )}
-            <div className="mt-3 flex gap-6 text-sm text-muted-foreground">
+            <div className="mt-3 flex flex-wrap gap-4 text-sm text-muted-foreground">
               <span className="flex items-center gap-1.5">
                 <MessageSquareQuote size={15} /> {formatNumber(partidoDeclaraciones.length)} declaraciones
               </span>
+              {partidoMenciones.length > 0 && (
+                <span className="flex items-center gap-1.5">
+                  <MessageSquareQuote size={15} /> {formatNumber(partidoMenciones.length)} menciones
+                </span>
+              )}
               <span className="flex items-center gap-1.5">
                 <Users size={15} /> {formatNumber(totalCandidatos)} candidatos
               </span>
@@ -180,7 +185,7 @@ export function PartidoDetalle() {
           <button
             type="button"
             onClick={() => setTemasOpen((v) => !v)}
-            className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
+            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${temasOpen ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30' : 'bg-card'}`}
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
               <Tags className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -233,7 +238,7 @@ export function PartidoDetalle() {
         <button
           type="button"
           onClick={() => setDeclaracionesOpen((v) => !v)}
-          className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
+          className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${declaracionesOpen ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30' : 'bg-card'}`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
             <MessageSquareQuote className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -328,13 +333,97 @@ export function PartidoDetalle() {
         )}
       </section>
 
+      {/* Menciones en Medios */}
+      {partidoMenciones.length > 0 && (
+        <section>
+          <button
+            type="button"
+            onClick={() => setMencionesOpen((v) => !v)}
+            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${mencionesOpen ? 'bg-orange-50/50 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-800/30' : 'bg-card'}`}
+          >
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10">
+              <AtSign className="h-4 w-4 text-orange-600 dark:text-orange-400" />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h2 className="text-lg font-semibold">Menciones en Medios</h2>
+              <p className="text-xs text-muted-foreground">
+                {formatNumber(partidoMenciones.length)} menciones del partido en medios
+              </p>
+            </div>
+            <ChevronDown
+              className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+                mencionesOpen ? 'rotate-0' : '-rotate-90'
+              }`}
+            />
+          </button>
+          {mencionesOpen && (
+            <div className="mt-4">
+              <div className="space-y-3">
+                {partidoMenciones.map((d, idx) => (
+                  <Link
+                    key={`mencion-${d.master_id}-${idx}`}
+                    to={`/declaraciones/${d.master_id}`}
+                    className="group flex items-start gap-4 rounded-xl border border-orange-200/50 dark:border-orange-800/30 bg-orange-50/30 dark:bg-orange-950/20 p-4 transition-all hover:shadow-sm hover:border-orange-300/50"
+                  >
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center gap-2">
+                        <span className="inline-flex items-center gap-1 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 text-[11px] font-medium">
+                          <AtSign className="h-3 w-3" />
+                          Mención
+                        </span>
+                        {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
+                          <span className="rounded-md bg-muted px-1.5 py-0.5 text-[11px] font-medium text-muted-foreground">
+                            {d.canal}
+                          </span>
+                        )}
+                      </div>
+                      <p className="mt-2 text-sm text-muted-foreground leading-relaxed">
+                        {d.contenido}
+                      </p>
+                      <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
+                        {d.tema_interaccion && (
+                          <span className="rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-0.5 text-[11px] font-medium">
+                            {d.tema_interaccion}
+                          </span>
+                        )}
+                        {d.fecha && (
+                          <span className="text-[11px] text-muted-foreground">
+                            {formatDate(d.fecha)}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                    <div className="shrink-0 flex flex-col items-end gap-2">
+                      {d.ruta && (
+                        <a
+                          href={d.ruta}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          onClick={(e) => e.stopPropagation()}
+                          className="text-muted-foreground hover:text-foreground transition-colors"
+                          title="Ver fuente"
+                          aria-label="Ver fuente"
+                        >
+                          <ExternalLink size={14} />
+                        </a>
+                      )}
+                      <ArrowRight className="h-4 w-4 text-muted-foreground/30 group-hover:text-orange-500 transition-colors" />
+                    </div>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
+
       {/* Candidatos grid */}
       {candidatos.length > 0 && (
         <section>
           <button
             type="button"
             onClick={() => setCandidatosOpen((v) => !v)}
-            className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
+            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${candidatosOpen ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <Users className="h-4 w-4 text-primary" />
@@ -392,7 +481,7 @@ export function PartidoDetalle() {
           <button
             type="button"
             onClick={() => setCategoriasOpen((v) => !v)}
-            className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
+            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${categoriasOpen ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <Tags className="h-4 w-4 text-primary" />
@@ -454,7 +543,7 @@ export function PartidoDetalle() {
         <button
           type="button"
           onClick={() => setPropuestasOpen((v) => !v)}
-          className="w-full flex items-center gap-2.5 rounded-xl border bg-card px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer"
+          className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${propuestasOpen ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200/50 dark:border-indigo-800/30' : 'bg-card'}`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
             <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
