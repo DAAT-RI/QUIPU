@@ -9,6 +9,9 @@ interface CSVUploaderProps {
   accept?: string
 }
 
+const MAX_FILE_SIZE = 5 * 1024 * 1024 // 5MB
+const ALLOWED_MIME_TYPES = ['text/csv', 'text/plain', 'application/vnd.ms-excel']
+
 export function CSVUploader({
   onParsed,
   expectedColumns = ['DNI'],
@@ -23,8 +26,18 @@ export function CSVUploader({
     (file: File) => {
       setError(null)
 
-      if (!file.name.endsWith('.csv')) {
+      if (!file.name.toLowerCase().endsWith('.csv')) {
         setError('Solo se permiten archivos CSV')
+        return
+      }
+
+      if (file.size > MAX_FILE_SIZE) {
+        setError('El archivo excede el tamaño máximo de 5MB')
+        return
+      }
+
+      if (file.type && !ALLOWED_MIME_TYPES.includes(file.type)) {
+        setError('Tipo de archivo no válido')
         return
       }
 
@@ -120,7 +133,7 @@ export function CSVUploader({
               </label>
             </p>
             <p className="text-xs text-muted-foreground mt-1">
-              Columnas esperadas: {expectedColumns.join(', ')}
+              Columnas esperadas: {expectedColumns.join(', ')} (máx. 5MB)
             </p>
           </>
         )}

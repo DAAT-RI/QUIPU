@@ -27,7 +27,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Cargar sesión inicial
   useEffect(() => {
+    // Safety timeout - never stay in loading state for more than 10 seconds
+    const safetyTimeout = setTimeout(() => {
+      console.warn('Safety timeout triggered - forcing loading to false')
+      setLoading(false)
+    }, 10000)
+
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('getSession result:', { hasSession: !!session, hasUser: !!session?.user })
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -39,15 +46,19 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
         }
       } else {
+        console.log('No session/user, setting loading to false')
         setLoading(false)
       }
+      clearTimeout(safetyTimeout)
     }).catch((error) => {
       console.error('Error getting session:', error)
       setLoading(false)
+      clearTimeout(safetyTimeout)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        console.log('Auth state changed:', { event, hasSession: !!session, hasUser: !!session?.user })
         setSession(session)
         setUser(session?.user ?? null)
         if (session?.user) {
@@ -61,6 +72,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setClienteId(null)
           setClienteNombre(null)
           setIsSuperadmin(false)
+          setLoading(false)
         }
       }
     )
@@ -73,16 +85,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (!user) return
 
     const interval = setInterval(async () => {
-      const { data } = await supabase
-        .from('quipu_usuarios')
-        .select('current_session_id')
-        .eq('auth_user_id', user.id)
-        .single()
+      try {
+        const { data, error } = await supabase
+          .from('quipu_usuarios')
+          .select('current_session_id')
+          .eq('auth_user_id', user.id)
+          .single()
 
-      if (data && data.current_session_id !== sessionId) {
-        // Otra sesión tomó el control
-        await supabase.auth.signOut()
-        alert('Sesión cerrada: iniciaste sesión en otro dispositivo')
+        if (error) {
+          console.error('Error checking session:', error)
+          return // Don't sign out on error, just skip this check
+        }
+
+        if (data && data.current_session_id && data.current_session_id !== sessionId) {
+          // Otra sesión tomó el control
+          console.log('Session conflict detected, signing out')
+          await supabase.auth.signOut()
+          alert('Sesión cerrada: iniciaste sesión en otro dispositivo')
+        }
+      } catch (error) {
+        console.error('Exception in session validation:', error)
       }
     }, 30000)
 
@@ -100,9 +122,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('Error fetching usuario:', error)
       } else if (data) {
+        console.log('Usuario data:', { rol: data.rol, cliente_id: data.cliente_id })
         setClienteId(data.cliente_id)
         setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
         setIsSuperadmin(data.rol === 'superadmin')
+        console.log('isSuperadmin set to:', data.rol === 'superadmin')
       }
     } catch (error) {
       console.error('Exception in loadClienteData:', error)
@@ -112,10 +136,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function registerSession(authUserId: string) {
-    await supabase
-      .from('quipu_usuarios')
-      .update({ current_session_id: sessionId })
-      .eq('auth_user_id', authUserId)
+    try {
+      const { error } = await supabase
+        .from('quipu_usuarios')
+        .update({ current_session_id: sessionId })
+        .eq('auth_user_id', authUserId)
+
+      if (error) {
+        console.error('Error registering session:', error)
+      }
+    } catch (error) {
+      console.error('Exception in registerSession:', error)
+    }
   }
 
   async function signIn(email: string, password: string) {
