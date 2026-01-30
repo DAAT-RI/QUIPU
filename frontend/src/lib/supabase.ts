@@ -7,14 +7,4 @@ if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Missing VITE_SUPABASE_URL or VITE_SUPABASE_ANON_KEY in .env')
 }
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey, {
-  global: {
-    // Disable browser HTTP cache to prevent stale data on refresh
-    fetch: (url, options = {}) => {
-      return fetch(url, {
-        ...options,
-        cache: 'no-store'
-      })
-    }
-  }
-})
+export const supabase = createClient(supabaseUrl, supabaseAnonKey)
