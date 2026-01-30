@@ -3,13 +3,14 @@ import { supabase } from '@/lib/supabase'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function useClienteCandidatos() {
-  const { clienteId } = useAuth()
+  const { clienteId, loading, isSuperadmin } = useAuth()
 
   return useQuery({
-    queryKey: ['cliente-candidatos', clienteId],
+    queryKey: ['cliente-candidatos', clienteId, isSuperadmin],
+    enabled: !loading,
     queryFn: async () => {
-      // Master user (sin cliente) = todos los candidatos
-      if (clienteId === null) {
+      // Superadmin = todos los candidatos (más eficiente que ir por junction table)
+      if (isSuperadmin) {
         const { data, error } = await supabase
           .from('quipu_candidatos')
           .select('id, nombre_completo, dni, cargo_postula')
@@ -22,7 +23,7 @@ export function useClienteCandidatos() {
         })) ?? []
       }
 
-      // Usuario normal = solo sus candidatos
+      // Usuario normal = solo sus candidatos via junction table
       const { data, error } = await supabase
         .from('quipu_cliente_candidatos')
         .select(`

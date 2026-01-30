@@ -59,7 +59,7 @@ function getSearchVariants(text: string): string[] {
  * - Uses quipu_stakeholder_aliases for accurate stakeholder matching
  */
 export function useDeclaraciones(filters: DeclaracionFilters) {
-  const { clienteId } = useAuth()
+  const { clienteId, loading, isSuperadmin } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
   // Get candidato IDs for this client
@@ -67,11 +67,11 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
 
   return useQuery({
     queryKey: ['declaraciones', filters, clienteId, clienteCandidatoIds],
-    enabled: clienteId === null || clienteCandidatoIds.length > 0,
+    enabled: !loading && (isSuperadmin || clienteCandidatoIds.length > 0),
     queryFn: async () => {
-      // For non-master users, first get aliases that map to their candidates
+      // For non-superadmin users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
-      if (clienteId !== null && clienteCandidatoIds.length > 0) {
+      if (!isSuperadmin && clienteCandidatoIds.length > 0) {
         const { data: aliases } = await supabase
           .from('quipu_stakeholder_aliases')
           .select('alias_normalized')
@@ -86,7 +86,7 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
 
       // Filtro multi-tenant: solo declaraciones de candidatos del cliente
       // Uses aliases table for accurate stakeholder matching
-      if (clienteId !== null) {
+      if (!isSuperadmin) {
         if (aliasNormalized.length > 0) {
           const stakeholderConditions = aliasNormalized
             .slice(0, 100) // Limitar para performance
