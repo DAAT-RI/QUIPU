@@ -108,7 +108,7 @@ export default function StakeholderAliases() {
             </div>
 
             {/* Table */}
-            <div className="bg-card border rounded-lg overflow-hidden">
+            <div className="bg-card border rounded-lg">
                 <table className="w-full">
                     <thead className="bg-muted/50">
                         <tr>
@@ -140,7 +140,7 @@ export default function StakeholderAliases() {
                                         <div className="font-medium">{alias.alias}</div>
                                         <div className="text-xs text-muted-foreground">{alias.alias_normalized}</div>
                                     </td>
-                                    <td className="px-4 py-3">
+                                    <td className="px-4 py-3 relative overflow-visible">
                                         {editingId === alias.id ? (
                                             <div className="relative">
                                                 <input
@@ -152,7 +152,7 @@ export default function StakeholderAliases() {
                                                     autoFocus
                                                 />
                                                 {candidatoResults && candidatoResults.length > 0 && (
-                                                    <div className="absolute z-10 w-full mt-1 bg-card border rounded-lg shadow-lg max-h-48 overflow-auto">
+                                                    <div className="absolute z-50 w-72 mt-1 bg-card border rounded-lg shadow-xl max-h-64 overflow-auto left-0 top-full">
                                                         {candidatoResults.map((c: any) => (
                                                             <button
                                                                 key={c.id}
