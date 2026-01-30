@@ -1,5 +1,6 @@
-import { BrowserRouter, Routes, Route, ScrollRestoration } from 'react-router-dom'
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { useEffect } from 'react'
 import { Layout } from '@/components/layout/Layout'
 import { Dashboard } from '@/pages/Dashboard'
 import { Declaraciones } from '@/pages/Declaraciones'
@@ -24,11 +25,20 @@ const queryClient = new QueryClient({
   },
 })
 
+// Scroll to top on route change (compatible with BrowserRouter)
+function ScrollToTop() {
+  const { pathname } = useLocation()
+  useEffect(() => {
+    window.scrollTo(0, 0)
+  }, [pathname])
+  return null
+}
+
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <ScrollRestoration />
+        <ScrollToTop />
         <Routes>
           <Route element={<Layout />}>
             <Route path="/" element={<Dashboard />} />
