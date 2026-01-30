@@ -7,7 +7,7 @@ export function useClienteCandidatos() {
 
   return useQuery({
     queryKey: ['cliente-candidatos', clienteId, isSuperadmin],
-    enabled: !loading,
+    enabled: !loading && (isSuperadmin || clienteId !== null),
     queryFn: async () => {
       // Superadmin = todos los candidatos (más eficiente que ir por junction table)
       if (isSuperadmin) {
