@@ -3,10 +3,10 @@ import { supabase } from '@/lib/supabase'
 
 export interface Usuario {
   id: string
-  cliente_id: number
+  cliente_id: number | null  // null para superadmin/master
   email: string
   nombre: string | null
-  rol: string
+  rol: string  // 'admin' | 'analyst' | 'viewer' | 'superadmin'
   auth_user_id: string | null
   activo: boolean
   created_at: string
