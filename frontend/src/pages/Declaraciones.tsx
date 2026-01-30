@@ -1,5 +1,5 @@
-import { useState, useEffect, useMemo } from 'react'
-import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { useMemo } from 'react'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useDeclaraciones, useCanales, useOrganizacionesMencionadas } from '@/hooks/useDeclaraciones'
 import { useDeclaracionesPorTema } from '@/hooks/useDashboardStats'
 import { SearchInput } from '@/components/ui/SearchInput'
@@ -27,32 +27,34 @@ const TIPO_OPTIONS = [
 ]
 
 export function Declaraciones() {
-  const [searchParams] = useSearchParams()
-  const navigate = useNavigate()
-  const stakeholderFromUrl = searchParams.get('stakeholder') || ''
-  const temaFromUrl = searchParams.get('tema') || ''
+  const [searchParams, setSearchParams] = useSearchParams()
 
-  // Default: solo declarations (mentions tienen mucho ruido)
-  const [tipo, setTipo] = useState<string>('declaration')
-  const [search, setSearch] = useState('')
-  const [stakeholder, setStakeholder] = useState(stakeholderFromUrl)
-  const [canal, setCanal] = useState('')
-  const [tema, setTema] = useState(temaFromUrl)
-  const [organizacion, setOrganizacion] = useState('')
-  const [producto, setProducto] = useState('')
-  const [page, setPage] = useState(0)
+  // Leer TODOS los filtros desde URL (no local state)
+  const tipo = searchParams.get('tipo') || 'declaration'
+  const search = searchParams.get('search') || ''
+  const stakeholder = searchParams.get('stakeholder') || ''
+  const canal = searchParams.get('canal') || ''
+  const tema = searchParams.get('tema') || ''
+  const organizacion = searchParams.get('organizacion') || ''
+  const producto = searchParams.get('producto') || ''
+  const page = parseInt(searchParams.get('page') || '0', 10)
 
-  // Sync stakeholder with URL param
-  useEffect(() => {
-    setStakeholder(stakeholderFromUrl)
-    setPage(0)
-  }, [stakeholderFromUrl])
-
-  // Sync tema with URL param
-  useEffect(() => {
-    setTema(temaFromUrl)
-    setPage(0)
-  }, [temaFromUrl])
+  // Helper para actualizar URL params
+  const updateParams = (updates: Record<string, string | number>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === '' || value === 0 || (key === 'tipo' && value === 'declaration')) {
+        params.delete(key)
+      } else {
+        params.set(key, String(value))
+      }
+    })
+    // Reset page when changing filters (except when changing page itself)
+    if (!('page' in updates)) {
+      params.delete('page')
+    }
+    setSearchParams(params, { replace: true })
+  }
 
   // Obtener canales, organizaciones y temas dinámicamente
   const { data: canalesData } = useCanales()
@@ -88,11 +90,17 @@ export function Declaraciones() {
   const hasNext = page < totalPages - 1
   const hasPrev = page > 0
 
-  function handleFilterChange<T>(setter: (v: T) => void) {
-    return (value: T) => {
-      setter(value)
-      setPage(0)
-    }
+  // Crear handlers para cada filtro
+  const setTipo = (v: string) => updateParams({ tipo: v })
+  const setSearch = (v: string) => updateParams({ search: v })
+  const setStakeholder = (v: string) => updateParams({ stakeholder: v })
+  const setCanal = (v: string) => updateParams({ canal: v })
+  const setTema = (v: string) => updateParams({ tema: v })
+  const setOrganizacion = (v: string) => updateParams({ organizacion: v })
+  const setProducto = (v: string) => updateParams({ producto: v })
+  const setPage = (v: number | ((p: number) => number)) => {
+    const newPage = typeof v === 'function' ? v(page) : v
+    updateParams({ page: newPage })
   }
 
   return (
@@ -117,10 +125,7 @@ export function Declaraciones() {
           <span className="font-semibold text-primary">{tema}</span>
           <button
             type="button"
-            onClick={() => {
-              setTema('')
-              navigate('/declaraciones')
-            }}
+            onClick={() => setTema('')}
             className="ml-auto flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <X size={14} />
@@ -135,25 +140,25 @@ export function Declaraciones() {
         <div className="flex flex-col sm:flex-row gap-3">
           <SearchInput
             value={search}
-            onChange={handleFilterChange(setSearch)}
+            onChange={setSearch}
             placeholder="Buscar en lo que dijeron..."
             className="flex-1"
           />
           <SearchInput
             value={stakeholder}
-            onChange={handleFilterChange(setStakeholder)}
+            onChange={setStakeholder}
             placeholder="Quién dijo..."
             className="sm:w-48"
           />
           <FilterSelect
             value={tipo}
-            onChange={handleFilterChange(setTipo)}
+            onChange={setTipo}
             options={TIPO_OPTIONS}
             placeholder="Todos"
           />
           <FilterSelect
             value={canal}
-            onChange={handleFilterChange(setCanal)}
+            onChange={setCanal}
             options={canalOptions}
             placeholder="Fuente"
           />
@@ -163,19 +168,19 @@ export function Declaraciones() {
         <div className="flex flex-col sm:flex-row gap-3">
           <FilterSelect
             value={tema}
-            onChange={handleFilterChange(setTema)}
+            onChange={setTema}
             options={temaOptions}
             placeholder="Categoría"
           />
           <FilterSelect
             value={organizacion}
-            onChange={handleFilterChange(setOrganizacion)}
+            onChange={setOrganizacion}
             options={orgOptions}
             placeholder="Organización mencionada"
           />
           <SearchInput
             value={producto}
-            onChange={handleFilterChange(setProducto)}
+            onChange={setProducto}
             placeholder="Buscar sector/industria..."
             className="flex-1"
           />
@@ -214,6 +219,7 @@ export function Declaraciones() {
               <Link
                 key={`${d.master_id}-${d.idx}`}
                 to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
+                state={{ from: `/declaraciones${searchParams.toString() ? `?${searchParams.toString()}` : ''}` }}
                 className="group block rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
               >
                 {/* Header: Stakeholder + Canal (si diferente) + Fecha */}

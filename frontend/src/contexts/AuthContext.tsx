@@ -33,6 +33,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }, 10000)
 
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('[Auth] Got session:', session ? `User: ${session.user.email}` : 'No session')
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
@@ -40,15 +41,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           await loadClienteData(session.user.id)
           await registerSession(session.user.id)
         } catch (error) {
-          console.error('Error loading cliente data:', error)
+          console.error('[Auth] Error loading cliente data:', error)
           setLoading(false)
         }
       } else {
+        console.log('[Auth] No session, setting loading=false')
         setLoading(false)
       }
       clearTimeout(safetyTimeout)
     }).catch((error) => {
-      console.error('Error getting session:', error)
+      console.error('[Auth] Error getting session:', error)
       setLoading(false)
       clearTimeout(safetyTimeout)
     })
@@ -107,6 +109,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, sessionId])
 
   async function loadClienteData(authUserId: string) {
+    console.log('[Auth] Loading cliente data for:', authUserId)
     try {
       const { data, error } = await supabase
         .from('quipu_usuarios')
@@ -114,15 +117,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('auth_user_id', authUserId)
         .single()
 
+      console.log('[Auth] Query result:', { data, error })
+
       if (error) {
-        console.error('Error fetching usuario:', error)
+        console.error('[Auth] Error fetching usuario:', error)
       } else if (data) {
+        console.log('[Auth] Setting user data:', {
+          cliente_id: data.cliente_id,
+          rol: data.rol,
+          cliente_nombre: (data.quipu_clientes as any)?.nombre
+        })
         setClienteId(data.cliente_id)
         setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
         setIsSuperadmin(data.rol === 'superadmin')
       }
     } catch (error) {
-      console.error('Exception in loadClienteData:', error)
+      console.error('[Auth] Exception in loadClienteData:', error)
     } finally {
       setLoading(false)
     }

@@ -212,7 +212,7 @@ export function Dashboard() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <MessageSquareQuote className="h-4 w-4 text-primary" />
             </div>
-            <h2 className="text-lg font-semibold">Declaraciones Recientes</h2>
+            <h2 className="text-lg font-semibold">Feed de declaraciones recientes</h2>
           </div>
           <Link
             to="/declaraciones"
@@ -261,23 +261,15 @@ export function Dashboard() {
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                       {decl.contenido}
                     </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      {decl.categorias_interaccion &&
-                        decl.categorias_interaccion
-                          .split(';')
-                          .map((t: string) => t.trim())
-                          .filter(Boolean)
-                          .map((t: string) => (
-                            <span key={t} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                              {t}
-                            </span>
-                          ))}
-                      {decl.canal && (
-                        <span className="rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-0.5 text-[11px] font-medium">
-                          {decl.canal}
-                        </span>
-                      )}
-                    </div>
+                    {decl.categorias_interaccion && (
+                      <div className="flex flex-wrap gap-1 mt-2">
+                        {decl.categorias_interaccion.split(';').map((cat: string) => cat.trim()).filter(Boolean).slice(0, 3).map((cat: string) => (
+                          <span key={cat} className="rounded-full bg-primary/10 text-primary px-2 py-0.5 text-[10px] font-medium">
+                            {cat}
+                          </span>
+                        ))}
+                      </div>
+                    )}
                   </div>
                   <div className="shrink-0 text-right flex flex-col items-end gap-1">
                     <span className="text-xs text-muted-foreground">
@@ -291,7 +283,6 @@ export function Dashboard() {
 
             {/* Categorías del feed - columna lateral */}
             <div className="space-y-3">
-              <p className="text-sm font-medium text-muted-foreground">Categorías en el feed</p>
               <div className="rounded-xl border bg-card divide-y">
                 {(() => {
                   // Extraer categorías únicas de las declaraciones (categorias_interaccion puede tener múltiples separadas por ;)
@@ -515,6 +506,7 @@ function CandidatosPresidencialesSection({
   vice1: CandidatoCompleto[]
   vice2: CandidatoCompleto[]
 }) {
+  const [showPresidentes, setShowPresidentes] = useState(true)
   const [showVices, setShowVices] = useState(false)
 
   return (
@@ -535,44 +527,68 @@ function CandidatosPresidencialesSection({
         </Link>
       </div>
 
-      {/* Presidentes - Grid expandido */}
-      <div>
-        <div className="flex items-center justify-between mb-3">
-          <p className="text-sm font-medium text-muted-foreground">Presidente de la República</p>
-          <span className="text-xs text-muted-foreground">{presidentes.length} candidatos</span>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
-          {presidentes.slice(0, 12).map((c, i) => (
-            <Link
-              key={c.id}
-              to={`/candidatos/${c.id}`}
-              className="group rounded-xl border bg-card p-3 transition-all hover:shadow-sm hover:border-primary/30 text-center"
-            >
-              <div className="relative">
-                <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold">
-                  {i + 1}
-                </span>
-                <CandidatoAvatar
-                  nombre={c.nombre_completo || ''}
-                  fotoUrl={c.foto_url}
-                  size="lg"
-                  className="mx-auto mb-2"
-                />
-              </div>
-              <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
-              <p className="text-xs text-muted-foreground truncate">{c.partido_nombre}</p>
-            </Link>
-          ))}
-          {presidentes.length > 12 && (
-            <Link
-              to="/candidatos?tipo=PRESIDENCIAL"
-              className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-card p-3 transition-all hover:border-primary hover:bg-primary/5"
-            >
-              <span className="text-lg font-bold text-muted-foreground">+{presidentes.length - 12}</span>
-              <span className="text-xs text-muted-foreground">más</span>
-            </Link>
-          )}
-        </div>
+      {/* Acordeón para Presidentes */}
+      <div className="rounded-xl border border-l-4 border-l-amber-500 bg-card overflow-hidden">
+        <button
+          type="button"
+          onClick={() => setShowPresidentes(!showPresidentes)}
+          className="w-full flex items-center gap-2 p-3 text-sm font-medium bg-gradient-to-r from-amber-500/10 to-transparent hover:from-amber-500/20 transition-all"
+        >
+          <ChevronDown
+            className={`h-4 w-4 text-amber-500 transition-transform duration-200 ${showPresidentes ? 'rotate-180' : ''}`}
+          />
+          <Crown className="h-4 w-4 text-amber-700 dark:text-amber-300" />
+          <span className="text-amber-700 dark:text-amber-300">
+            Presidente de la República ({presidentes.length})
+          </span>
+        </button>
+        {showPresidentes && (
+          <div className="border-t p-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+              {presidentes.slice(0, 12).map((c, i) => (
+                <Link
+                  key={c.id}
+                  to={`/candidatos/${c.id}`}
+                  className="group rounded-xl border bg-muted/30 p-3 transition-all hover:shadow-sm hover:border-primary/30 text-center"
+                >
+                  <div className="relative">
+                    <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold">
+                      {i + 1}
+                    </span>
+                    <CandidatoAvatar
+                      nombre={c.nombre_completo || ''}
+                      fotoUrl={c.foto_url}
+                      size="lg"
+                      className="mx-auto mb-2"
+                    />
+                  </div>
+                  <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
+                  <p className="text-xs text-muted-foreground truncate">{c.partido_nombre}</p>
+                </Link>
+              ))}
+              {presidentes.length > 12 && (
+                <Link
+                  to="/candidatos?tipo=PRESIDENCIAL"
+                  className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-muted/30 p-3 transition-all hover:border-primary hover:bg-primary/5"
+                >
+                  <span className="text-lg font-bold text-muted-foreground">+{presidentes.length - 12}</span>
+                  <span className="text-xs text-muted-foreground">más</span>
+                </Link>
+              )}
+            </div>
+            {/* Botón contraer en esquina inferior izquierda */}
+            <div className="flex justify-start mt-4">
+              <button
+                type="button"
+                onClick={() => setShowPresidentes(false)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronDown className="h-3 w-3 rotate-180" />
+                Contraer
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Acordeón para Vicepresidentes */}
@@ -604,6 +620,17 @@ function CandidatosPresidencialesSection({
               color="blue"
               expanded={true}
             />
+            {/* Botón contraer en esquina inferior izquierda */}
+            <div className="flex justify-start">
+              <button
+                type="button"
+                onClick={() => setShowVices(false)}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+              >
+                <ChevronDown className="h-3 w-3 rotate-180" />
+                Contraer
+              </button>
+            </div>
           </div>
         )}
       </div>

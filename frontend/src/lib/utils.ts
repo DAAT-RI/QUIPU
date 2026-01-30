@@ -39,31 +39,36 @@ export function getInitials(name: string): string {
     .toUpperCase()
 }
 
-export function sourceFromUrl(url: string | null): 'twitter' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'tv' | 'radio' | 'prensa' | 'plan' | 'otro' {
-  if (!url) return 'otro'
-  if (url.includes('twitter.com') || url.includes('x.com')) return 'twitter'
-  if (url.includes('facebook.com') || url.includes('fb.com')) return 'facebook'
-  if (url.includes('instagram.com')) return 'instagram'
-  if (url.includes('tiktok.com')) return 'tiktok'
-  if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube'
-  return 'prensa'
+/**
+ * Detecta el tipo de fuente desde la URL (ruta).
+ * Lógica simplificada:
+ * 1. Si es red social (x.com, twitter, tiktok, instagram, facebook, youtube) → esa red
+ * 2. Si tiene http/https → "web"
+ * 3. Si no → "tradicional" (medio tradicional: TV, radio, etc.)
+ */
+export function sourceFromUrl(url: string | null): 'twitter' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'web' | 'tradicional' | 'otro' {
+  if (!url) return 'tradicional'
+  const u = url.toLowerCase()
+  // Redes sociales
+  if (u.includes('twitter.com') || u.includes('x.com')) return 'twitter'
+  if (u.includes('facebook.com') || u.includes('fb.com') || u.includes('fb.watch')) return 'facebook'
+  if (u.includes('instagram.com')) return 'instagram'
+  if (u.includes('tiktok.com')) return 'tiktok'
+  if (u.includes('youtube.com') || u.includes('youtu.be')) return 'youtube'
+  // Si tiene http, es web
+  if (u.startsWith('http://') || u.startsWith('https://')) return 'web'
+  // Sin URL o no es web = medio tradicional
+  return 'tradicional'
 }
 
-/** Detects source type from canal name (more comprehensive detection) */
-export function sourceFromCanal(canal: string | null): 'twitter' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'tv' | 'radio' | 'prensa' | 'otro' {
-  if (!canal) return 'otro'
-  const c = canal.toLowerCase()
-  // Social media
-  if (c.includes('twitter') || c.includes(' x ') || c === 'x' || c.endsWith('/x')) return 'twitter'
-  if (c.includes('facebook') || c.includes('fb')) return 'facebook'
-  if (c.includes('instagram') || c.includes('ig')) return 'instagram'
-  if (c.includes('tiktok')) return 'tiktok'
-  if (c.includes('youtube')) return 'youtube'
-  // Traditional media
-  if (c.includes('tv') || c.includes('canal') || c.includes('america') || c.includes('latina') || c.includes('willax') || c.includes('atv') || c.includes('panamericana')) return 'tv'
-  if (c.includes('radio') || c.includes('rpp') || c.includes('exitosa') || c.includes('capital')) return 'radio'
-  // Default to prensa for other news sources
-  return 'prensa'
+/** Alias para compatibilidad - usa sourceFromUrl internamente */
+export function sourceFromCanal(canal: string | null): 'twitter' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'web' | 'tradicional' | 'otro' {
+  // Si el canal parece una URL, usar sourceFromUrl
+  if (canal && (canal.includes('http') || canal.includes('.com'))) {
+    return sourceFromUrl(canal)
+  }
+  // Si no hay canal, es medio tradicional
+  return 'tradicional'
 }
 
 /** Strip accents, lowercase, trim, replace spaces with underscores */

@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import { Search, ArrowRight, FileText, MessageSquareQuote } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useSearchParams } from 'react-router-dom'
 import { useSearchPromesas } from '@/hooks/useSearch'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { usePartidos } from '@/hooks/usePartidos'
@@ -11,14 +11,34 @@ import { SourceBadge } from '@/components/ui/SourceBadge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { BackButton } from '@/components/ui/BackButton'
 import { PLAN_CATEGORIES } from '@/lib/constants'
-import { formatDate, sourceFromCanal } from '@/lib/utils'
+import { formatDate } from '@/lib/utils'
 
 export function BuscarPromesas() {
-  const [query, setQuery] = useState('')
-  const [categoria, setCategoria] = useState('')
-  const [partidoId, setPartidoId] = useState('')
+  const [searchParams, setSearchParams] = useSearchParams()
   const inputRef = useRef<HTMLInputElement>(null)
   const prevHasQuery = useRef(false)
+
+  // Leer filtros desde URL
+  const query = searchParams.get('q') || ''
+  const categoria = searchParams.get('categoria') || ''
+  const partidoId = searchParams.get('partido') || ''
+
+  // Helper para actualizar URL params
+  const updateParams = (updates: Record<string, string>) => {
+    const params = new URLSearchParams(searchParams.toString())
+    Object.entries(updates).forEach(([key, value]) => {
+      if (value === '') {
+        params.delete(key)
+      } else {
+        params.set(key, value)
+      }
+    })
+    setSearchParams(params, { replace: true })
+  }
+
+  const setQuery = (v: string) => updateParams({ q: v })
+  const setCategoria = (v: string) => updateParams({ categoria: v })
+  const setPartidoId = (v: string) => updateParams({ partido: v })
 
   const { data: partidos } = usePartidos()
 
@@ -53,7 +73,9 @@ export function BuscarPromesas() {
 
   const hasQuery = query.length >= 3
   const hasFilters = categoria !== '' || partidoId !== ''
-  const showResults = hasQuery || hasFilters // Show results view if we have query OR filters
+  // Mostrar vista de resultados si: query >= 3 chars, o tiene filtros, o está escribiendo (evita salto de vista)
+  const isTyping = query.length > 0
+  const showResults = hasQuery || hasFilters || isTyping
   const promesas = promesasResult?.data ?? []
   const promesasCount = promesasResult?.count ?? 0
   const declaraciones = declaracionesResult?.data ?? []
@@ -158,6 +180,7 @@ export function BuscarPromesas() {
                 <Link
                   key={`${d.master_id}-${d.idx}`}
                   to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
+                  state={{ from: `/buscar${searchParams.toString() ? `?${searchParams.toString()}` : ''}` }}
                   className="group block p-3 hover:bg-muted/30 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">
@@ -168,9 +191,7 @@ export function BuscarPromesas() {
                     «{d.contenido}»
                   </p>
                   <div className="mt-2 flex flex-wrap gap-1">
-                    {d.canal && (
-                      <SourceBadge source={sourceFromCanal(d.canal)} />
-                    )}
+                    <SourceBadge url={d.ruta} />
                     {d.fecha && (
                       <span className="text-[10px] text-muted-foreground">
                         {formatDate(d.fecha)}

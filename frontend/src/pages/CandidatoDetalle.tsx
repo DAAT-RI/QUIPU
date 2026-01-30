@@ -1,5 +1,5 @@
-import { useParams, Link } from 'react-router-dom'
-import { useState, useMemo } from 'react'
+import { useParams, Link, useSearchParams } from 'react-router-dom'
+import { useState, useMemo, useEffect } from 'react'
 import { useCandidato, useCandidatoSiblings, useHojaVida } from '@/hooks/useCandidatos'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
@@ -211,7 +211,16 @@ function renderExperienciaLaboral(data: unknown[] | null | undefined) {
 
 export function CandidatoDetalle() {
   const { id } = useParams()
-  const [activeTab, setActiveTab] = useState('perfil-mediatico')
+  const [searchParams] = useSearchParams()
+  const tabFromUrl = searchParams.get('tab')
+  const [activeTab, setActiveTab] = useState(tabFromUrl || 'perfil-mediatico')
+
+  // Sincronizar tab con URL param cuando cambia
+  useEffect(() => {
+    if (tabFromUrl && tabFromUrl !== activeTab) {
+      setActiveTab(tabFromUrl)
+    }
+  }, [tabFromUrl])
 
   const {
     data: candidato,

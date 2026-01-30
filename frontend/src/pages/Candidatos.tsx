@@ -163,9 +163,9 @@ export function Candidatos() {
                     <p className="text-xs text-muted-foreground">{c.departamento}</p>
                   )}
                 </Link>
-                {/* Declarations link */}
+                {/* Declarations link - va a ficha del candidato */}
                 <Link
-                  to={`/declaraciones?stakeholder=${encodeURIComponent(apellido)}`}
+                  to={`/candidatos/${c.id}?tab=declaraciones`}
                   className="mt-3 flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                   title="Ver declaraciones en medios"
                 >
@@ -204,7 +204,7 @@ export function Candidatos() {
                   </span>
                 )}
                 <Link
-                  to={`/declaraciones?stakeholder=${encodeURIComponent(apellido)}`}
+                  to={`/candidatos/${c.id}?tab=declaraciones`}
                   className="p-2 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                   title="Ver declaraciones en medios"
                 >

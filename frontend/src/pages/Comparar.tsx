@@ -2,6 +2,7 @@ import { useState, useMemo } from 'react'
 import { X, Plus, MessageSquareQuote, FileText, TrendingUp, Users, ChevronDown } from 'lucide-react'
 import { useSearchCandidatosByName, useCandidatosByCargo } from '@/hooks/useCandidatos'
 import { usePromesasByPartido } from '@/hooks/usePromesas'
+import { usePartidos } from '@/hooks/usePartidos'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
@@ -207,9 +208,13 @@ export function Comparar() {
   const [selectedCandidatos, setSelectedCandidatos] = useState<CandidatoCompleto[]>([])
   const [categoriaFilter, setCategoriaFilter] = useState('')
   const [cargoFilter, setCargoFilter] = useState('')
+  const [partidoFilter, setPartidoFilter] = useState('')
   const [showAllCandidatos, setShowAllCandidatos] = useState(false)
   const [textFilter, setTextFilter] = useState('')
   const [selectorHidden, setSelectorHidden] = useState(false)
+
+  // Get partidos for filter
+  const { data: partidos } = usePartidos()
 
   // Get partido IDs from selected candidates
   const selectedPartidoIds = useMemo(() =>
@@ -269,9 +274,10 @@ export function Comparar() {
   }, [categoriaCounts])
 
   // Get candidates by selected cargo (only fetch when cargo is selected)
+  // Limit: 11 initial, 500 expanded (covers all candidates per cargo)
   const { data: candidatosData, isLoading: loadingCandidatos } = useCandidatosByCargo(
     cargoFilter || '',
-    showAllCandidatos ? 100 : 11
+    showAllCandidatos ? 500 : 11
   )
   const candidatos = candidatosData?.data ?? []
   const totalCandidatos = candidatosData?.count ?? 0
@@ -288,9 +294,25 @@ export function Comparar() {
     return true
   })
 
+  // Partido options for filter
+  const partidoOptions = useMemo(() => {
+    const options = [{ value: '', label: 'Todos los partidos' }]
+    if (partidos) {
+      for (const p of partidos) {
+        options.push({ value: String(p.id), label: p.nombre_oficial })
+      }
+    }
+    return options
+  }, [partidos])
+
   const availableCandidatos = useMemo(() => {
-    return candidatos.filter(c => !selectedIds.has(c.id))
-  }, [candidatos, selectedIds])
+    let filtered = candidatos.filter(c => !selectedIds.has(c.id))
+    // Apply partido filter
+    if (partidoFilter) {
+      filtered = filtered.filter(c => String(c.partido_id) === partidoFilter)
+    }
+    return filtered
+  }, [candidatos, selectedIds, partidoFilter])
 
   function addCandidato(candidato: CandidatoCompleto) {
     if (selectedCandidatos.length >= 4) return
@@ -301,7 +323,14 @@ export function Comparar() {
   }
 
   function removeCandidato(id: number) {
-    setSelectedCandidatos((prev) => prev.filter((c) => c.id !== id))
+    setSelectedCandidatos((prev) => {
+      const newList = prev.filter((c) => c.id !== id)
+      // Si quedan menos de 4, mostrar selector para agregar más
+      if (newList.length < 4) {
+        setSelectorHidden(false)
+      }
+      return newList
+    })
   }
 
   const gridCols =
@@ -393,21 +422,38 @@ export function Comparar() {
           {/* Selection controls - only show if less than 4 selected and not hidden */}
           {selectedCandidatos.length < 4 && !selectorHidden && (
             <>
-              {/* Step 1: Cargo selector */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium text-foreground mb-2">
-                  1. Elige el cargo
-                </label>
-                <FilterSelect
-                  value={cargoFilter}
-                  onChange={(v) => {
-                    setCargoFilter(v)
-                    setShowAllCandidatos(false)
-                  }}
-                  options={CARGO_OPTIONS}
-                  placeholder="Elige el cargo"
-                  className="max-w-xs"
-                />
+              {/* Step 1: Cargo selector + Partido filter */}
+              <div className="mb-4 flex flex-wrap gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    1. Elige el cargo
+                  </label>
+                  <FilterSelect
+                    value={cargoFilter}
+                    onChange={(v) => {
+                      setCargoFilter(v)
+                      setShowAllCandidatos(false)
+                    }}
+                    options={CARGO_OPTIONS}
+                    placeholder="Elige el cargo"
+                    className="min-w-[180px]"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-foreground mb-2">
+                    Filtrar por partido
+                  </label>
+                  <FilterSelect
+                    value={partidoFilter}
+                    onChange={(v) => {
+                      setPartidoFilter(v)
+                      setShowAllCandidatos(false)
+                    }}
+                    options={partidoOptions}
+                    placeholder="Todos los partidos"
+                    className="min-w-[220px]"
+                  />
+                </div>
               </div>
 
               {/* Step 2: Search by name */}
@@ -460,7 +506,7 @@ export function Comparar() {
                       <div className="col-span-full"><LoadingSpinner /></div>
                     ) : (
                       <>
-                        {availableCandidatos.slice(0, showAllCandidatos ? 100 : 11).map((c) => (
+                        {availableCandidatos.slice(0, showAllCandidatos ? 500 : 11).map((c) => (
                           <button
                             key={c.id}
                             onClick={() => addCandidato(c)}

@@ -9,7 +9,7 @@ interface SourceBadgeProps {
 
 export function SourceBadge({ url, source, className }: SourceBadgeProps) {
   const resolvedSource = source ?? sourceFromUrl(url ?? null)
-  const config = SOURCE_CONFIG[resolvedSource]
+  const config = SOURCE_CONFIG[resolvedSource as keyof typeof SOURCE_CONFIG] ?? SOURCE_CONFIG.otro
 
   const textColor = getContrastColor(config.color)
 
