@@ -27,15 +27,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Cargar sesión inicial
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
-        loadClienteData(session.user.id)
-        registerSession(session.user.id)
+        try {
+          await loadClienteData(session.user.id)
+          await registerSession(session.user.id)
+        } catch (error) {
+          console.error('Error loading cliente data:', error)
+          setLoading(false)
+        }
       } else {
         setLoading(false)
       }
+    }).catch((error) => {
+      console.error('Error getting session:', error)
+      setLoading(false)
     })
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -43,8 +51,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setSession(session)
         setUser(session?.user ?? null)
         if (session?.user) {
-          await loadClienteData(session.user.id)
-          await registerSession(session.user.id)
+          try {
+            await loadClienteData(session.user.id)
+            await registerSession(session.user.id)
+          } catch (error) {
+            console.error('Error on auth state change:', error)
+          }
         } else {
           setClienteId(null)
           setClienteNombre(null)
@@ -78,18 +90,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, sessionId])
 
   async function loadClienteData(authUserId: string) {
-    const { data } = await supabase
-      .from('quipu_usuarios')
-      .select('cliente_id, rol, quipu_clientes(nombre)')
-      .eq('auth_user_id', authUserId)
-      .single()
+    try {
+      const { data, error } = await supabase
+        .from('quipu_usuarios')
+        .select('cliente_id, rol, quipu_clientes(nombre)')
+        .eq('auth_user_id', authUserId)
+        .single()
 
-    if (data) {
-      setClienteId(data.cliente_id)
-      setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
-      setIsSuperadmin(data.rol === 'superadmin')
+      if (error) {
+        console.error('Error fetching usuario:', error)
+      } else if (data) {
+        setClienteId(data.cliente_id)
+        setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
+        setIsSuperadmin(data.rol === 'superadmin')
+      }
+    } catch (error) {
+      console.error('Exception in loadClienteData:', error)
+    } finally {
+      setLoading(false)
     }
-    setLoading(false)
   }
 
   async function registerSession(authUserId: string) {
