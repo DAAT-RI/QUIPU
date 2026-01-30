@@ -9,6 +9,7 @@ import { AdminLayout } from '@/pages/admin/AdminLayout'
 import { AdminDashboard } from '@/pages/admin/AdminDashboard'
 import { Clientes } from '@/pages/admin/Clientes'
 import { ClienteNuevo } from '@/pages/admin/ClienteNuevo'
+import { ClienteEditar } from '@/pages/admin/ClienteEditar'
 import { Dashboard } from '@/pages/Dashboard'
 import { Declaraciones } from '@/pages/Declaraciones'
 import { DeclaracionDetalle } from '@/pages/DeclaracionDetalle'
@@ -76,6 +77,7 @@ function App() {
                 <Route index element={<AdminDashboard />} />
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="clientes/nuevo" element={<ClienteNuevo />} />
+                <Route path="clientes/:id" element={<ClienteEditar />} />
               </Route>
             </Route>
           </Routes>

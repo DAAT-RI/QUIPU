@@ -71,6 +71,45 @@ export function useCreateCliente() {
   })
 }
 
+export function useAdminCliente(id: number) {
+  return useQuery({
+    queryKey: ['admin-cliente', id],
+    enabled: !!id,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('quipu_clientes')
+        .select('*')
+        .eq('id', id)
+        .single()
+
+      if (error) throw error
+      return data as Cliente
+    },
+  })
+}
+
+export function useUpdateCliente() {
+  const queryClient = useQueryClient()
+
+  return useMutation({
+    mutationFn: async ({ id, ...updates }: { id: number } & Partial<CreateClienteData>) => {
+      const { data, error } = await supabase
+        .from('quipu_clientes')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single()
+
+      if (error) throw error
+      return data
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-clientes'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-cliente', variables.id] })
+    },
+  })
+}
+
 export function useAssignCandidatos() {
   const queryClient = useQueryClient()
 
@@ -88,8 +127,9 @@ export function useAssignCandidatos() {
 
       if (error) throw error
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: ['admin-clientes'] })
+      queryClient.invalidateQueries({ queryKey: ['admin-cliente-candidatos', variables.clienteId] })
     },
   })
 }
