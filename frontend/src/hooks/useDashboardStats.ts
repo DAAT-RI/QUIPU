@@ -88,22 +88,31 @@ export function useTopPartidos() {
  * Usado para "Categorías Más Discutidas" en el Dashboard
  * Normaliza keys para agrupar variantes (con/sin tildes) y guarda labels originales
  *
- * MULTI-TENANT: Filtra por candidatos del cliente (excepto superadmin que ve todo)
+ * MULTI-TENANT: Uses quipu_stakeholder_aliases for accurate filtering
  */
 export function useDeclaracionesPorTema() {
   const { clienteId } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
-  // Extraer nombres de stakeholders del cliente (normalizados para matching)
-  const clienteStakeholders = candidatosData?.map(
-    c => normalizeForMatch((c.quipu_candidatos as any)?.nombre_completo || '')
-  ).filter(Boolean) ?? []
+  // Get candidato IDs for this client
+  const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
   return useQuery({
-    queryKey: ['declaraciones-por-tema', clienteId],
+    queryKey: ['declaraciones-por-tema', clienteId, clienteCandidatoIds],
     // Solo habilitar si es superadmin (clienteId === null) o hay candidatos cargados
-    enabled: clienteId === null || clienteStakeholders.length > 0,
+    enabled: clienteId === null || clienteCandidatoIds.length > 0,
     queryFn: async () => {
+      // For non-master users, first get aliases that map to their candidates
+      let aliasNormalized: string[] = []
+      if (clienteId !== null && clienteCandidatoIds.length > 0) {
+        const { data: aliases } = await supabase
+          .from('quipu_stakeholder_aliases')
+          .select('alias_normalized')
+          .in('candidato_id', clienteCandidatoIds)
+
+        aliasNormalized = aliases?.map(a => a.alias_normalized) ?? []
+      }
+
       // Get all categorias from QUIPU_MASTER interacciones
       const { data, error } = await supabase
         .from('QUIPU_MASTER')
@@ -122,11 +131,11 @@ export function useDeclaracionesPorTema() {
           if (i.type !== 'declaration') continue
           if (!i.categorias) continue
 
-          // MULTI-TENANT: Si no es superadmin, filtrar por candidatos del cliente
-          if (clienteId !== null && clienteStakeholders.length > 0) {
+          // MULTI-TENANT: Si no es superadmin, filtrar por aliases
+          if (clienteId !== null && aliasNormalized.length > 0) {
             const stakeholderNorm = normalizeForMatch(i.stakeholder || '')
-            const matchesCliente = clienteStakeholders.some(
-              cs => stakeholderNorm.includes(cs) || cs.includes(stakeholderNorm)
+            const matchesCliente = aliasNormalized.some(
+              alias => stakeholderNorm.includes(alias) || alias.includes(stakeholderNorm)
             )
             if (!matchesCliente) continue
           }
@@ -152,21 +161,30 @@ export function useDeclaracionesPorTema() {
 
 /**
  * Hook para obtener los partidos con más declaraciones
- * MULTI-TENANT: Filtra por candidatos del cliente (excepto superadmin)
+ * MULTI-TENANT: Uses quipu_stakeholder_aliases for accurate filtering
  */
 export function useTopPartidosByDeclaraciones() {
   const { clienteId } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
-  // Extraer nombres de stakeholders del cliente (normalizados para matching)
-  const clienteStakeholders = candidatosData?.map(
-    c => normalizeForMatch((c.quipu_candidatos as any)?.nombre_completo || '')
-  ).filter(Boolean) ?? []
+  // Get candidato IDs for this client
+  const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
   return useQuery({
-    queryKey: ['top-partidos-declaraciones', clienteId],
-    enabled: clienteId === null || clienteStakeholders.length > 0,
+    queryKey: ['top-partidos-declaraciones', clienteId, clienteCandidatoIds],
+    enabled: clienteId === null || clienteCandidatoIds.length > 0,
     queryFn: async () => {
+      // For non-master users, first get aliases that map to their candidates
+      let aliasNormalized: string[] = []
+      if (clienteId !== null && clienteCandidatoIds.length > 0) {
+        const { data: aliases } = await supabase
+          .from('quipu_stakeholder_aliases')
+          .select('alias_normalized')
+          .in('candidato_id', clienteCandidatoIds)
+
+        aliasNormalized = aliases?.map(a => a.alias_normalized) ?? []
+      }
+
       // Get all partidos with their presidential candidates
       const { data: partidos, error: partidosError } = await supabase
         .from('quipu_partidos')
@@ -182,12 +200,9 @@ export function useTopPartidosByDeclaraciones() {
       // Build a map of search terms to partido_id
       const searchTermsToPartido = new Map<string, number>()
 
-      // Add partido names and presidential candidates as search terms
-      // Use normalizeForMatch to handle accents (César vs Cesar, Acuña vs Acuna)
       for (const partido of partidos) {
         if (partido.nombre_oficial) {
           searchTermsToPartido.set(normalizeForMatch(partido.nombre_oficial), partido.id)
-          // Also add significant parts of partido name (words >= 4 chars)
           const parts = normalizeForMatch(partido.nombre_oficial).split(/[\s,]+/)
           for (const part of parts) {
             if (part.length >= 4) {
@@ -197,7 +212,6 @@ export function useTopPartidosByDeclaraciones() {
         }
         if (partido.candidato_presidencial) {
           searchTermsToPartido.set(normalizeForMatch(partido.candidato_presidencial), partido.id)
-          // Add parts of presidential candidate name
           const parts = normalizeForMatch(partido.candidato_presidencial).split(' ')
           for (const part of parts) {
             if (part.length >= 4) {
@@ -207,13 +221,10 @@ export function useTopPartidosByDeclaraciones() {
         }
       }
 
-      // Add all candidatos as search terms
       for (const candidato of candidatos) {
         if (!candidato.partido_id) continue
-        // Add full name
         if (candidato.nombre_completo) {
           searchTermsToPartido.set(normalizeForMatch(candidato.nombre_completo), candidato.partido_id)
-          // Also add parts of name that are long enough (apellidos)
           const parts = normalizeForMatch(candidato.nombre_completo).split(' ')
           for (const part of parts) {
             if (part.length >= 4) {
@@ -221,7 +232,6 @@ export function useTopPartidosByDeclaraciones() {
             }
           }
         }
-        // Add apellido paterno
         if (candidato.apellido_paterno) {
           searchTermsToPartido.set(normalizeForMatch(candidato.apellido_paterno), candidato.partido_id)
         }
@@ -239,23 +249,20 @@ export function useTopPartidosByDeclaraciones() {
         counts[partido.id] = 0
       }
 
-      // Stakeholder is INSIDE interacciones[], not at row level
       for (const entry of masterData) {
         const interacciones = entry.interacciones as Array<{ type?: string; stakeholder?: string }> | null
         if (!interacciones) continue
 
         for (const i of interacciones) {
-          // Only count declarations
           if (i.type !== 'declaration') continue
           if (!i.stakeholder) continue
 
-          // Normalize stakeholder to handle accents (César vs Cesar, Acuña vs Acuna)
           const stakeholder = normalizeForMatch(i.stakeholder)
 
-          // MULTI-TENANT: Si no es superadmin, filtrar por candidatos del cliente
-          if (clienteId !== null && clienteStakeholders.length > 0) {
-            const matchesCliente = clienteStakeholders.some(
-              cs => stakeholder.includes(cs) || cs.includes(stakeholder)
+          // MULTI-TENANT: Si no es superadmin, filtrar por aliases
+          if (clienteId !== null && aliasNormalized.length > 0) {
+            const matchesCliente = aliasNormalized.some(
+              alias => stakeholder.includes(alias) || alias.includes(stakeholder)
             )
             if (!matchesCliente) continue
           }
@@ -263,11 +270,9 @@ export function useTopPartidosByDeclaraciones() {
           // Try to match stakeholder to a partido
           let matchedPartidoId: number | null = null
 
-          // Check direct match first
           if (searchTermsToPartido.has(stakeholder)) {
             matchedPartidoId = searchTermsToPartido.get(stakeholder)!
           } else {
-            // Check if stakeholder contains any search term
             for (const [term, partidoId] of searchTermsToPartido) {
               if (term.length >= 4 && stakeholder.includes(term)) {
                 matchedPartidoId = partidoId
@@ -282,7 +287,6 @@ export function useTopPartidosByDeclaraciones() {
         }
       }
 
-      // Build result with partido info
       const partidoMap = new Map(partidos.map(p => [p.id, p]))
       return Object.entries(counts)
         .filter(([, count]) => count > 0)

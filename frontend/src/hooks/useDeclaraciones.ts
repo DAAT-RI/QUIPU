@@ -9,51 +9,7 @@ function removeAccents(text: string): string {
   return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
 }
 
-/**
- * Extract significant search terms from a candidato name.
- * Peruvian names are typically: NOMBRE1 NOMBRE2 APELLIDO_PATERNO APELLIDO_MATERNO
- * Media often uses just apellidos: "López Aliaga", "Cerrón", "del Castillo"
- *
- * Strategy: Extract apellidos (words 3+ onwards) and significant name parts
- */
-function extractSearchTerms(fullName: string): string[] {
-  const normalized = removeAccents(fullName.toLowerCase().trim())
-  const words = normalized.split(/\s+/).filter(w => w.length >= 3)
-
-  if (words.length <= 2) {
-    // Short name - use all words
-    return words
-  }
-
-  // For longer names, focus on apellidos (typically last 2 words)
-  // But also include compound apellidos like "del castillo", "de la cruz"
-  const terms = new Set<string>()
-
-  // Add individual apellidos (words 3+, skipping common first names)
-  const commonFirstNames = new Set(['jose', 'maria', 'juan', 'luis', 'carlos', 'jorge', 'pedro', 'miguel', 'rafael', 'alberto', 'cesar', 'victor', 'manuel', 'fernando', 'antonio', 'francisco', 'rosa', 'ana', 'carmen', 'luz', 'flor', 'gloria', 'patricia', 'elizabeth', 'martha', 'silvia'])
-
-  for (let i = 0; i < words.length; i++) {
-    const word = words[i]
-    // Skip very common first names for individual matching
-    if (!commonFirstNames.has(word) && word.length >= 4) {
-      terms.add(word)
-    }
-  }
-
-  // Add compound apellidos (last 2 words together)
-  if (words.length >= 2) {
-    const lastTwo = words.slice(-2).join(' ')
-    terms.add(lastTwo)
-  }
-
-  // Add last 3 words for compound surnames like "del castillo galvez"
-  if (words.length >= 3) {
-    const lastThree = words.slice(-3).join(' ')
-    terms.add(lastThree)
-  }
-
-  return Array.from(terms)
-}
+// extractSearchTerms function removed - now using quipu_stakeholder_aliases table for matching
 
 /**
  * Generate search variants for accent-insensitive search (Spanish).
@@ -100,43 +56,40 @@ function getSearchVariants(text: string): string[] {
  * - `resumen` es del ARTÍCULO completo, no de la declaración
  * - `search` busca en CONTENIDO (lo que dijo), NO en keywords/titulo
  * - `organizaciones` es clave para filtrar por gremio/sector
+ * - Uses quipu_stakeholder_aliases for accurate stakeholder matching
  */
 export function useDeclaraciones(filters: DeclaracionFilters) {
   const { clienteId } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
-  // Filter candidates by cargo if needed
-  const filteredCandidatos = candidatosData?.filter(c => {
-    if (!filters.cargo) return true
-    return (c.quipu_candidatos as any)?.cargo_postula === filters.cargo
-  }) ?? []
-
-  // Extraer términos de búsqueda (apellidos) de los candidatos del cliente
-  // Usamos apellidos porque los medios usan "López Aliaga" no "RAFAEL BERNARDO LOPEZ ALIAGA CAZORLA"
-  const searchTerms = filteredCandidatos.flatMap(c => {
-    const nombre = (c.quipu_candidatos as any)?.nombre_completo
-    return nombre ? extractSearchTerms(nombre) : []
-  }).filter(Boolean) ?? []
-
-  // Deduplicar y limitar términos
-  const uniqueTerms = [...new Set(searchTerms)].slice(0, 100)
+  // Get candidato IDs for this client
+  const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
   return useQuery({
-    queryKey: ['declaraciones', filters, clienteId],
-    enabled: clienteId === null || uniqueTerms.length > 0,
+    queryKey: ['declaraciones', filters, clienteId, clienteCandidatoIds],
+    enabled: clienteId === null || clienteCandidatoIds.length > 0,
     queryFn: async () => {
+      // For non-master users, first get aliases that map to their candidates
+      let aliasNormalized: string[] = []
+      if (clienteId !== null && clienteCandidatoIds.length > 0) {
+        const { data: aliases } = await supabase
+          .from('quipu_stakeholder_aliases')
+          .select('alias_normalized')
+          .in('candidato_id', clienteCandidatoIds)
+
+        aliasNormalized = aliases?.map(a => a.alias_normalized) ?? []
+      }
+
       let query = supabase
         .from('v_quipu_declaraciones')
         .select('*', { count: 'exact' })
 
       // Filtro multi-tenant: solo declaraciones de candidatos del cliente
-      // Master (clienteId === null) no tiene filtro, ve todo
-      // Buscamos por APELLIDOS (ej: "lopez aliaga") no nombres completos
-      if (clienteId !== null && uniqueTerms.length > 0) {
-        const stakeholderConditions = uniqueTerms
-          .filter(term => term.length >= 5) // Solo términos significativos
-          .slice(0, 50) // Limitar para performance
-          .map(term => `stakeholder.ilike.%${term}%`)
+      // Uses aliases table for accurate stakeholder matching
+      if (clienteId !== null && aliasNormalized.length > 0) {
+        const stakeholderConditions = aliasNormalized
+          .slice(0, 100) // Limitar para performance
+          .map(alias => `stakeholder.ilike.%${alias}%`)
           .join(',')
 
         if (stakeholderConditions) {
