@@ -3,7 +3,12 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
+import { AdminRoute } from '@/components/admin/AdminRoute'
 import { Layout } from '@/components/layout/Layout'
+import { AdminLayout } from '@/pages/admin/AdminLayout'
+import { AdminDashboard } from '@/pages/admin/AdminDashboard'
+import { Clientes } from '@/pages/admin/Clientes'
+import { ClienteNuevo } from '@/pages/admin/ClienteNuevo'
 import { Dashboard } from '@/pages/Dashboard'
 import { Declaraciones } from '@/pages/Declaraciones'
 import { DeclaracionDetalle } from '@/pages/DeclaracionDetalle'
@@ -62,6 +67,15 @@ function App() {
                 <Route path="/categorias/:nombre" element={<CategoriaDetalle />} />
                 <Route path="/comparar" element={<Comparar />} />
                 <Route path="/mapa" element={<MapaElectoral />} />
+              </Route>
+            </Route>
+
+            {/* Rutas de administración (solo superadmin) */}
+            <Route element={<AdminRoute />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route index element={<AdminDashboard />} />
+                <Route path="clientes" element={<Clientes />} />
+                <Route path="clientes/nuevo" element={<ClienteNuevo />} />
               </Route>
             </Route>
           </Routes>

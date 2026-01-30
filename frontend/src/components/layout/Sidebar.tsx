@@ -9,9 +9,11 @@ import {
   GitCompare,
   Menu,
   X,
+  Settings,
 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 import { useState, useEffect, useCallback } from 'react'
+import { useAuth } from '@/contexts/AuthContext'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: LayoutDashboard },
@@ -25,6 +27,7 @@ const navigation = [
 
 export function Sidebar() {
   const location = useLocation()
+  const { isSuperadmin } = useAuth()
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
 
   const closeMobileMenu = useCallback(() => setIsMobileMenuOpen(false), [])
@@ -96,6 +99,25 @@ export function Sidebar() {
               )
             })}
           </nav>
+
+          {/* Admin Link */}
+          {isSuperadmin && (
+            <div className="px-3 pt-4 border-t">
+              <Link
+                to="/admin"
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={cn(
+                  'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
+                  location.pathname.startsWith('/admin')
+                    ? 'bg-parley-gold text-white'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                )}
+              >
+                <Settings className="h-5 w-5" />
+                Administración
+              </Link>
+            </div>
+          )}
 
           {/* Footer */}
           <div className="border-t p-4 flex items-center gap-2">

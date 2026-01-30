@@ -8,6 +8,7 @@ interface AuthContextType {
   session: Session | null
   clienteId: number | null
   clienteNombre: string | null
+  isSuperadmin: boolean
   loading: boolean
   signIn: (email: string, password: string) => Promise<{ error: Error | null }>
   signOut: () => Promise<void>
@@ -20,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(null)
   const [clienteId, setClienteId] = useState<number | null>(null)
   const [clienteNombre, setClienteNombre] = useState<string | null>(null)
+  const [isSuperadmin, setIsSuperadmin] = useState(false)
   const [loading, setLoading] = useState(true)
   const [sessionId] = useState(() => crypto.randomUUID())
 
@@ -46,6 +48,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         } else {
           setClienteId(null)
           setClienteNombre(null)
+          setIsSuperadmin(false)
         }
       }
     )
@@ -77,13 +80,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function loadClienteData(authUserId: string) {
     const { data } = await supabase
       .from('quipu_usuarios')
-      .select('cliente_id, quipu_clientes(nombre)')
+      .select('cliente_id, is_superadmin, quipu_clientes(nombre)')
       .eq('auth_user_id', authUserId)
       .single()
 
     if (data) {
       setClienteId(data.cliente_id)
       setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
+      setIsSuperadmin(data.is_superadmin ?? false)
     }
     setLoading(false)
   }
@@ -112,7 +116,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   return (
     <AuthContext.Provider value={{
-      user, session, clienteId, clienteNombre, loading, signIn, signOut
+      user, session, clienteId, clienteNombre, isSuperadmin, loading, signIn, signOut
     }}>
       {children}
     </AuthContext.Provider>
