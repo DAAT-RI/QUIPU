@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef } from 'react'
 import { Search, ArrowRight, FileText, MessageSquareQuote } from 'lucide-react'
 import { Link, useSearchParams } from 'react-router-dom'
 import { useSearchPromesas } from '@/hooks/useSearch'
@@ -11,12 +11,13 @@ import { SourceBadge } from '@/components/ui/SourceBadge'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { BackButton } from '@/components/ui/BackButton'
 import { PLAN_CATEGORIES } from '@/lib/constants'
-import { formatDate } from '@/lib/utils'
+import { formatDate, cn } from '@/lib/utils'
 
 export function BuscarPromesas() {
   const [searchParams, setSearchParams] = useSearchParams()
   const inputRef = useRef<HTMLInputElement>(null)
-  const prevHasQuery = useRef(false)
+
+  // No references to prevHasQuery needed if we don't unmount input
 
   // Leer filtros desde URL
   const query = searchParams.get('q') || ''
@@ -45,10 +46,23 @@ export function BuscarPromesas() {
   // Get partido name for filtering
   const selectedPartido = (partidos ?? []).find(p => String(p.id) === partidoId)
 
+  // Determine if we should show results
+  // Mostrar vista de resultados si: query >= 3 chars, o tiene filtros, o está escribiendo
+  const hasQuery = query.length >= 3
+  const hasFilters = categoria !== '' || partidoId !== ''
+  const isTyping = query.length > 0
+  const showResults = hasQuery || hasFilters || isTyping
+
+  // Data Fetching (Only runs if needed essentially, but React Query handles caching)
   const {
     data: promesasResult,
     isLoading: loadingPromesas,
-  } = useSearchPromesas(query, categoria || undefined, selectedPartido?.nombre_oficial)
+  } = useSearchPromesas(
+    query,
+    categoria || undefined,
+    selectedPartido?.nombre_oficial,
+    // Enable/Disable based on showResults logic if desired, but default behavior is fine
+  )
 
   const {
     data: declaracionesResult,
@@ -71,181 +85,179 @@ export function BuscarPromesas() {
     label: p.nombre_oficial,
   }))
 
-  const hasQuery = query.length >= 3
-  const hasFilters = categoria !== '' || partidoId !== ''
-  // Mostrar vista de resultados si: query >= 3 chars, o tiene filtros, o está escribiendo (evita salto de vista)
-  const isTyping = query.length > 0
-  const showResults = hasQuery || hasFilters || isTyping
   const promesas = promesasResult?.data ?? []
   const promesasCount = promesasResult?.count ?? 0
   const declaraciones = declaracionesResult?.data ?? []
   const declaracionesCount = declaracionesResult?.count ?? 0
 
-  // Keep focus when transitioning from hero to results
-  useEffect(() => {
-    if (showResults && !prevHasQuery.current) {
-      // Just transitioned to results view, restore focus
-      setTimeout(() => {
-        inputRef.current?.focus()
-      }, 0)
-    }
-    prevHasQuery.current = showResults
-  }, [showResults])
+  return (
+    <div className={cn(
+      "transition-all duration-500 ease-in-out",
+      showResults ? "space-y-6" : "flex flex-col items-center justify-center min-h-[50vh]"
+    )}>
 
-  // Hero layout when no query entered and no filters active
-  if (!showResults) {
-    return (
-      <div className="flex flex-col items-center justify-center min-h-[50vh]">
-        <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6">
-          <Search className="h-8 w-8 text-primary" />
+      {/* Back Button (Only in Results Mode) */}
+      {showResults && (
+        <div className="w-full animate-in fade-in slide-in-from-top-4 duration-500">
+          <BackButton fallback="/" />
         </div>
-        <h1 className="text-3xl font-bold mb-2">Buscar Promesas</h1>
-        <p className="text-muted-foreground mb-8">
-          Busca en 22,000+ propuestas de planes de gobierno y declaraciones en medios
-        </p>
-        <div className="w-full max-w-2xl">
-          <SearchInput
-            ref={inputRef}
-            value={query}
-            onChange={setQuery}
-            placeholder="Escribe al menos 3 caracteres para buscar..."
-            className="[&_input]:h-14 [&_input]:text-base"
-          />
+      )}
+
+      {/* Hero Content (Icon + Title) - Only in Hero Mode */}
+      {!showResults && (
+        <div className="text-center animate-in fade-in zoom-in duration-500 mb-6">
+          <div className="flex h-16 w-16 items-center justify-center rounded-2xl bg-primary/10 mb-6 mx-auto">
+            <Search className="h-8 w-8 text-primary" />
+          </div>
+          <h1 className="text-3xl font-bold mb-2">Buscar Promesas</h1>
+          <p className="text-muted-foreground mb-8">
+            Busca en 22,000+ propuestas de planes de gobierno y declaraciones en medios
+          </p>
         </div>
-        {query.length > 0 && query.length < 3 && (
-          <p className="text-sm text-muted-foreground mt-3">
+      )}
+
+      {/* Search Bar Container - Morph from Center to Top */}
+      <div className={cn(
+        "w-full transition-all duration-500 ease-in-out",
+        showResults ? "" : "max-w-2xl"
+      )}>
+        <div className={cn(
+          "rounded-xl bg-card transition-all duration-500",
+          showResults ? "border p-4" : ""
+        )}>
+          <div className={cn("flex gap-3", showResults ? "flex-col sm:flex-row" : "flex-col")}>
+            <SearchInput
+              ref={inputRef}
+              value={query}
+              onChange={setQuery}
+              placeholder={showResults ? "Buscar promesas..." : "Escribe al menos 3 caracteres para buscar..."}
+              className={cn("transition-all", showResults ? "flex-1" : "[&_input]:h-14 [&_input]:text-base")}
+            />
+
+            {/* Filters - Fade In */}
+            {showResults && (
+              <div className="contents animate-in fade-in slide-in-from-right-4 duration-500">
+                <FilterSelect
+                  value={categoria}
+                  onChange={setCategoria}
+                  options={categoriaOptions}
+                  placeholder="Todas las categorias"
+                />
+                <FilterSelect
+                  value={partidoId}
+                  onChange={setPartidoId}
+                  options={partidoOptions}
+                  placeholder="Todos los partidos"
+                />
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Start typing helper text */}
+        {!showResults && query.length > 0 && query.length < 3 && (
+          <p className="text-sm text-muted-foreground mt-3 text-center animate-in fade-in">
             Escribe al menos 3 caracteres para iniciar la busqueda
           </p>
         )}
       </div>
-    )
-  }
 
-  // Results layout - Two columns
-  return (
-    <div className="space-y-6">
-      {/* Back button */}
-      <BackButton fallback="/" />
-
-      {/* Search bar + filters */}
-      <div className="rounded-xl border bg-card p-4">
-        <div className="flex flex-col sm:flex-row gap-3">
-          <SearchInput
-            ref={inputRef}
-            value={query}
-            onChange={setQuery}
-            placeholder="Buscar promesas..."
-            className="flex-1"
-          />
-          <FilterSelect
-            value={categoria}
-            onChange={setCategoria}
-            options={categoriaOptions}
-            placeholder="Todas las categorias"
-          />
-          <FilterSelect
-            value={partidoId}
-            onChange={setPartidoId}
-            options={partidoOptions}
-            placeholder="Todos los partidos"
-          />
-        </div>
-      </div>
-
-      {/* Two column results - Declaraciones first (eje principal) */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Column 1: Declaraciones en Medios (PRIMERO - eje principal) */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
-              <MessageSquareQuote className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-            </div>
-            <h2 className="text-base font-semibold">
-              Declaraciones en Medios
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
-                ({declaracionesCount.toLocaleString()})
-              </span>
-            </h2>
-          </div>
-
-          <div className="rounded-xl border bg-card divide-y max-h-[70vh] overflow-y-auto">
-            {loadingDeclaraciones ? (
-              <div className="p-8"><LoadingSpinner /></div>
-            ) : declaraciones.length === 0 ? (
-              <div className="p-8 text-center text-sm text-muted-foreground">
-                Sin resultados en medios
+      {/* Results Grid - Fade In */}
+      {showResults && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 w-full animate-in fade-in slide-in-from-bottom-8 duration-700 delay-100">
+          {/* Column 1: Declaraciones en Medios (PRIMERO - eje principal) */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
+                <MessageSquareQuote className="h-4 w-4 text-amber-600 dark:text-amber-400" />
               </div>
-            ) : (
-              declaraciones.map((d) => (
-                <Link
-                  key={`${d.master_id}-${d.idx}`}
-                  to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
-                  state={{ from: `/buscar${searchParams.toString() ? `?${searchParams.toString()}` : ''}` }}
-                  className="group block p-3 hover:bg-muted/30 transition-colors"
-                >
-                  <div className="flex items-start justify-between gap-2">
-                    <p className="text-sm font-medium">{d.stakeholder}</p>
-                    <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
-                  </div>
-                  <p className="mt-1 text-sm leading-relaxed text-muted-foreground line-clamp-2">
-                    «{d.contenido}»
-                  </p>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    <SourceBadge url={d.ruta} />
-                    {d.fecha && (
-                      <span className="text-[10px] text-muted-foreground">
-                        {formatDate(d.fecha)}
-                      </span>
-                    )}
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </section>
-
-        {/* Column 2: Planes de Gobierno */}
-        <section className="space-y-3">
-          <div className="flex items-center gap-2.5">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
-              <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              <h2 className="text-base font-semibold">
+                Declaraciones en Medios
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  ({declaracionesCount.toLocaleString()})
+                </span>
+              </h2>
             </div>
-            <h2 className="text-base font-semibold">
-              Planes de Gobierno
-              <span className="ml-2 text-sm font-normal text-muted-foreground">
-                ({promesasCount.toLocaleString()})
-              </span>
-            </h2>
-          </div>
 
-          <div className="rounded-xl border bg-card divide-y max-h-[70vh] overflow-y-auto">
-            {loadingPromesas ? (
-              <div className="p-8"><LoadingSpinner /></div>
-            ) : promesas.length === 0 ? (
-              <div className="p-8 text-center text-sm text-muted-foreground">
-                Sin resultados en planes
-              </div>
-            ) : (
-              promesas.map((p) => (
-                <div key={p.id} className="p-3">
-                  <p className="text-sm leading-relaxed">{p.texto_original}</p>
-                  <div className="mt-2 flex flex-wrap gap-1">
-                    <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[10px] font-medium">
-                      {p.partido}
-                    </span>
-                    <CategoryBadge categoria={p.categoria} />
-                    {p.pagina_pdf && (
-                      <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
-                        p. {p.pagina_pdf}
-                      </span>
-                    )}
-                  </div>
+            <div className="rounded-xl border bg-card divide-y max-h-[70vh] overflow-y-auto">
+              {loadingDeclaraciones ? (
+                <div className="p-8"><LoadingSpinner /></div>
+              ) : declaraciones.length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  Sin resultados en medios
                 </div>
-              ))
-            )}
-          </div>
-        </section>
-      </div>
+              ) : (
+                declaraciones.map((d) => (
+                  <Link
+                    key={`${d.master_id}-${d.idx}`}
+                    to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
+                    state={{ from: `/buscar${searchParams.toString() ? `?${searchParams.toString()}` : ''}` }}
+                    className="group block p-3 hover:bg-muted/30 transition-colors"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <p className="text-sm font-medium">{d.stakeholder}</p>
+                      <ArrowRight className="h-3.5 w-3.5 shrink-0 text-muted-foreground/30 group-hover:text-primary transition-colors" />
+                    </div>
+                    <p className="mt-1 text-sm leading-relaxed text-muted-foreground line-clamp-2">
+                      «{d.contenido}»
+                    </p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      <SourceBadge url={d.ruta} />
+                      {d.fecha && (
+                        <span className="text-[10px] text-muted-foreground">
+                          {formatDate(d.fecha)}
+                        </span>
+                      )}
+                    </div>
+                  </Link>
+                ))
+              )}
+            </div>
+          </section>
+
+          {/* Column 2: Planes de Gobierno */}
+          <section className="space-y-3">
+            <div className="flex items-center gap-2.5">
+              <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
+                <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+              </div>
+              <h2 className="text-base font-semibold">
+                Planes de Gobierno
+                <span className="ml-2 text-sm font-normal text-muted-foreground">
+                  ({promesasCount.toLocaleString()})
+                </span>
+              </h2>
+            </div>
+
+            <div className="rounded-xl border bg-card divide-y max-h-[70vh] overflow-y-auto">
+              {loadingPromesas ? (
+                <div className="p-8"><LoadingSpinner /></div>
+              ) : promesas.length === 0 ? (
+                <div className="p-8 text-center text-sm text-muted-foreground">
+                  Sin resultados en planes
+                </div>
+              ) : (
+                promesas.map((p) => (
+                  <div key={p.id} className="p-3">
+                    <p className="text-sm leading-relaxed">{p.texto_original}</p>
+                    <div className="mt-2 flex flex-wrap gap-1">
+                      <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[10px] font-medium">
+                        {p.partido}
+                      </span>
+                      <CategoryBadge categoria={p.categoria} />
+                      {p.pagina_pdf && (
+                        <span className="rounded-md bg-muted px-1.5 py-0.5 text-[10px] text-muted-foreground">
+                          p. {p.pagina_pdf}
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </section>
+        </div>
+      )}
     </div>
   )
 }
