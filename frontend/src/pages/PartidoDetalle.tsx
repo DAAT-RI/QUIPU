@@ -92,8 +92,8 @@ export function PartidoDetalle() {
     for (const d of partidoDeclaraciones) {
       // Use individual declaration categoria first, then fall back to entry-level categorias
       const categorias: string[] = []
-      if (d.tema_interaccion) {
-        categorias.push(...d.tema_interaccion.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
+      if (d.categorias_interaccion) {
+        categorias.push(...d.categorias_interaccion.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
       } else if (d.categorias) {
         categorias.push(...d.categorias.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
       }
@@ -291,7 +291,7 @@ export function PartidoDetalle() {
                         &laquo;{d.contenido}&raquo;
                       </blockquote>
                       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                        {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
+                        {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
                           <span key={cat} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
                             {cat}
                           </span>
@@ -388,7 +388,7 @@ export function PartidoDetalle() {
                         {d.contenido}
                       </p>
                       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                        {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
+                        {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
                           <span key={cat} className="rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-0.5 text-[11px] font-medium">
                             {cat}
                           </span>

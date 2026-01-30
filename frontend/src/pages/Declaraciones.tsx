@@ -264,8 +264,8 @@ export function Declaraciones() {
 
                 {/* Tags: Temas de la interacción + Canal */}
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {d.tema_interaccion &&
-                    d.tema_interaccion
+                  {d.categorias_interaccion &&
+                    d.categorias_interaccion
                       .split(';')
                       .map((t) => t.trim())
                       .filter(Boolean)

@@ -84,7 +84,7 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
       // Filtro por categoría de la declaración específica (con soporte para tildes)
       if (filters.categoriaDeclaracion) {
         const variants = getSearchVariants(filters.categoriaDeclaracion)
-        query = query.or(variants.map(v => `tema_interaccion.ilike.%${v}%`).join(','))
+        query = query.or(variants.map(v => `categorias_interaccion.ilike.%${v}%`).join(','))
       }
 
       // Filtro por organización mencionada (IMPORTANTE para gremios) - con soporte para tildes
