@@ -2,6 +2,16 @@ import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
 import { normalizeKey } from '@/lib/utils'
 
+/** Remove accents from text for accent-insensitive matching */
+function removeAccents(text: string): string {
+  return text.normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+}
+
+/** Normalize text for matching: lowercase and remove accents */
+function normalizeForMatch(text: string): string {
+  return removeAccents(text.toLowerCase().trim())
+}
+
 export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard-stats'],
@@ -74,6 +84,7 @@ export function useTopPartidos() {
 /**
  * Hook para contar temas de declaraciones (tema_interaccion de v_quipu_declaraciones)
  * Usado para "Temas Más Discutidos" en el Dashboard
+ * Normaliza keys para agrupar variantes (con/sin tildes) y guarda labels originales
  */
 export function useDeclaracionesPorTema() {
   return useQuery({
@@ -86,8 +97,8 @@ export function useDeclaracionesPorTema() {
 
       if (error) throw error
 
-      // Count topics from all interactions
-      const counts: Record<string, number> = {}
+      // Count topics from all interactions (normalize to group variants)
+      const counts: Record<string, { label: string; count: number }> = {}
       for (const entry of data || []) {
         const interacciones = entry.interacciones as Array<{ type?: string; tema?: string }> | null
         if (!interacciones) continue
@@ -100,13 +111,17 @@ export function useDeclaracionesPorTema() {
           // tema can have multiple topics separated by ;
           const temas = i.tema.split(';').map(t => t.trim()).filter(t => t)
           for (const tema of temas) {
-            counts[tema] = (counts[tema] || 0) + 1
+            const key = normalizeKey(tema)
+            if (!counts[key]) {
+              counts[key] = { label: tema, count: 0 }
+            }
+            counts[key].count += 1
           }
         }
       }
 
       return Object.entries(counts)
-        .map(([tema, count]) => ({ tema, count }))
+        .map(([key, { label, count }]) => ({ key, tema: label, count }))
         .sort((a, b) => b.count - a.count)
     },
   })
@@ -132,11 +147,12 @@ export function useTopPartidosByDeclaraciones() {
       const searchTermsToPartido = new Map<string, number>()
 
       // Add partido names and presidential candidates as search terms
+      // Use normalizeForMatch to handle accents (César vs Cesar, Acuña vs Acuna)
       for (const partido of partidos) {
         if (partido.nombre_oficial) {
-          searchTermsToPartido.set(partido.nombre_oficial.toLowerCase(), partido.id)
+          searchTermsToPartido.set(normalizeForMatch(partido.nombre_oficial), partido.id)
           // Also add significant parts of partido name (words >= 4 chars)
-          const parts = partido.nombre_oficial.toLowerCase().split(/[\s,]+/)
+          const parts = normalizeForMatch(partido.nombre_oficial).split(/[\s,]+/)
           for (const part of parts) {
             if (part.length >= 4) {
               searchTermsToPartido.set(part, partido.id)
@@ -144,9 +160,9 @@ export function useTopPartidosByDeclaraciones() {
           }
         }
         if (partido.candidato_presidencial) {
-          searchTermsToPartido.set(partido.candidato_presidencial.toLowerCase(), partido.id)
+          searchTermsToPartido.set(normalizeForMatch(partido.candidato_presidencial), partido.id)
           // Add parts of presidential candidate name
-          const parts = partido.candidato_presidencial.toLowerCase().split(' ')
+          const parts = normalizeForMatch(partido.candidato_presidencial).split(' ')
           for (const part of parts) {
             if (part.length >= 4) {
               searchTermsToPartido.set(part, partido.id)
@@ -160,9 +176,9 @@ export function useTopPartidosByDeclaraciones() {
         if (!candidato.partido_id) continue
         // Add full name
         if (candidato.nombre_completo) {
-          searchTermsToPartido.set(candidato.nombre_completo.toLowerCase(), candidato.partido_id)
+          searchTermsToPartido.set(normalizeForMatch(candidato.nombre_completo), candidato.partido_id)
           // Also add parts of name that are long enough (apellidos)
-          const parts = candidato.nombre_completo.toLowerCase().split(' ')
+          const parts = normalizeForMatch(candidato.nombre_completo).split(' ')
           for (const part of parts) {
             if (part.length >= 4) {
               searchTermsToPartido.set(part, candidato.partido_id)
@@ -171,7 +187,7 @@ export function useTopPartidosByDeclaraciones() {
         }
         // Add apellido paterno
         if (candidato.apellido_paterno) {
-          searchTermsToPartido.set(candidato.apellido_paterno.toLowerCase(), candidato.partido_id)
+          searchTermsToPartido.set(normalizeForMatch(candidato.apellido_paterno), candidato.partido_id)
         }
       }
 
@@ -188,7 +204,8 @@ export function useTopPartidosByDeclaraciones() {
       }
 
       for (const entry of masterData) {
-        const stakeholder = entry.stakeholder?.toLowerCase() || ''
+        // Normalize stakeholder to handle accents (César vs Cesar, Acuña vs Acuna)
+        const stakeholder = entry.stakeholder ? normalizeForMatch(entry.stakeholder) : ''
         if (!stakeholder) continue
 
         // Try to match stakeholder to a partido

@@ -96,35 +96,73 @@ export function useCategoriaCounts() {
 }
 
 /**
- * Fetches categories only for specific partido IDs.
+ * Fetches categories for specific partido IDs AND declaration temas for specific stakeholders.
  * Used in Comparar page to show only relevant categories.
  */
-export function useCategoriasByPartidos(partidoIds: number[]) {
+export function useCategoriasByPartidos(partidoIds: number[], stakeholders: string[] = []) {
   return useQuery({
-    queryKey: ['categorias-by-partidos', partidoIds],
-    enabled: partidoIds.length > 0,
+    queryKey: ['categorias-by-partidos', partidoIds, stakeholders],
+    enabled: partidoIds.length > 0 || stakeholders.length > 0,
     queryFn: async () => {
       const plans: Record<string, number> = {}
       const planLabels: Record<string, string> = {}
+      const declarations: Record<string, number> = {}
+      const declarationLabels: Record<string, string> = {}
 
       // Fetch categories for selected partidos
-      const { data, error } = await supabase
-        .from('quipu_promesas_planes')
-        .select('categoria')
-        .in('partido_id', partidoIds)
+      if (partidoIds.length > 0) {
+        const { data, error } = await supabase
+          .from('quipu_promesas_planes')
+          .select('categoria')
+          .in('partido_id', partidoIds)
 
-      if (error) throw error
+        if (error) throw error
 
-      for (const row of data) {
-        if (!row.categoria) continue
-        const key = normalizeKey(row.categoria)
-        plans[key] = (plans[key] || 0) + 1
-        if (!planLabels[key]) {
-          planLabels[key] = row.categoria
+        for (const row of data) {
+          if (!row.categoria) continue
+          const key = normalizeKey(row.categoria)
+          plans[key] = (plans[key] || 0) + 1
+          if (!planLabels[key]) {
+            planLabels[key] = row.categoria
+          }
         }
       }
 
-      return { plans, planLabels }
+      // Fetch declaration temas for selected stakeholders
+      if (stakeholders.length > 0) {
+        const { data: masterData, error: masterError } = await supabase
+          .from('QUIPU_MASTER')
+          .select('interacciones')
+
+        if (masterError) throw masterError
+
+        // Filter by stakeholder matching (case-insensitive partial match)
+        const stakeholderLower = stakeholders.map(s => s.toLowerCase())
+
+        for (const entry of (masterData as Pick<QuipuMasterEntry, 'interacciones'>[])) {
+          if (!entry.interacciones) continue
+          for (const inter of entry.interacciones as Interaccion[]) {
+            if (inter.type !== 'declaration') continue
+            if (!inter.tema) continue
+            // Check if stakeholder matches any of our candidates
+            const stakeholder = (inter.stakeholder || '').toLowerCase()
+            const matches = stakeholderLower.some(s => stakeholder.includes(s) || s.includes(stakeholder))
+            if (!matches) continue
+
+            // Dividir temas múltiples separados por ;
+            const temas = inter.tema.split(';').map(t => t.trim()).filter(Boolean)
+            for (const tema of temas) {
+              const key = normalizeKey(tema)
+              declarations[key] = (declarations[key] || 0) + 1
+              if (!declarationLabels[key]) {
+                declarationLabels[key] = tema
+              }
+            }
+          }
+        }
+      }
+
+      return { plans, planLabels, declarations, declarationLabels }
     },
   })
 }

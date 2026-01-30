@@ -49,6 +49,7 @@ function CandidatoColumn({
   const { data: declResult, isLoading: loadingDecl } = useDeclaraciones({
     stakeholder: apellido,
     tipo: 'declaration',
+    temaDeclaracion: categoriaFilter || undefined,
     offset: 0,
     limit: 50,
   })
@@ -209,24 +210,52 @@ export function Comparar() {
     [selectedCandidatos]
   )
 
-  // Get category counts only for selected partidos
-  const { data: categoriaCounts } = useCategoriasByPartidos(selectedPartidoIds)
+  // Get stakeholder names (apellidos) from selected candidates
+  const selectedStakeholders = useMemo(() =>
+    selectedCandidatos.map(c => c.apellido_paterno ?? c.nombre_completo?.split(' ').pop() ?? '').filter(Boolean),
+    [selectedCandidatos]
+  )
 
-  // Generate tema options dynamically from selected candidates' categories
+  // Get category counts for selected partidos AND declaration temas for selected stakeholders
+  const { data: categoriaCounts } = useCategoriasByPartidos(selectedPartidoIds, selectedStakeholders)
+
+  // Generate tema options dynamically from both plans AND declarations
   const temaOptions = useMemo(() => {
     const options = [{ value: '', label: 'Todos los temas' }]
     if (categoriaCounts) {
-      // Add plan categories sorted alphabetically by label
-      const planEntries = Object.entries(categoriaCounts.plans)
-        .filter(([, count]) => count > 0)
-        .sort(([keyA], [keyB]) => {
-          const labelA = categoriaCounts.planLabels[keyA] || keyA
-          const labelB = categoriaCounts.planLabels[keyB] || keyB
-          return labelA.localeCompare(labelB, 'es')
-        })
-      for (const [key] of planEntries) {
-        const label = categoriaCounts.planLabels[key] || key
-        options.push({ value: label, label })
+      // Combine all categories/temas into a single sorted list
+      const allEntries: { key: string; label: string; count: number; source: 'plan' | 'declaracion' }[] = []
+
+      // Add plan categories
+      for (const [key, count] of Object.entries(categoriaCounts.plans)) {
+        if (count > 0) {
+          allEntries.push({
+            key,
+            label: categoriaCounts.planLabels[key] || key,
+            count,
+            source: 'plan',
+          })
+        }
+      }
+
+      // Add declaration temas (if not already in plans)
+      const planKeys = new Set(Object.keys(categoriaCounts.plans))
+      for (const [key, count] of Object.entries(categoriaCounts.declarations || {})) {
+        if (count > 0 && !planKeys.has(key)) {
+          allEntries.push({
+            key,
+            label: categoriaCounts.declarationLabels?.[key] || key,
+            count,
+            source: 'declaracion',
+          })
+        }
+      }
+
+      // Sort alphabetically by label
+      allEntries.sort((a, b) => a.label.localeCompare(b.label, 'es'))
+
+      for (const entry of allEntries) {
+        options.push({ value: entry.label, label: entry.label })
       }
     }
     return options

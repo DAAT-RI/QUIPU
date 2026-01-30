@@ -1,12 +1,12 @@
-import { useState, useEffect } from 'react'
-import { Link, useSearchParams } from 'react-router-dom'
+import { useState, useEffect, useMemo } from 'react'
+import { Link, useSearchParams, useNavigate } from 'react-router-dom'
 import { useDeclaraciones, useCanales, useOrganizacionesMencionadas } from '@/hooks/useDeclaraciones'
+import { useDeclaracionesPorTema } from '@/hooks/useDashboardStats'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { formatDate, isRedundantCanal } from '@/lib/utils'
-import { QUIPU_MASTER_TEMAS } from '@/lib/constants'
 import {
   ExternalLink,
   Quote,
@@ -15,6 +15,7 @@ import {
   MessageSquareQuote,
   ArrowRight,
   AtSign,
+  X,
 } from 'lucide-react'
 
 const PAGE_LIMIT = 20
@@ -25,10 +26,9 @@ const TIPO_OPTIONS = [
   { value: 'mention', label: 'Menciones' },
 ]
 
-const TEMA_OPTIONS = QUIPU_MASTER_TEMAS.map((t) => ({ value: t, label: t }))
-
 export function Declaraciones() {
   const [searchParams] = useSearchParams()
+  const navigate = useNavigate()
   const stakeholderFromUrl = searchParams.get('stakeholder') || ''
   const temaFromUrl = searchParams.get('tema') || ''
 
@@ -54,12 +54,19 @@ export function Declaraciones() {
     setPage(0)
   }, [temaFromUrl])
 
-  // Obtener canales y organizaciones dinámicamente
+  // Obtener canales, organizaciones y temas dinámicamente
   const { data: canalesData } = useCanales()
   const { data: orgsData } = useOrganizacionesMencionadas()
+  const { data: temasData } = useDeclaracionesPorTema()
 
   const canalOptions = canalesData ?? []
   const orgOptions = orgsData ?? []
+
+  // Generar opciones de tema dinámicamente desde la BD
+  const temaOptions = useMemo(() => {
+    if (!temasData) return []
+    return temasData.map((t) => ({ value: t.tema, label: t.tema }))
+  }, [temasData])
 
   const offset = page * PAGE_LIMIT
 
@@ -103,6 +110,22 @@ export function Declaraciones() {
         </div>
       </div>
 
+      {/* Active filter indicator */}
+      {temaFromUrl && (
+        <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
+          <span className="text-sm text-muted-foreground">Filtrando por tema:</span>
+          <span className="font-semibold text-primary">{temaFromUrl}</span>
+          <button
+            type="button"
+            onClick={() => navigate('/declaraciones')}
+            className="ml-auto flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
+          >
+            <X size={14} />
+            Limpiar filtro
+          </button>
+        </div>
+      )}
+
       {/* Filters Card */}
       <div className="rounded-xl border bg-card p-4 space-y-3">
         {/* Row 1: Search + Stakeholder + Tipo + Canal */}
@@ -138,8 +161,8 @@ export function Declaraciones() {
           <FilterSelect
             value={tema}
             onChange={handleFilterChange(setTema)}
-            options={TEMA_OPTIONS}
-            placeholder="Tema del artículo"
+            options={temaOptions}
+            placeholder="Tema de declaración"
           />
           <FilterSelect
             value={organizacion}

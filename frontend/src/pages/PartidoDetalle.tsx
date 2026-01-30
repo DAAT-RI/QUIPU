@@ -13,7 +13,7 @@ import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
 import { ErrorState } from '@/components/ui/ErrorState'
 import { BackButton } from '@/components/ui/BackButton'
-import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
+import { formatNumber, formatDate, isRedundantCanal, normalizeKey } from '@/lib/utils'
 import {
   ArrowRight,
   Users,
@@ -123,13 +123,17 @@ export function PartidoDetalle() {
       counts[p.categoria] = (counts[p.categoria] || 0) + 1
     }
     return Object.entries(counts)
-      .map(([categoria, count]) => ({
-        categoria,
-        label: CATEGORY_CONFIG[categoria]?.label ?? categoria,
-        count,
-        color: CATEGORY_CONFIG[categoria]?.color ?? '#94a3b8',
-        icon: CATEGORY_CONFIG[categoria]?.icon,
-      }))
+      .map(([categoria, count]) => {
+        const key = normalizeKey(categoria)
+        return {
+          categoria,
+          key, // key normalizada para la URL
+          label: CATEGORY_CONFIG[key]?.label ?? categoria,
+          count,
+          color: CATEGORY_CONFIG[key]?.color ?? '#94a3b8',
+          icon: CATEGORY_CONFIG[key]?.icon,
+        }
+      })
       .sort((a, b) => b.count - a.count)
   }, [allPromesas])
   const maxCount = chartData[0]?.count || 1
@@ -508,8 +512,8 @@ export function PartidoDetalle() {
                 const Icon = item.icon
                 return (
                   <Link
-                    key={item.categoria}
-                    to={`/categorias/${item.categoria}`}
+                    key={item.key}
+                    to={`/categorias/${item.key}`}
                     className="group flex items-center gap-4 p-4 transition-colors hover:bg-muted/30"
                   >
                     <div

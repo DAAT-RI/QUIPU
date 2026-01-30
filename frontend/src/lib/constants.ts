@@ -447,16 +447,29 @@ function generatePlanCategories(): Record<string, CategoryConfig> {
   return config
 }
 
-// Declaraciones (temas de QUIPU_MASTER)
+// Declaraciones (temas de QUIPU_MASTER) - labels con tildes como en la BD
 const DECLARATION_CONFIG: Record<string, CategoryConfig> = {
-  politica: { key: 'politica', label: 'Politica', icon: Megaphone, color: '#6366F1', order: 301, source: 'declaracion' },
-  partidos_politicos: { key: 'partidos_politicos', label: 'Partidos Politicos', icon: Flag, color: '#8B5CF6', order: 302, source: 'declaracion' },
-  corrupcion_y_transparencia: { key: 'corrupcion_y_transparencia', label: 'Corrupcion y Transparencia', icon: Eye, color: '#F43F5E', order: 303, source: 'declaracion' },
-  derechos_humanos: { key: 'derechos_humanos', label: 'Derechos Humanos', icon: Heart, color: '#EC4899', order: 304, source: 'declaracion' },
-  desarrollo_social: { key: 'desarrollo_social', label: 'Desarrollo Social', icon: Users, color: '#F97316', order: 305, source: 'declaracion' },
-  elecciones_y_sistemas_electorales: { key: 'elecciones_y_sistemas_electorales', label: 'Elecciones y Sistemas Electorales', icon: Vote, color: '#3B82F6', order: 306, source: 'declaracion' },
-  gobierno_y_administracion_publica: { key: 'gobierno_y_administracion_publica', label: 'Gobierno y Administracion Publica', icon: Building2, color: '#64748B', order: 307, source: 'declaracion' },
-  startups_y_emprendimiento: { key: 'startups_y_emprendimiento', label: 'Startups y Emprendimiento', icon: Rocket, color: '#06B6D4', order: 308, source: 'declaracion' },
+  salud_publica_y_sistema_de_salud: { key: 'salud_publica_y_sistema_de_salud', label: 'Salud Pública y Sistema de Salud', icon: HeartPulse, color: '#EF4444', order: 301, source: 'declaracion' },
+  seguridad_publica: { key: 'seguridad_publica', label: 'Seguridad Pública', icon: Siren, color: '#F97316', order: 302, source: 'declaracion' },
+  desarrollo_economico: { key: 'desarrollo_economico', label: 'Desarrollo Económico', icon: TrendingUp, color: '#22C55E', order: 303, source: 'declaracion' },
+  infraestructura: { key: 'infraestructura', label: 'Infraestructura', icon: Building2, color: '#64748B', order: 304, source: 'declaracion' },
+  comercio_internacional: { key: 'comercio_internacional', label: 'Comercio Internacional', icon: Globe, color: '#06B6D4', order: 305, source: 'declaracion' },
+  transporte_y_movilidad_urbana: { key: 'transporte_y_movilidad_urbana', label: 'Transporte y Movilidad Urbana', icon: Bus, color: '#8B5CF6', order: 306, source: 'declaracion' },
+  turismo: { key: 'turismo', label: 'Turismo', icon: Compass, color: '#14B8A6', order: 307, source: 'declaracion' },
+  gobierno_regional_y_local: { key: 'gobierno_regional_y_local', label: 'Gobierno Regional y Local', icon: Landmark, color: '#3B82F6', order: 308, source: 'declaracion' },
+  politica: { key: 'politica', label: 'Política', icon: Megaphone, color: '#6366F1', order: 309, source: 'declaracion' },
+  elecciones_y_sistemas_electorales: { key: 'elecciones_y_sistemas_electorales', label: 'Elecciones y Sistemas Electorales', icon: Vote, color: '#EC4899', order: 310, source: 'declaracion' },
+  partidos_politicos: { key: 'partidos_politicos', label: 'Partidos Políticos', icon: Flag, color: '#A855F7', order: 311, source: 'declaracion' },
+  corrupcion_y_transparencia: { key: 'corrupcion_y_transparencia', label: 'Corrupción y Transparencia', icon: Eye, color: '#F43F5E', order: 312, source: 'declaracion' },
+  educacion_superior: { key: 'educacion_superior', label: 'Educación Superior', icon: GraduationCap, color: '#0EA5E9', order: 313, source: 'declaracion' },
+  educacion_escolar: { key: 'educacion_escolar', label: 'Educación Escolar', icon: School, color: '#10B981', order: 314, source: 'declaracion' },
+  inclusion_financiera: { key: 'inclusion_financiera', label: 'Inclusión Financiera', icon: PiggyBank, color: '#EAB308', order: 315, source: 'declaracion' },
+  desarrollo_social: { key: 'desarrollo_social', label: 'Desarrollo Social', icon: Users, color: '#F97316', order: 316, source: 'declaracion' },
+  mineria: { key: 'mineria', label: 'Minería', icon: Mountain, color: '#78716C', order: 317, source: 'declaracion' },
+  justicia: { key: 'justicia', label: 'Justicia', icon: Scale, color: '#7C3AED', order: 318, source: 'declaracion' },
+  gobierno_y_administracion_publica: { key: 'gobierno_y_administracion_publica', label: 'Gobierno y Administración Pública', icon: Landmark, color: '#64748B', order: 319, source: 'declaracion' },
+  derechos_humanos: { key: 'derechos_humanos', label: 'Derechos Humanos', icon: Heart, color: '#EC4899', order: 320, source: 'declaracion' },
+  movimientos_sociales: { key: 'movimientos_sociales', label: 'Movimientos Sociales', icon: Megaphone, color: '#F59E0B', order: 321, source: 'declaracion' },
 }
 
 // Combinar todas las categorías
@@ -468,17 +481,6 @@ export const CATEGORY_CONFIG: Record<string, CategoryConfig> = {
 export const CATEGORIES_LIST = Object.values(CATEGORY_CONFIG).sort((a, b) => a.order - b.order)
 export const PLAN_CATEGORIES = CATEGORIES_LIST.filter((c) => c.source === 'plan')
 export const DECLARATION_TEMAS = CATEGORIES_LIST.filter((c) => c.source === 'declaracion')
-
-export const QUIPU_MASTER_TEMAS = [
-  'Politica',
-  'Partidos Politicos',
-  'Corrupcion y Transparencia',
-  'Derechos Humanos',
-  'Desarrollo Social',
-  'Elecciones y Sistemas Electorales',
-  'Gobierno y Administracion Publica',
-  'Startups y Emprendimiento',
-] as const
 
 // Colores para temas dinámicos (se asignan cíclicamente)
 const DYNAMIC_COLORS = [
