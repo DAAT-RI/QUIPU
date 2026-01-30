@@ -333,7 +333,7 @@ export function Dashboard() {
         )}
       </section>
 
-      {/* Two-column: Candidatos por Cargo + Candidatos Presidenciales */}
+      {/* Two-column: Candidatos por Cargo + Estadística General */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Candidatos por Cargo */}
         <section>
@@ -420,53 +420,53 @@ export function Dashboard() {
           </div>
         </section>
 
-        {/* Candidatos Presidenciales */}
-        <CandidatosPresidencialesSection
-          presidentes={presidentes}
-          vice1={vice1}
-          vice2={vice2}
-        />
+        {/* Estadística General */}
+        <section>
+          <div className="flex items-center gap-2.5 mb-4">
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
+              <TrendingUp className="h-4 w-4 text-primary" />
+            </div>
+            <h2 className="text-lg font-semibold">Estadística General</h2>
+          </div>
+          {statsLoading ? (
+            <LoadingSpinner />
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <StatPill
+                label="Partidos"
+                value={formatNumber(stats?.totalPartidos)}
+                icon={Building2}
+                href="/partidos"
+              />
+              <StatPill
+                label="Promesas"
+                value={formatNumber(stats?.totalPromesas)}
+                icon={FileText}
+                href="/buscar"
+              />
+              <StatPill
+                label="Candidatos"
+                value={formatNumber(stats?.totalCandidatos)}
+                icon={Users}
+                href="/candidatos"
+              />
+              <StatPill
+                label="Declaraciones"
+                value={formatNumber(declaracionesResult?.count ?? 0)}
+                icon={MessageSquareQuote}
+                href="/declaraciones"
+              />
+            </div>
+          )}
+        </section>
       </div>
 
-      {/* Estadística General - Stats Strip */}
-      <section>
-        <div className="flex items-center gap-2.5 mb-4">
-          <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-            <TrendingUp className="h-4 w-4 text-primary" />
-          </div>
-          <h2 className="text-lg font-semibold">Estadística General</h2>
-        </div>
-        {statsLoading ? (
-          <LoadingSpinner />
-        ) : (
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-            <StatPill
-              label="Partidos"
-              value={formatNumber(stats?.totalPartidos)}
-              icon={Building2}
-              href="/partidos"
-            />
-            <StatPill
-              label="Promesas"
-              value={formatNumber(stats?.totalPromesas)}
-              icon={FileText}
-              href="/buscar"
-            />
-            <StatPill
-              label="Candidatos"
-              value={formatNumber(stats?.totalCandidatos)}
-              icon={Users}
-              href="/candidatos"
-            />
-            <StatPill
-              label="Declaraciones"
-              value={formatNumber(declaracionesResult?.count ?? 0)}
-              icon={MessageSquareQuote}
-              href="/declaraciones"
-            />
-          </div>
-        )}
-      </section>
+      {/* Candidatos Presidenciales - Full width expanded */}
+      <CandidatosPresidencialesSection
+        presidentes={presidentes}
+        vice1={vice1}
+        vice2={vice2}
+      />
     </div>
   )
 }
@@ -499,7 +499,7 @@ function StatPill({
   )
 }
 
-/* ── Candidatos Presidenciales con acordeón ─────────────────────── */
+/* ── Candidatos Presidenciales expandido ─────────────────────── */
 function CandidatosPresidencialesSection({
   presidentes,
   vice1,
@@ -529,12 +529,45 @@ function CandidatosPresidencialesSection({
         </Link>
       </div>
 
-      {/* Presidentes - siempre visible */}
-      <CandidatoCargoSection
-        title="Presidente de la República"
-        candidatos={presidentes}
-        color="amber"
-      />
+      {/* Presidentes - Grid expandido */}
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-muted-foreground">Presidente de la República</p>
+          <span className="text-xs text-muted-foreground">{presidentes.length} candidatos</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {presidentes.slice(0, 12).map((c, i) => (
+            <Link
+              key={c.id}
+              to={`/candidatos/${c.id}`}
+              className="group rounded-xl border bg-card p-3 transition-all hover:shadow-sm hover:border-primary/30 text-center"
+            >
+              <div className="relative">
+                <span className="absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full bg-amber-500/10 text-amber-600 dark:text-amber-400 text-[10px] font-bold">
+                  {i + 1}
+                </span>
+                <CandidatoAvatar
+                  nombre={c.nombre_completo || ''}
+                  fotoUrl={c.foto_url}
+                  size="lg"
+                  className="mx-auto mb-2"
+                />
+              </div>
+              <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
+              <p className="text-xs text-muted-foreground truncate">{c.partido_nombre}</p>
+            </Link>
+          ))}
+          {presidentes.length > 12 && (
+            <Link
+              to="/candidatos?tipo=PRESIDENCIAL"
+              className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-card p-3 transition-all hover:border-primary hover:bg-primary/5"
+            >
+              <span className="text-lg font-bold text-muted-foreground">+{presidentes.length - 12}</span>
+              <span className="text-xs text-muted-foreground">más</span>
+            </Link>
+          )}
+        </div>
+      </div>
 
       {/* Acordeón para Vicepresidentes */}
       <div className="rounded-xl border bg-card overflow-hidden">
@@ -552,16 +585,18 @@ function CandidatosPresidencialesSection({
           />
         </button>
         {showVices && (
-          <div className="border-t p-3 space-y-4">
+          <div className="border-t p-4 space-y-6">
             <CandidatoCargoSection
               title="Primer Vicepresidente"
               candidatos={vice1}
               color="violet"
+              expanded={true}
             />
             <CandidatoCargoSection
               title="Segundo Vicepresidente"
               candidatos={vice2}
               color="blue"
+              expanded={true}
             />
           </div>
         )}
@@ -590,14 +625,60 @@ function CandidatoCargoSection({
   title,
   candidatos,
   color,
+  expanded = false,
 }: {
   title: string
   candidatos: CandidatoCompleto[]
   color: keyof typeof COLOR_CLASSES
+  expanded?: boolean
 }) {
   const colors = COLOR_CLASSES[color]
-  const displayList = candidatos.slice(0, 5)
-  const remaining = candidatos.length - 5
+  const displayCount = expanded ? 12 : 5
+  const displayList = candidatos.slice(0, displayCount)
+  const remaining = candidatos.length - displayCount
+
+  if (expanded) {
+    return (
+      <div>
+        <div className="flex items-center justify-between mb-3">
+          <p className="text-sm font-medium text-muted-foreground">{title}</p>
+          <span className="text-xs text-muted-foreground">{candidatos.length} candidatos</span>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-3">
+          {displayList.map((c, i) => (
+            <Link
+              key={c.id}
+              to={`/candidatos/${c.id}`}
+              className="group rounded-xl border bg-muted/30 p-3 transition-all hover:shadow-sm hover:border-primary/30 text-center"
+            >
+              <div className="relative">
+                <span className={`absolute -top-1 -left-1 flex h-5 w-5 items-center justify-center rounded-full ${colors.bg} ${colors.text} text-[10px] font-bold`}>
+                  {i + 1}
+                </span>
+                <CandidatoAvatar
+                  nombre={c.nombre_completo || ''}
+                  fotoUrl={c.foto_url}
+                  size="lg"
+                  className="mx-auto mb-2"
+                />
+              </div>
+              <p className="text-sm font-medium truncate">{c.nombre_completo}</p>
+              <p className="text-xs text-muted-foreground truncate">{c.partido_nombre}</p>
+            </Link>
+          ))}
+          {remaining > 0 && (
+            <Link
+              to="/candidatos?tipo=PRESIDENCIAL"
+              className="flex flex-col items-center justify-center rounded-xl border-2 border-dashed bg-muted/30 p-3 transition-all hover:border-primary hover:bg-primary/5"
+            >
+              <span className="text-lg font-bold text-muted-foreground">+{remaining}</span>
+              <span className="text-xs text-muted-foreground">más</span>
+            </Link>
+          )}
+        </div>
+      </div>
+    )
+  }
 
   return (
     <div>

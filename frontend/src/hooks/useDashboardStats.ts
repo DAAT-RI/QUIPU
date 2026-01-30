@@ -81,52 +81,90 @@ export function useTopPartidosByDeclaraciones() {
         .select('id, nombre_oficial, candidato_presidencial')
       if (partidosError) throw partidosError
 
+      // Get all candidatos with their partido_id and names
+      const { data: candidatos, error: candidatosError } = await supabase
+        .from('quipu_candidatos')
+        .select('partido_id, nombre_completo, apellido_paterno')
+      if (candidatosError) throw candidatosError
+
+      // Build a map of search terms to partido_id
+      const searchTermsToPartido = new Map<string, number>()
+      for (const candidato of candidatos) {
+        if (!candidato.partido_id) continue
+        // Add full name
+        if (candidato.nombre_completo) {
+          searchTermsToPartido.set(candidato.nombre_completo.toLowerCase(), candidato.partido_id)
+          // Also add parts of name that are long enough (apellidos)
+          const parts = candidato.nombre_completo.toLowerCase().split(' ')
+          for (const part of parts) {
+            if (part.length >= 4) {
+              searchTermsToPartido.set(part, candidato.partido_id)
+            }
+          }
+        }
+        // Add apellido paterno
+        if (candidato.apellido_paterno) {
+          searchTermsToPartido.set(candidato.apellido_paterno.toLowerCase(), candidato.partido_id)
+        }
+      }
+
       // Get all declarations from QUIPU_MASTER
       const { data: masterData, error: masterError } = await supabase
         .from('QUIPU_MASTER')
-        .select('stakeholder, canal, interacciones')
+        .select('stakeholder, interacciones')
       if (masterError) throw masterError
 
       // Count declarations per partido
-      const counts: Record<number, { partido: typeof partidos[0]; count: number }> = {}
-
+      const counts: Record<number, number> = {}
       for (const partido of partidos) {
-        counts[partido.id] = { partido, count: 0 }
-        const nombreLower = partido.nombre_oficial.toLowerCase()
-        const candidatoLower = partido.candidato_presidencial?.toLowerCase()
+        counts[partido.id] = 0
+      }
 
-        for (const entry of masterData) {
-          const stakeholder = entry.stakeholder?.toLowerCase() || ''
-          const canal = entry.canal?.toLowerCase() || ''
+      for (const entry of masterData) {
+        const stakeholder = entry.stakeholder?.toLowerCase() || ''
+        if (!stakeholder) continue
 
-          // Match by partido name or candidate name
-          const matchesByName = stakeholder.includes(nombreLower) || canal.includes(nombreLower)
-          const matchesByCandidato = candidatoLower && (
-            stakeholder.includes(candidatoLower) ||
-            candidatoLower.split(' ').some((part: string) => part.length > 3 && stakeholder.includes(part))
-          )
+        // Try to match stakeholder to a partido
+        let matchedPartidoId: number | null = null
 
-          if (matchesByName || matchesByCandidato) {
-            // Count declarations in this entry
-            const interacciones = entry.interacciones as Array<{ type?: string }> | null
-            if (interacciones) {
-              const declCount = interacciones.filter(i => i.type === 'declaration').length
-              counts[partido.id].count += declCount
+        // Check direct match first
+        if (searchTermsToPartido.has(stakeholder)) {
+          matchedPartidoId = searchTermsToPartido.get(stakeholder)!
+        } else {
+          // Check if stakeholder contains any search term
+          for (const [term, partidoId] of searchTermsToPartido) {
+            if (term.length >= 4 && stakeholder.includes(term)) {
+              matchedPartidoId = partidoId
+              break
             }
+          }
+        }
+
+        if (matchedPartidoId !== null) {
+          // Count declarations in this entry
+          const interacciones = entry.interacciones as Array<{ type?: string }> | null
+          if (interacciones) {
+            const declCount = interacciones.filter(i => i.type === 'declaration').length
+            counts[matchedPartidoId] = (counts[matchedPartidoId] || 0) + declCount
           }
         }
       }
 
-      return Object.values(counts)
-        .filter(c => c.count > 0)
-        .sort((a, b) => b.count - a.count)
+      // Build result with partido info
+      const partidoMap = new Map(partidos.map(p => [p.id, p]))
+      return Object.entries(counts)
+        .filter(([, count]) => count > 0)
+        .sort(([, a], [, b]) => b - a)
         .slice(0, 10)
-        .map(c => ({
-          id: c.partido.id,
-          nombre_oficial: c.partido.nombre_oficial,
-          candidato_presidencial: c.partido.candidato_presidencial,
-          total_declaraciones: c.count,
-        }))
+        .map(([id, count]) => {
+          const partido = partidoMap.get(Number(id))!
+          return {
+            id: partido.id,
+            nombre_oficial: partido.nombre_oficial,
+            candidato_presidencial: partido.candidato_presidencial,
+            total_declaraciones: count,
+          }
+        })
     },
   })
 }

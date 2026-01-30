@@ -40,7 +40,7 @@ export function useCandidatos(filters: CandidatoFilters) {
 
 /**
  * Fetch candidates by cargo_postula.
- * Uses exact match by default. Set exactMatch=false for partial matching.
+ * Uses case-insensitive exact match by default. Set exactMatch=false for partial matching.
  */
 export function useCandidatosByCargo(cargo: string, limit = 50, exactMatch = true) {
   return useQuery({
@@ -52,7 +52,8 @@ export function useCandidatosByCargo(cargo: string, limit = 50, exactMatch = tru
         .select('*', { count: 'exact' })
 
       if (exactMatch) {
-        query = query.eq('cargo_postula', cargo)
+        // ilike without wildcards = case-insensitive exact match
+        query = query.ilike('cargo_postula', cargo)
       } else {
         query = query.ilike('cargo_postula', `%${cargo}%`)
       }
