@@ -576,18 +576,18 @@ function CandidatosPresidencialesSection({
       </div>
 
       {/* Acordeón para Vicepresidentes */}
-      <div className="rounded-xl border bg-card overflow-hidden">
+      <div className="rounded-xl border border-l-4 border-l-violet-500 bg-card overflow-hidden">
         <button
           type="button"
           onClick={() => setShowVices(!showVices)}
-          className="w-full flex items-center justify-between p-3 text-sm font-medium text-muted-foreground hover:text-foreground hover:bg-muted/30 transition-colors"
+          className="w-full flex items-center justify-between p-3 text-sm font-medium bg-gradient-to-r from-violet-500/10 to-transparent hover:from-violet-500/20 transition-all"
         >
-          <span className="flex items-center gap-2">
+          <span className="flex items-center gap-2 text-violet-700 dark:text-violet-300">
             <Users className="h-4 w-4" />
             Vicepresidentes ({vice1.length + vice2.length})
           </span>
           <ChevronDown
-            className={`h-4 w-4 transition-transform duration-200 ${showVices ? 'rotate-180' : ''}`}
+            className={`h-4 w-4 text-violet-500 transition-transform duration-200 ${showVices ? 'rotate-180' : ''}`}
           />
         </button>
         {showVices && (

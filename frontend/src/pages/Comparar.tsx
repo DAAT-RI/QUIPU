@@ -140,9 +140,9 @@ function CandidatoColumn({
               <button
                 type="button"
                 onClick={() => setExpandedDecl(!expandedDecl)}
-                className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2"
+                className="w-full text-center text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 py-2 border-t border-dashed border-amber-200 dark:border-amber-800 transition-colors"
               >
-                {expandedDecl ? 'Ver menos' : `+${declaraciones.length - 3} declaraciones más`}
+                {expandedDecl ? '▲ Ver menos' : `▼ +${declaraciones.length - 3} declaraciones más`}
               </button>
             )}
           </>
@@ -174,9 +174,9 @@ function CandidatoColumn({
               <button
                 type="button"
                 onClick={() => setExpandedPromesas(!expandedPromesas)}
-                className="w-full text-center text-sm text-muted-foreground hover:text-foreground py-2"
+                className="w-full text-center text-sm font-medium text-indigo-600 dark:text-indigo-400 hover:text-indigo-700 dark:hover:text-indigo-300 py-2 border-t border-dashed border-indigo-200 dark:border-indigo-800 transition-colors"
               >
-                {expandedPromesas ? 'Ver menos' : `+${promesasList.length - 2} propuestas más`}
+                {expandedPromesas ? '▲ Ver menos' : `▼ +${promesasList.length - 2} propuestas más`}
               </button>
             )}
           </>
@@ -210,21 +210,29 @@ export function Comparar() {
   const temaOptions = useMemo(() => {
     const options = [{ value: '', label: 'Todos los temas' }]
     if (categoriaCounts) {
-      // Add plan categories sorted by count
+      // Add plan categories sorted alphabetically by label
       const planEntries = Object.entries(categoriaCounts.plans)
         .filter(([, count]) => count > 0)
-        .sort(([, a], [, b]) => b - a)
+        .sort(([keyA], [keyB]) => {
+          const labelA = categoriaCounts.planLabels[keyA] || keyA
+          const labelB = categoriaCounts.planLabels[keyB] || keyB
+          return labelA.localeCompare(labelB, 'es')
+        })
       for (const [key] of planEntries) {
         const label = categoriaCounts.planLabels[key] || key
-        options.push({ value: key, label })
+        options.push({ value: label, label })
       }
-      // Add declaration temas that aren't already in plans
+      // Add declaration temas that aren't already in plans (sorted alphabetically)
       const declEntries = Object.entries(categoriaCounts.declarations)
         .filter(([key, count]) => count > 0 && !categoriaCounts.plans[key])
-        .sort(([, a], [, b]) => b - a)
+        .sort(([keyA], [keyB]) => {
+          const labelA = categoriaCounts.declarationLabels[keyA] || keyA
+          const labelB = categoriaCounts.declarationLabels[keyB] || keyB
+          return labelA.localeCompare(labelB, 'es')
+        })
       for (const [key] of declEntries) {
         const label = categoriaCounts.declarationLabels[key] || key
-        options.push({ value: key, label })
+        options.push({ value: label, label })
       }
     }
     return options

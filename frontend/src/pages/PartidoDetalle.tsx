@@ -188,7 +188,7 @@ export function PartidoDetalle() {
           <button
             type="button"
             onClick={() => setTemasOpen((v) => !v)}
-            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${temasOpen ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30' : 'bg-card'}`}
+            className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-amber-500 px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${temasOpen ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30' : 'bg-card hover:border-amber-300/50'}`}
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
               <Tags className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -200,13 +200,13 @@ export function PartidoDetalle() {
               </p>
             </div>
             <ChevronDown
-              className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+              className={`h-5 w-5 text-amber-500 transition-transform duration-200 ${
                 temasOpen ? 'rotate-0' : '-rotate-90'
               }`}
             />
           </button>
           {temasOpen && (
-            <div className="rounded-xl border bg-card divide-y mt-4">
+            <div className="rounded-xl border bg-card divide-y mt-2">
               {temaChartData.map((item) => {
                 const barPct = (item.count / maxTemaCount) * 100
                 return (
@@ -241,7 +241,7 @@ export function PartidoDetalle() {
         <button
           type="button"
           onClick={() => setDeclaracionesOpen((v) => !v)}
-          className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${declaracionesOpen ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30' : 'bg-card'}`}
+          className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-amber-500 px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${declaracionesOpen ? 'bg-amber-50/50 dark:bg-amber-950/20 border-amber-200/50 dark:border-amber-800/30' : 'bg-card hover:border-amber-300/50'}`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-amber-500/10">
             <MessageSquareQuote className="h-4 w-4 text-amber-600 dark:text-amber-400" />
@@ -253,13 +253,13 @@ export function PartidoDetalle() {
             </p>
           </div>
           <ChevronDown
-            className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+            className={`h-5 w-5 text-amber-500 transition-transform duration-200 ${
               declaracionesOpen ? 'rotate-0' : '-rotate-90'
             }`}
           />
         </button>
         {declaracionesOpen && (
-          <div className="mt-4">
+          <div className="mt-2">
             {loadingDecl ? (
               <LoadingSpinner />
             ) : partidoDeclaraciones.length === 0 ? (
@@ -342,7 +342,7 @@ export function PartidoDetalle() {
           <button
             type="button"
             onClick={() => setMencionesOpen((v) => !v)}
-            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${mencionesOpen ? 'bg-orange-50/50 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-800/30' : 'bg-card'}`}
+            className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-orange-500 px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${mencionesOpen ? 'bg-orange-50/50 dark:bg-orange-950/20 border-orange-200/50 dark:border-orange-800/30' : 'bg-card hover:border-orange-300/50'}`}
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-500/10">
               <AtSign className="h-4 w-4 text-orange-600 dark:text-orange-400" />
@@ -354,13 +354,13 @@ export function PartidoDetalle() {
               </p>
             </div>
             <ChevronDown
-              className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+              className={`h-5 w-5 text-orange-500 transition-transform duration-200 ${
                 mencionesOpen ? 'rotate-0' : '-rotate-90'
               }`}
             />
           </button>
           {mencionesOpen && (
-            <div className="mt-4">
+            <div className="mt-2">
               <div className="space-y-3">
                 {partidoMenciones.map((d, idx) => (
                   <Link
@@ -426,7 +426,7 @@ export function PartidoDetalle() {
           <button
             type="button"
             onClick={() => setCandidatosOpen((v) => !v)}
-            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${candidatosOpen ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}
+            className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-primary px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${candidatosOpen ? 'bg-primary/5 border-primary/20' : 'bg-card hover:border-primary/30'}`}
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <Users className="h-4 w-4 text-primary" />
@@ -438,13 +438,13 @@ export function PartidoDetalle() {
               </p>
             </div>
             <ChevronDown
-              className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+              className={`h-5 w-5 text-primary transition-transform duration-200 ${
                 candidatosOpen ? 'rotate-0' : '-rotate-90'
               }`}
             />
           </button>
           {candidatosOpen && (
-            <div className="mt-4">
+            <div className="mt-2">
               {totalCandidatos > 12 && (
                 <div className="flex justify-end mb-3">
                   <Link
@@ -484,10 +484,10 @@ export function PartidoDetalle() {
           <button
             type="button"
             onClick={() => setCategoriasOpen((v) => !v)}
-            className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${categoriasOpen ? 'bg-primary/5 border-primary/20' : 'bg-card'}`}
+            className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-emerald-500 px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${categoriasOpen ? 'bg-emerald-50/50 dark:bg-emerald-950/20 border-emerald-200/50 dark:border-emerald-800/30' : 'bg-card hover:border-emerald-300/50'}`}
           >
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
-              <Tags className="h-4 w-4 text-primary" />
+            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-emerald-500/10">
+              <Tags className="h-4 w-4 text-emerald-600 dark:text-emerald-400" />
             </div>
             <div className="flex-1 min-w-0">
               <h2 className="text-lg font-semibold">Propuestas por Categoria</h2>
@@ -496,13 +496,13 @@ export function PartidoDetalle() {
               </p>
             </div>
             <ChevronDown
-              className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+              className={`h-5 w-5 text-emerald-500 transition-transform duration-200 ${
                 categoriasOpen ? 'rotate-0' : '-rotate-90'
               }`}
             />
           </button>
           {categoriasOpen && (
-            <div className="rounded-xl border bg-card divide-y mt-4">
+            <div className="rounded-xl border bg-card divide-y mt-2">
               {chartData.map((item) => {
                 const barPct = (item.count / maxCount) * 100
                 const Icon = item.icon
@@ -546,7 +546,7 @@ export function PartidoDetalle() {
         <button
           type="button"
           onClick={() => setPropuestasOpen((v) => !v)}
-          className={`w-full flex items-center gap-2.5 rounded-xl border px-5 py-4 text-left transition-all hover:shadow-sm hover:border-primary/30 cursor-pointer ${propuestasOpen ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200/50 dark:border-indigo-800/30' : 'bg-card'}`}
+          className={`w-full flex items-center gap-2.5 rounded-xl border border-l-4 border-l-indigo-500 px-5 py-4 text-left transition-all hover:shadow-sm cursor-pointer ${propuestasOpen ? 'bg-indigo-50/50 dark:bg-indigo-950/20 border-indigo-200/50 dark:border-indigo-800/30' : 'bg-card hover:border-indigo-300/50'}`}
         >
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-indigo-500/10">
             <FileText className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
@@ -558,13 +558,13 @@ export function PartidoDetalle() {
             </p>
           </div>
           <ChevronDown
-            className={`h-5 w-5 text-muted-foreground transition-transform duration-200 ${
+            className={`h-5 w-5 text-indigo-500 transition-transform duration-200 ${
               propuestasOpen ? 'rotate-0' : '-rotate-90'
             }`}
           />
         </button>
         {propuestasOpen && (
-          <div className="mt-4 space-y-4">
+          <div className="mt-2 space-y-4">
             <div className="flex justify-end">
               <FilterSelect
                 value={categoriaFilter}
