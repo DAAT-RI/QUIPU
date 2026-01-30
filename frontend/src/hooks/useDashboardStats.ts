@@ -91,17 +91,15 @@ export function useTopPartidos() {
  * MULTI-TENANT: Uses quipu_stakeholder_aliases for accurate filtering
  */
 export function useDeclaracionesPorTema() {
-  const { clienteId, loading } = useAuth()
+  const { clienteId } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
   // Get candidato IDs for this client
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
-  const isEnabled = !loading && (clienteId === null || clienteCandidatoIds.length > 0)
-
   return useQuery({
     queryKey: ['declaraciones-por-tema', clienteId, clienteCandidatoIds],
-    enabled: isEnabled,
+    enabled: clienteId === null || clienteCandidatoIds.length > 0,
     queryFn: async () => {
       // For non-master users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
@@ -167,17 +165,15 @@ export function useDeclaracionesPorTema() {
  * MULTI-TENANT: Uses quipu_stakeholder_aliases for accurate filtering
  */
 export function useTopPartidosByDeclaraciones() {
-  const { clienteId, loading } = useAuth()
+  const { clienteId } = useAuth()
   const { data: candidatosData } = useClienteCandidatos()
 
   // Get candidato IDs for this client
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
-  const isEnabled = !loading && (clienteId === null || clienteCandidatoIds.length > 0)
-
   return useQuery({
     queryKey: ['top-partidos-declaraciones', clienteId, clienteCandidatoIds],
-    enabled: isEnabled,
+    enabled: clienteId === null || clienteCandidatoIds.length > 0,
     queryFn: async () => {
       // For non-master users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
