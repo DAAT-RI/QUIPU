@@ -86,14 +86,14 @@ export function Dashboard() {
         </p>
       </div>
 
-      {/* Temas Más Discutidos */}
+      {/* Categorías Más Discutidas */}
       <section>
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2.5">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <TrendingUp className="h-4 w-4 text-primary" />
             </div>
-            <h2 className="text-lg font-semibold">Temas Más Discutidos</h2>
+            <h2 className="text-lg font-semibold">Categorías Más Discutidas</h2>
           </div>
           <Link
             to="/declaraciones"

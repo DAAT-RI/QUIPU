@@ -203,9 +203,9 @@ export function PartidoDetalle() {
               <Tags className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold">Declaraciones por Tema</h2>
+              <h2 className="text-lg font-semibold">Declaraciones por Categoría</h2>
               <p className="text-xs text-muted-foreground">
-                {formatNumber(partidoDeclaraciones.length)} declaraciones en {temaChartData.length} temas
+                {formatNumber(partidoDeclaraciones.length)} declaraciones en {temaChartData.length} categorías
               </p>
             </div>
           </button>

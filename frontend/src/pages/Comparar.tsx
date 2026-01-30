@@ -228,7 +228,7 @@ export function Comparar() {
 
   // Generate tema options dynamically from both plans AND declarations
   const temaOptions = useMemo(() => {
-    const options = [{ value: '', label: 'Todos los temas' }]
+    const options = [{ value: '', label: 'Todas las categorías' }]
     if (categoriaCounts) {
       // Combine all categories/temas into a single sorted list
       const allEntries: { key: string; label: string; count: number; source: 'plan' | 'declaracion' }[] = []

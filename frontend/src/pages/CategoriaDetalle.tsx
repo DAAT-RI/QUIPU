@@ -333,7 +333,7 @@ export function CategoriaDetalle() {
             <LoadingSpinner />
           ) : paginatedDecl.length === 0 ? (
             <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
-              No se encontraron declaraciones en este tema
+              No se encontraron declaraciones en esta categoría
             </div>
           ) : (
             <>

@@ -111,7 +111,7 @@ export function Categorias() {
         <div>
           <h1 className="text-2xl font-bold tracking-tight">Categorias</h1>
           <p className="text-sm text-muted-foreground">
-            Temas de planes de gobierno y declaraciones en medios
+            Categorías de planes de gobierno y declaraciones en medios
           </p>
         </div>
       </div>
@@ -133,9 +133,9 @@ export function Categorias() {
               <MessageSquareQuote className="h-4 w-4 text-amber-600 dark:text-amber-400" />
             </div>
             <div className="flex-1 min-w-0">
-              <h2 className="text-lg font-semibold">Temas declarados en Medios o RRSS</h2>
+              <h2 className="text-lg font-semibold">Categorías en Medios o RRSS</h2>
               <p className="text-xs text-muted-foreground">
-                {formatNumber(totalDeclarations)} declaraciones por tema
+                {formatNumber(totalDeclarations)} declaraciones por categoría
               </p>
             </div>
           </button>

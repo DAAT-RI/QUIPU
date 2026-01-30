@@ -717,7 +717,7 @@ function TabDeclaracionesMejorado({
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
           <p className="text-2xl font-bold">{stats.temasUnicos}</p>
-          <p className="text-xs text-muted-foreground mt-1">temas</p>
+          <p className="text-xs text-muted-foreground mt-1">categorías</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
           <p className="text-2xl font-bold">{stats.canalesUnicos}</p>
@@ -725,11 +725,11 @@ function TabDeclaracionesMejorado({
         </div>
       </div>
 
-      {/* Temas más frecuentes (clickeables para filtrar) */}
+      {/* Categorías más frecuentes (clickeables para filtrar) */}
       {stats.topTemas.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
-            <Hash size={14} /> Temas más frecuentes
+            <Hash size={14} /> Categorías más frecuentes
           </p>
           <div className="flex flex-wrap gap-2">
             {filtroTema && (
@@ -892,7 +892,7 @@ function TabPerfilMediatico({
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
           <p className="text-3xl font-bold">{stats.temasUnicos}</p>
-          <p className="text-xs text-muted-foreground mt-1">temas diferentes</p>
+          <p className="text-xs text-muted-foreground mt-1">categorías diferentes</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
           <p className="text-3xl font-bold">{stats.canalesUnicos}</p>
@@ -907,7 +907,7 @@ function TabPerfilMediatico({
           <div className="rounded-xl border bg-card p-4">
             <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
               <Hash size={14} className="text-muted-foreground" />
-              Temas que más habla
+              Categorías de las que más habla
             </h3>
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
@@ -986,7 +986,7 @@ function TabPerfilMediatico({
       {/* Topic Pills (for quick overview) */}
       {stats.topTemas.length > 0 && (
         <div className="rounded-xl border bg-card p-4">
-          <h3 className="text-sm font-semibold mb-3">Temas principales</h3>
+          <h3 className="text-sm font-semibold mb-3">Categorías principales</h3>
           <div className="flex flex-wrap gap-2">
             {stats.topTemas.map(({ name, value }, idx) => (
               <span
