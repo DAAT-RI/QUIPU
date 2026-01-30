@@ -33,24 +33,49 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setLoading(false)
     }, 10000)
 
-    // Force network call first to bypass any stale localStorage cache
-    supabase.auth.refreshSession().then(async ({ data: { session } }) => {
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        try {
-          await loadClienteData(session.user.id)
-          await registerSession(session.user.id)
-        } catch (error) {
-          console.error('[Auth] Error loading cliente data:', error)
-          setLoading(false)
+    // Try refreshSession first (forces network), fallback to getSession (uses cache)
+    supabase.auth.refreshSession().then(async ({ data: { session }, error }) => {
+      // If refresh failed, try getSession as fallback
+      if (error || !session) {
+        const { data } = await supabase.auth.getSession()
+        if (data.session) {
+          setSession(data.session)
+          setUser(data.session.user)
+          try {
+            await loadClienteData(data.session.user.id)
+            await registerSession(data.session.user.id)
+          } catch (err) {
+            console.error('[Auth] Error loading cliente data:', err)
+          }
         }
-      } else {
         setLoading(false)
+        clearTimeout(safetyTimeout)
+        return
       }
+
+      setSession(session)
+      setUser(session.user)
+      try {
+        await loadClienteData(session.user.id)
+        await registerSession(session.user.id)
+      } catch (error) {
+        console.error('[Auth] Error loading cliente data:', error)
+      }
+      setLoading(false)
       clearTimeout(safetyTimeout)
-    }).catch((error) => {
+    }).catch(async (error) => {
       console.error('[Auth] Error refreshing session:', error)
+      // Fallback to getSession on error
+      try {
+        const { data } = await supabase.auth.getSession()
+        if (data.session) {
+          setSession(data.session)
+          setUser(data.session.user)
+          await loadClienteData(data.session.user.id)
+        }
+      } catch (e) {
+        console.error('[Auth] Fallback getSession failed:', e)
+      }
       setLoading(false)
       clearTimeout(safetyTimeout)
     })
