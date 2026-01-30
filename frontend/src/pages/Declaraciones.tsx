@@ -1,6 +1,6 @@
 import { useMemo } from 'react'
 import { Link, useSearchParams } from 'react-router-dom'
-import { useDeclaraciones, useCanales, useOrganizacionesMencionadas } from '@/hooks/useDeclaraciones'
+import { useDeclaraciones, useCanales } from '@/hooks/useDeclaraciones'
 import { useDeclaracionesPorTema } from '@/hooks/useDashboardStats'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
@@ -35,7 +35,6 @@ export function Declaraciones() {
   const stakeholder = searchParams.get('stakeholder') || ''
   const canal = searchParams.get('canal') || ''
   const tema = searchParams.get('tema') || ''
-  const organizacion = searchParams.get('organizacion') || ''
   const producto = searchParams.get('producto') || ''
   const page = parseInt(searchParams.get('page') || '0', 10)
 
@@ -56,13 +55,11 @@ export function Declaraciones() {
     setSearchParams(params, { replace: true })
   }
 
-  // Obtener canales, organizaciones y temas dinámicamente
+  // Obtener canales y temas dinámicamente
   const { data: canalesData } = useCanales()
-  const { data: orgsData } = useOrganizacionesMencionadas()
   const { data: temasData } = useDeclaracionesPorTema()
 
   const canalOptions = canalesData ?? []
-  const orgOptions = orgsData ?? []
 
   // Generar opciones de tema dinámicamente desde la BD
   const temaOptions = useMemo(() => {
@@ -78,7 +75,6 @@ export function Declaraciones() {
     stakeholder: stakeholder || undefined,
     canal: canal || undefined,
     categoriaDeclaracion: tema || undefined, // Filter by categorias_interaccion (declaration category)
-    organizacion: organizacion || undefined,
     producto: producto || undefined,
     offset,
     limit: PAGE_LIMIT,
@@ -96,7 +92,6 @@ export function Declaraciones() {
   const setStakeholder = (v: string) => updateParams({ stakeholder: v })
   const setCanal = (v: string) => updateParams({ canal: v })
   const setTema = (v: string) => updateParams({ tema: v })
-  const setOrganizacion = (v: string) => updateParams({ organizacion: v })
   const setProducto = (v: string) => updateParams({ producto: v })
   const setPage = (v: number | ((p: number) => number)) => {
     const newPage = typeof v === 'function' ? v(page) : v
@@ -164,19 +159,13 @@ export function Declaraciones() {
           />
         </div>
 
-        {/* Row 2: Tema + Organización + Sector */}
+        {/* Row 2: Tema + Sector */}
         <div className="flex flex-col sm:flex-row gap-3">
           <FilterSelect
             value={tema}
             onChange={setTema}
             options={temaOptions}
             placeholder="Categoría"
-          />
-          <FilterSelect
-            value={organizacion}
-            onChange={setOrganizacion}
-            options={orgOptions}
-            placeholder="Organización mencionada"
           />
           <SearchInput
             value={producto}
