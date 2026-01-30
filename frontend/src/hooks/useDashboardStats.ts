@@ -194,7 +194,7 @@ export function useTopPartidosByDeclaraciones() {
       // Get all declarations from QUIPU_MASTER
       const { data: masterData, error: masterError } = await supabase
         .from('QUIPU_MASTER')
-        .select('stakeholder, interacciones')
+        .select('interacciones')
       if (masterError) throw masterError
 
       // Count declarations per partido
@@ -203,33 +203,37 @@ export function useTopPartidosByDeclaraciones() {
         counts[partido.id] = 0
       }
 
+      // Stakeholder is INSIDE interacciones[], not at row level
       for (const entry of masterData) {
-        // Normalize stakeholder to handle accents (César vs Cesar, Acuña vs Acuna)
-        const stakeholder = entry.stakeholder ? normalizeForMatch(entry.stakeholder) : ''
-        if (!stakeholder) continue
+        const interacciones = entry.interacciones as Array<{ type?: string; stakeholder?: string }> | null
+        if (!interacciones) continue
 
-        // Try to match stakeholder to a partido
-        let matchedPartidoId: number | null = null
+        for (const i of interacciones) {
+          // Only count declarations
+          if (i.type !== 'declaration') continue
+          if (!i.stakeholder) continue
 
-        // Check direct match first
-        if (searchTermsToPartido.has(stakeholder)) {
-          matchedPartidoId = searchTermsToPartido.get(stakeholder)!
-        } else {
-          // Check if stakeholder contains any search term
-          for (const [term, partidoId] of searchTermsToPartido) {
-            if (term.length >= 4 && stakeholder.includes(term)) {
-              matchedPartidoId = partidoId
-              break
+          // Normalize stakeholder to handle accents (César vs Cesar, Acuña vs Acuna)
+          const stakeholder = normalizeForMatch(i.stakeholder)
+
+          // Try to match stakeholder to a partido
+          let matchedPartidoId: number | null = null
+
+          // Check direct match first
+          if (searchTermsToPartido.has(stakeholder)) {
+            matchedPartidoId = searchTermsToPartido.get(stakeholder)!
+          } else {
+            // Check if stakeholder contains any search term
+            for (const [term, partidoId] of searchTermsToPartido) {
+              if (term.length >= 4 && stakeholder.includes(term)) {
+                matchedPartidoId = partidoId
+                break
+              }
             }
           }
-        }
 
-        if (matchedPartidoId !== null) {
-          // Count declarations in this entry
-          const interacciones = entry.interacciones as Array<{ type?: string }> | null
-          if (interacciones) {
-            const declCount = interacciones.filter(i => i.type === 'declaration').length
-            counts[matchedPartidoId] = (counts[matchedPartidoId] || 0) + declCount
+          if (matchedPartidoId !== null) {
+            counts[matchedPartidoId] = (counts[matchedPartidoId] || 0) + 1
           }
         }
       }

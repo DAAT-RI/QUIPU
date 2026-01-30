@@ -110,41 +110,54 @@ function CandidatoColumn({
       <div className="p-4 space-y-3 max-h-[60vh] overflow-y-auto">
         {(loadingPromesas || loadingDecl) && <LoadingSpinner />}
 
-        {/* Declaraciones */}
-        {!loadingDecl && declaraciones.length > 0 && (
+        {/* Declaraciones - En Medios */}
+        {!loadingDecl && (
           <>
-            {(expandedDecl ? declaraciones : declaraciones.slice(0, 3)).map((d, i) => (
-              <div
-                key={`${d.master_id}-${i}`}
-                className="p-3 bg-muted/30 rounded-lg"
-              >
-                <div className="flex items-center justify-between mb-2">
-                  {d.tema_interaccion && (
-                    <span className="text-xs font-medium text-muted-foreground bg-background px-2 py-1 rounded">
-                      {d.tema_interaccion}
-                    </span>
-                  )}
-                  <MessageSquareQuote size={14} className="text-amber-500" />
-                </div>
-                <p className="text-sm text-foreground leading-relaxed line-clamp-3">
-                  {d.contenido}
-                </p>
-                <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
-                  {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
-                    <span>{d.canal}</span>
-                  )}
-                  {d.fecha && <span>{formatDate(d.fecha)}</span>}
-                </div>
-              </div>
-            ))}
-            {declaraciones.length > 3 && (
-              <button
-                type="button"
-                onClick={() => setExpandedDecl(!expandedDecl)}
-                className="w-full text-center text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 py-2 border-t border-dashed border-amber-200 dark:border-amber-800 transition-colors"
-              >
-                {expandedDecl ? '▲ Ver menos' : `▼ +${declaraciones.length - 3} declaraciones más`}
-              </button>
+            <div className="flex items-center gap-1.5 mb-2">
+              <MessageSquareQuote size={14} className="text-amber-500" />
+              <span className="text-xs font-medium text-muted-foreground uppercase">En Medios</span>
+            </div>
+            {declaraciones.length === 0 ? (
+              <p className="text-sm text-muted-foreground italic py-2">
+                {categoriaFilter
+                  ? `Sin declaraciones sobre "${categoriaFilter}"`
+                  : 'Sin declaraciones'}
+              </p>
+            ) : (
+              <>
+                {(expandedDecl ? declaraciones : declaraciones.slice(0, 3)).map((d, i) => (
+                  <div
+                    key={`${d.master_id}-${i}`}
+                    className="p-3 bg-muted/30 rounded-lg"
+                  >
+                    <div className="flex flex-wrap items-center gap-1.5 mb-2">
+                      {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
+                        <span key={tema} className="text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">
+                          {tema}
+                        </span>
+                      ))}
+                    </div>
+                    <p className="text-sm text-foreground leading-relaxed line-clamp-3">
+                      {d.contenido}
+                    </p>
+                    <div className="flex items-center justify-between mt-2 text-xs text-muted-foreground">
+                      {d.canal && !isRedundantCanal(d.canal, d.stakeholder) && (
+                        <span>{d.canal}</span>
+                      )}
+                      {d.fecha && <span>{formatDate(d.fecha)}</span>}
+                    </div>
+                  </div>
+                ))}
+                {declaraciones.length > 3 && (
+                  <button
+                    type="button"
+                    onClick={() => setExpandedDecl(!expandedDecl)}
+                    className="w-full text-center text-sm font-medium text-amber-600 dark:text-amber-400 hover:text-amber-700 dark:hover:text-amber-300 py-2 border-t border-dashed border-amber-200 dark:border-amber-800 transition-colors"
+                  >
+                    {expandedDecl ? '▲ Ver menos' : `▼ +${declaraciones.length - 3} declaraciones más`}
+                  </button>
+                )}
+              </>
             )}
           </>
         )}
@@ -181,15 +194,6 @@ function CandidatoColumn({
               </button>
             )}
           </>
-        )}
-
-        {/* Empty state */}
-        {!loadingDecl && !loadingPromesas && declaraciones.length === 0 && promesasList.length === 0 && (
-          <p className="text-sm text-muted-foreground text-center py-4">
-            {textFilter
-              ? `No hay declaraciones ni propuestas con "${textFilter}"`
-              : 'Sin declaraciones o propuestas encontradas'}
-          </p>
         )}
       </div>
     </div>

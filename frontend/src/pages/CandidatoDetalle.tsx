@@ -783,11 +783,11 @@ function TabDeclaracionesMejorado({
                       {d.canal}
                     </span>
                   )}
-                  {d.tema_interaccion && (
-                    <span className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
-                      {d.tema_interaccion}
+                  {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
+                    <span key={tema} className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
+                      {tema}
                     </span>
-                  )}
+                  ))}
                   {d.fecha && <span>{formatDate(d.fecha)}</span>}
                 </div>
               </div>

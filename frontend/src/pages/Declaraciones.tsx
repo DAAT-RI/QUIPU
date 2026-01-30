@@ -110,14 +110,17 @@ export function Declaraciones() {
         </div>
       </div>
 
-      {/* Active filter indicator */}
-      {temaFromUrl && (
+      {/* Active filter indicator - follows dropdown state, not just URL */}
+      {tema && (
         <div className="flex items-center gap-3 rounded-xl border border-primary/30 bg-primary/5 px-4 py-3">
           <span className="text-sm text-muted-foreground">Filtrando por tema:</span>
-          <span className="font-semibold text-primary">{temaFromUrl}</span>
+          <span className="font-semibold text-primary">{tema}</span>
           <button
             type="button"
-            onClick={() => navigate('/declaraciones')}
+            onClick={() => {
+              setTema('')
+              navigate('/declaraciones')
+            }}
             className="ml-auto flex items-center gap-1 rounded-lg px-2 py-1 text-xs text-muted-foreground hover:bg-muted hover:text-foreground transition-colors"
           >
             <X size={14} />
