@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react'
-import { X, Plus, MessageSquareQuote, FileText, TrendingUp, Users } from 'lucide-react'
+import { X, Plus, MessageSquareQuote, FileText, TrendingUp, Users, ChevronDown } from 'lucide-react'
 import { useSearchCandidatosByName, useCandidatosByCargo } from '@/hooks/useCandidatos'
 import { usePromesasByPartido } from '@/hooks/usePromesas'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
@@ -209,6 +209,7 @@ export function Comparar() {
   const [cargoFilter, setCargoFilter] = useState('')
   const [showAllCandidatos, setShowAllCandidatos] = useState(false)
   const [textFilter, setTextFilter] = useState('')
+  const [selectorHidden, setSelectorHidden] = useState(false)
 
   // Get partido IDs from selected candidates
   const selectedPartidoIds = useMemo(() =>
@@ -341,7 +342,7 @@ export function Comparar() {
 
           {/* Selected candidates chips */}
           {selectedCandidatos.length > 0 && (
-            <div className="flex flex-wrap gap-3 mb-6">
+            <div className="flex flex-wrap items-center gap-3 mb-6">
               {selectedCandidatos.map((c) => (
                 <div
                   key={c.id}
@@ -363,11 +364,34 @@ export function Comparar() {
                   </button>
                 </div>
               ))}
+              {/* Comparar / Agregar button */}
+              {selectedCandidatos.length >= 2 && (
+                <button
+                  onClick={() => setSelectorHidden(!selectorHidden)}
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full font-medium text-sm transition-colors ${
+                    selectorHidden
+                      ? 'bg-muted text-muted-foreground hover:bg-muted/80'
+                      : 'bg-gray-500 text-white hover:bg-gray-600'
+                  }`}
+                >
+                  {selectorHidden ? (
+                    <>
+                      <Plus size={16} />
+                      Agregar
+                    </>
+                  ) : (
+                    <>
+                      <ChevronDown size={16} />
+                      Comparar
+                    </>
+                  )}
+                </button>
+              )}
             </div>
           )}
 
-          {/* Selection controls - only show if less than 4 selected */}
-          {selectedCandidatos.length < 4 && (
+          {/* Selection controls - only show if less than 4 selected and not hidden */}
+          {selectedCandidatos.length < 4 && !selectorHidden && (
             <>
               {/* Step 1: Cargo selector */}
               <div className="mb-4">
