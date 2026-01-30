@@ -1,5 +1,7 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { useAuth } from '@/contexts/AuthContext'
+import { useClienteCandidatos } from './useClienteCandidatos'
 import type { DeclaracionFilters, DeclaracionView, QuipuMasterEntry } from '@/types/database'
 
 /** Remove accents from text for accent-insensitive search */
@@ -45,6 +47,7 @@ function getSearchVariants(text: string): string[] {
 
 /**
  * Hook para obtener declaraciones desde v_quipu_declaraciones
+ * FILTRADO POR CANDIDATOS DEL CLIENTE (multi-tenant)
  *
  * NOTAS IMPORTANTES:
  * - Default: tipo='declaration' (mentions tienen mucho ruido)
@@ -53,12 +56,31 @@ function getSearchVariants(text: string): string[] {
  * - `organizaciones` es clave para filtrar por gremio/sector
  */
 export function useDeclaraciones(filters: DeclaracionFilters) {
+  const { clienteId } = useAuth()
+  const { data: candidatosData } = useClienteCandidatos()
+
+  // Extraer nombres de stakeholders del cliente
+  const clienteStakeholders = candidatosData?.map(
+    c => (c.quipu_candidatos as any)?.nombre_completo
+  ).filter(Boolean) ?? []
+
   return useQuery({
-    queryKey: ['declaraciones', filters],
+    queryKey: ['declaraciones', filters, clienteId],
+    enabled: !!clienteId && clienteStakeholders.length > 0,
     queryFn: async () => {
       let query = supabase
         .from('v_quipu_declaraciones')
         .select('*', { count: 'exact' })
+
+      // Filtro multi-tenant: solo declaraciones de candidatos del cliente
+      if (clienteStakeholders.length > 0) {
+        const stakeholderConditions = clienteStakeholders
+          .slice(0, 50) // Limitar para performance
+          .map(name => `stakeholder.ilike.%${name}%`)
+          .join(',')
+
+        query = query.or(stakeholderConditions)
+      }
 
       // Filtro por tipo (default: declaration) - case insensitive
       if (filters.tipo) {
