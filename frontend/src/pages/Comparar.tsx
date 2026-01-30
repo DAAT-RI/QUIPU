@@ -14,9 +14,9 @@ import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
 const CARGO_OPTIONS = [
-  { value: 'PRESIDENTE DE LA REP', label: 'Presidente' },
-  { value: 'PRIMER VICEPRESIDENTE', label: '1er Vicepresidente' },
-  { value: 'SEGUNDO VICEPRESIDENTE', label: '2do Vicepresidente' },
+  { value: 'PRESIDENTE DE LA REPÚBLICA', label: 'Presidente' },
+  { value: 'PRIMER VICEPRESIDENTE DE LA REPÚBLICA', label: '1er Vicepresidente' },
+  { value: 'SEGUNDO VICEPRESIDENTE DE LA REPÚBLICA', label: '2do Vicepresidente' },
   { value: 'DIPUTADO', label: 'Diputados' },
   { value: 'SENADOR', label: 'Senadores' },
 ]

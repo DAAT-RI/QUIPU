@@ -34,9 +34,9 @@ export function Dashboard() {
   })
 
   // Get presidential candidates by cargo type (separated)
-  const { data: presidentesData } = useCandidatosByCargo('PRESIDENTE DE LA REP', 50)
-  const { data: vice1Data } = useCandidatosByCargo('PRIMER VICEPRESIDENTE', 50)
-  const { data: vice2Data } = useCandidatosByCargo('SEGUNDO VICEPRESIDENTE', 50)
+  const { data: presidentesData } = useCandidatosByCargo('PRESIDENTE DE LA REPÚBLICA', 50)
+  const { data: vice1Data } = useCandidatosByCargo('PRIMER VICEPRESIDENTE DE LA REPÚBLICA', 50)
+  const { data: vice2Data } = useCandidatosByCargo('SEGUNDO VICEPRESIDENTE DE LA REPÚBLICA', 50)
 
   // Get candidate counts by cargo type
   const { data: cargoCountsData } = useCandidatoCountByTipo()
@@ -290,18 +290,20 @@ export function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">Categorías en el feed</p>
               <div className="rounded-xl border bg-card divide-y">
                 {(() => {
-                  // Extraer categorías únicas de las declaraciones
+                  // Extraer categorías únicas de las declaraciones (tema_interaccion puede tener múltiples separadas por ;)
                   const categoryMap = new Map<string, number>()
                   recentDeclaraciones.forEach((decl) => {
                     if (decl.tema_interaccion) {
-                      categoryMap.set(
-                        decl.tema_interaccion,
-                        (categoryMap.get(decl.tema_interaccion) || 0) + 1
-                      )
+                      // Separar por ; y contar cada categoría individualmente
+                      const cats = decl.tema_interaccion.split(';').map(c => c.trim()).filter(c => c)
+                      cats.forEach(cat => {
+                        categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1)
+                      })
                     }
                   })
                   const categories = Array.from(categoryMap.entries())
                     .sort((a, b) => b[1] - a[1])
+                    .slice(0, 10) // Limitar a top 10 categorías
 
                   if (categories.length === 0) {
                     return (
