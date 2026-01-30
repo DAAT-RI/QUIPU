@@ -39,17 +39,25 @@ export function useCandidatos(filters: CandidatoFilters) {
 }
 
 /**
- * Fetch candidates by partial cargo_postula match.
- * Used in Dashboard to separate Presidente, 1er Vice, 2do Vice.
+ * Fetch candidates by cargo_postula.
+ * Uses exact match by default. Set exactMatch=false for partial matching.
  */
-export function useCandidatosByCargo(cargoPattern: string, limit = 50) {
+export function useCandidatosByCargo(cargo: string, limit = 50, exactMatch = true) {
   return useQuery({
-    queryKey: ['candidatos-cargo', cargoPattern, limit],
+    queryKey: ['candidatos-cargo', cargo, limit, exactMatch],
+    enabled: !!cargo,
     queryFn: async () => {
-      const { data, error, count } = await supabase
+      let query = supabase
         .from('v_quipu_candidatos_unicos')
         .select('*', { count: 'exact' })
-        .ilike('cargo_postula', `%${cargoPattern}%`)
+
+      if (exactMatch) {
+        query = query.eq('cargo_postula', cargo)
+      } else {
+        query = query.ilike('cargo_postula', `%${cargo}%`)
+      }
+
+      const { data, error, count } = await query
         .order('partido_nombre')
         .limit(limit)
       if (error) throw error

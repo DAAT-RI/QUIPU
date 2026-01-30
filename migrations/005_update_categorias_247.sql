@@ -3,6 +3,13 @@
 -- Reemplaza las 15 categorías genéricas con las 247 específicas
 -- =====================================================
 
+-- Primero eliminar la vista que depende de la columna 'nombre'
+DROP VIEW IF EXISTS v_quipu_promesas_planes_completas;
+
+-- Aumentar el tamaño de la columna nombre para acomodar keys más largos
+-- (algunas categorías como 'industria_de_entregas_y_logistica_de_ultima_milla' tienen >50 chars)
+ALTER TABLE quipu_categorias_promesas ALTER COLUMN nombre TYPE VARCHAR(100);
+
 -- Eliminar las categorías antiguas (las 15 originales)
 DELETE FROM quipu_categorias_promesas;
 
@@ -268,6 +275,26 @@ ON CONFLICT (nombre) DO UPDATE SET
   icono = EXCLUDED.icono,
   color = EXCLUDED.color,
   orden = EXCLUDED.orden;
+
+-- Recrear la vista que fue eliminada
+CREATE OR REPLACE VIEW v_quipu_promesas_planes_completas AS
+SELECT
+    p.id,
+    p.texto_original,
+    p.resumen,
+    p.categoria,
+    p.subcategoria,
+    p.ambito,
+    p.pagina_pdf,
+    p.confianza_extraccion,
+    pp.nombre_oficial as partido,
+    pp.candidato_presidencial,
+    c.nombre_display as categoria_display,
+    c.icono as categoria_icono,
+    c.color as categoria_color
+FROM quipu_promesas_planes p
+JOIN quipu_partidos pp ON p.partido_id = pp.id
+LEFT JOIN quipu_categorias_promesas c ON p.categoria = c.nombre;
 
 -- Verificar el resultado
 SELECT COUNT(*) as total_categorias FROM quipu_categorias_promesas;
