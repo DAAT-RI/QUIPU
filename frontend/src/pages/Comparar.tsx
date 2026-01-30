@@ -185,7 +185,9 @@ function CandidatoColumn({
         {/* Empty state */}
         {!loadingDecl && !loadingPromesas && declaraciones.length === 0 && promesasList.length === 0 && (
           <p className="text-sm text-muted-foreground text-center py-4">
-            Sin declaraciones o propuestas encontradas
+            {textFilter
+              ? `No hay declaraciones ni propuestas con "${textFilter}"`
+              : 'Sin declaraciones o propuestas encontradas'}
           </p>
         )}
       </div>

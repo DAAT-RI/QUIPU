@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { supabase } from '@/lib/supabase'
+import { normalizeKey } from '@/lib/utils'
 import type { CandidatoFilters, CandidatoCompleto, HojaVida } from '@/types/database'
 
 export function useCandidatos(filters: CandidatoFilters) {
@@ -85,20 +86,33 @@ export function useCandidato(id: string | undefined) {
 
 /**
  * Search candidatos by name, partido, or cargo.
+ * Case-insensitive and accent-insensitive (ignores tildes).
  * Used in Comparar page for flexible candidate selection.
  */
 export function useSearchCandidatosByName(search: string) {
+  const normalizedSearch = normalizeKey(search)
   return useQuery({
-    queryKey: ['search-candidatos', search],
+    queryKey: ['search-candidatos', normalizedSearch],
     enabled: search.length >= 2,
     queryFn: async () => {
+      // Fetch more results to filter client-side for accent-insensitive search
       const { data, error } = await supabase
         .from('v_quipu_candidatos_unicos')
         .select('*')
-        .or(`nombre_completo.ilike.%${search}%,partido_nombre.ilike.%${search}%,cargo_postula.ilike.%${search}%`)
-        .limit(20)
+        .limit(500)
       if (error) throw error
-      return data as CandidatoCompleto[]
+
+      // Client-side filtering: normalize both search and fields for accent-insensitive matching
+      const filtered = (data as CandidatoCompleto[]).filter(c => {
+        const nombre = normalizeKey(c.nombre_completo || '')
+        const partido = normalizeKey(c.partido_nombre || '')
+        const cargo = normalizeKey(c.cargo_postula || '')
+        return nombre.includes(normalizedSearch) ||
+               partido.includes(normalizedSearch) ||
+               cargo.includes(normalizedSearch)
+      })
+
+      return filtered.slice(0, 20)
     },
   })
 }

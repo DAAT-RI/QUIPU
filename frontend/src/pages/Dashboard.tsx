@@ -20,7 +20,7 @@ import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { useCandidatoCountByTipo, useCandidatosByCargo } from '@/hooks/useCandidatos'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
-import { CATEGORY_CONFIG, CATEGORIES_LIST } from '@/lib/constants'
+import { CATEGORIES_LIST, getDynamicCategoryConfig } from '@/lib/constants'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
@@ -51,13 +51,13 @@ export function Dashboard() {
   const topicCards = useMemo(() => {
     if (!porCategoria) return []
     const total = porCategoria.reduce((s, c) => s + c.count, 0)
-    return porCategoria.slice(0, 6).map((item) => {
-      const cfg = CATEGORY_CONFIG[item.categoria]
+    return porCategoria.slice(0, 6).map((item, index) => {
+      const cfg = getDynamicCategoryConfig(item.categoria, index, 'plan')
       return {
-        key: item.categoria,
-        label: cfg?.label ?? item.categoria,
-        icon: cfg?.icon ?? FileText,
-        color: cfg?.color ?? '#6B7280',
+        key: cfg.key,
+        label: cfg.label,
+        icon: cfg.icon,
+        color: cfg.color,
         count: item.count,
         pct: total > 0 ? (item.count / total) * 100 : 0,
       }
@@ -160,6 +160,10 @@ export function Dashboard() {
         </div>
         {partidosLoading ? (
           <LoadingSpinner />
+        ) : partidoRanking.length === 0 ? (
+          <div className="rounded-xl border border-dashed p-8 text-center text-sm text-muted-foreground">
+            No se encontraron declaraciones vinculadas a partidos.
+          </div>
         ) : (
           <div className="rounded-xl border bg-card divide-y">
             {partidoRanking.map((p) => {
@@ -335,6 +339,13 @@ export function Dashboard() {
         )}
       </section>
 
+      {/* Candidatos Presidenciales - Full width expanded */}
+      <CandidatosPresidencialesSection
+        presidentes={presidentes}
+        vice1={vice1}
+        vice2={vice2}
+      />
+
       {/* Two-column: Candidatos por Cargo + Estadística General */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
         {/* Candidatos por Cargo */}
@@ -462,13 +473,6 @@ export function Dashboard() {
           )}
         </section>
       </div>
-
-      {/* Candidatos Presidenciales - Full width expanded */}
-      <CandidatosPresidencialesSection
-        presidentes={presidentes}
-        vice1={vice1}
-        vice2={vice2}
-      />
     </div>
   )
 }
