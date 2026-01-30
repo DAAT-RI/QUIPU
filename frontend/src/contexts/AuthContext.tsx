@@ -98,8 +98,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
         if (data && data.current_session_id && data.current_session_id !== sessionId) {
           // Otra sesión tomó el control
-          await supabase.auth.signOut()
-          alert('Sesión cerrada: iniciaste sesión en otro dispositivo')
+          console.warn('[Auth] Session mismatch detected (Remote: ' + data.current_session_id + ' vs Local: ' + sessionId + ')')
+          // TEMPORARY FIX: Disable auto-logout to debug RLS/Update issue
+          // await supabase.auth.signOut()
+          // alert('Sesión cerrada: iniciaste sesión en otro dispositivo')
         }
       } catch (error) {
         console.error('Exception in session validation:', error)
