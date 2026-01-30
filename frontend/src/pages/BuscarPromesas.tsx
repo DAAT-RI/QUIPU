@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react'
 import { Search, ArrowRight, FileText, MessageSquareQuote } from 'lucide-react'
-import { Link } from 'react-router-dom'
+import { Link, useLocation } from 'react-router-dom'
 import { useSearchPromesas } from '@/hooks/useSearch'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { usePartidos } from '@/hooks/usePartidos'
@@ -20,6 +20,10 @@ export function BuscarPromesas() {
   // Track if user has ever entered results view to prevent disorienting view changes
   const [hasEnteredResults, setHasEnteredResults] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
+  const location = useLocation()
+
+  // Current URL for preserving navigation state
+  const currentUrl = location.pathname + location.search
 
   const { data: partidos } = usePartidos()
 
@@ -160,6 +164,7 @@ export function BuscarPromesas() {
                 <Link
                   key={`${d.master_id}-${d.idx}`}
                   to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
+                  state={{ from: currentUrl }}
                   className="group block p-3 hover:bg-muted/30 transition-colors"
                 >
                   <div className="flex items-start justify-between gap-2">

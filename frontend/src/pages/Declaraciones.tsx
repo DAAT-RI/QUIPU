@@ -1,5 +1,5 @@
 import { useState, useEffect, useMemo } from 'react'
-import { Link, useSearchParams, useNavigate } from 'react-router-dom'
+import { Link, useSearchParams, useNavigate, useLocation } from 'react-router-dom'
 import { useDeclaraciones, useCanales, useOrganizacionesMencionadas } from '@/hooks/useDeclaraciones'
 import { useDeclaracionesPorTema } from '@/hooks/useDashboardStats'
 import { SearchInput } from '@/components/ui/SearchInput'
@@ -28,10 +28,14 @@ const TIPO_OPTIONS = [
 ]
 
 export function Declaraciones() {
-  const [searchParams] = useSearchParams()
+  const [searchParams, setSearchParams] = useSearchParams()
   const navigate = useNavigate()
+  const location = useLocation()
   const stakeholderFromUrl = searchParams.get('stakeholder') || ''
   const temaFromUrl = searchParams.get('tema') || ''
+
+  // Current URL for preserving navigation state
+  const currentUrl = location.pathname + location.search
 
   // Default: solo declarations (mentions tienen mucho ruido)
   const [tipo, setTipo] = useState<string>('declaration')
@@ -218,6 +222,7 @@ export function Declaraciones() {
               <Link
                 key={`${d.master_id}-${d.idx}`}
                 to={`/declaraciones/${d.master_id}?idx=${d.idx}`}
+                state={{ from: currentUrl }}
                 className="group block rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
               >
                 {/* Header: Stakeholder + Canal (si diferente) + Fecha */}
