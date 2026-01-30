@@ -64,33 +64,35 @@ export function useUpdateUsuario() {
 export function useCreateUsuario() {
   const queryClient = useQueryClient()
 
-  mutationFn: async (usuario: {
-    email: string
-    nombre?: string
-    rol: string
-    cliente_id?: number | null
-    clienteId?: number
-  }) => {
-    // Support both cliente_id and clienteId for backwards compatibility
-    const insertData = {
-      email: usuario.email,
-      nombre: usuario.nombre || null,
-      rol: usuario.rol,
-      cliente_id: usuario.cliente_id ?? usuario.clienteId ?? null
-    }
-    const { data, error } = await supabase
-      .from('quipu_usuarios')
-      .insert(usuario)
-      .select()
-      .single()
+  return useMutation({
+    mutationFn: async (usuario: {
+      email: string
+      nombre?: string
+      rol: string
+      cliente_id?: number | null
+      clienteId?: number
+    }) => {
+      // Support both cliente_id and clienteId for backwards compatibility
+      const insertData = {
+        email: usuario.email,
+        nombre: usuario.nombre || null,
+        rol: usuario.rol,
+        cliente_id: usuario.cliente_id ?? usuario.clienteId ?? null
+      }
+      const { data, error } = await supabase
+        .from('quipu_usuarios')
+        .insert(insertData)
+        .select()
+        .single()
 
-    if (error) throw error
-    return data
-  },
+      if (error) throw error
+      return data
+    },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['admin-usuarios'] })
+      queryClient.invalidateQueries({ queryKey: ['cliente-usuarios'] })
     }
-})
+  })
 }
 
 export function useClientes() {
