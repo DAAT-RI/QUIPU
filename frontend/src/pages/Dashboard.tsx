@@ -213,7 +213,7 @@ export function Dashboard() {
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary/10">
               <MessageSquareQuote className="h-4 w-4 text-primary" />
             </div>
-            <h2 className="text-lg font-semibold">Declaraciones Recientes</h2>
+            <h2 className="text-lg font-semibold">Feed de declaraciones recientes</h2>
           </div>
           <Link
             to="/declaraciones"
@@ -262,23 +262,6 @@ export function Dashboard() {
                     <p className="text-sm text-muted-foreground mt-1 line-clamp-2 leading-relaxed">
                       {decl.contenido}
                     </p>
-                    <div className="mt-2 flex flex-wrap items-center gap-1.5">
-                      {decl.tema_interaccion &&
-                        decl.tema_interaccion
-                          .split(';')
-                          .map((t) => t.trim())
-                          .filter(Boolean)
-                          .map((t) => (
-                            <span key={t} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                              {t}
-                            </span>
-                          ))}
-                      {decl.canal && (
-                        <span className="rounded-md bg-emerald-100 text-emerald-800 dark:bg-emerald-900/30 dark:text-emerald-300 px-2 py-0.5 text-[11px] font-medium">
-                          {decl.canal}
-                        </span>
-                      )}
-                    </div>
                   </div>
                   <div className="shrink-0 text-right flex flex-col items-end gap-1">
                     <span className="text-xs text-muted-foreground">
@@ -621,6 +604,15 @@ function CandidatosPresidencialesSection({
               color="blue"
               expanded={true}
             />
+            {/* Botón colapsar en esquina inferior izquierda */}
+            <button
+              type="button"
+              onClick={() => setShowVices(false)}
+              className="flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground transition-colors"
+            >
+              <ChevronDown className="h-4 w-4 rotate-180" />
+              Colapsar
+            </button>
           </div>
         )}
       </div>

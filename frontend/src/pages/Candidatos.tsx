@@ -8,6 +8,7 @@ import { ViewToggle } from '@/components/ui/ViewToggle'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatNumber } from '@/lib/utils'
 import { Users, ChevronLeft, ChevronRight, ArrowRight, MessageSquareQuote } from 'lucide-react'
 import { PAGE_SIZE } from '@/lib/constants'
@@ -85,6 +86,9 @@ export function Candidatos() {
 
   return (
     <div className="space-y-8">
+      {/* Back to Dashboard */}
+      <BackButton fallback="/" label="Volver al Dashboard" />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">
@@ -166,9 +170,9 @@ export function Candidatos() {
                     <p className="text-xs text-muted-foreground">{c.departamento}</p>
                   )}
                 </Link>
-                {/* Declarations link */}
+                {/* Declarations link - goes to candidate profile */}
                 <Link
-                  to={`/declaraciones?stakeholder=${encodeURIComponent(apellido)}`}
+                  to={`/candidatos/${c.id}`}
                   className="mt-3 flex items-center justify-center gap-1 text-xs text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                   title="Ver declaraciones en medios"
                 >
@@ -207,7 +211,7 @@ export function Candidatos() {
                   </span>
                 )}
                 <Link
-                  to={`/declaraciones?stakeholder=${encodeURIComponent(apellido)}`}
+                  to={`/candidatos/${c.id}`}
                   className="p-2 rounded-lg hover:bg-amber-500/10 text-muted-foreground hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
                   title="Ver declaraciones en medios"
                 >

@@ -16,10 +16,11 @@ export function useDashboardStats() {
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
+      // Use v_quipu_candidatos_unicos for consistent candidate counts across the app
       const [partidos, promesas, candidatos, categorias] = await Promise.all([
         supabase.from('quipu_partidos').select('*', { count: 'exact', head: true }),
         supabase.from('quipu_promesas_planes').select('*', { count: 'exact', head: true }),
-        supabase.from('quipu_candidatos').select('*', { count: 'exact', head: true }),
+        supabase.from('v_quipu_candidatos_unicos').select('*', { count: 'exact', head: true }),
         supabase.from('quipu_categorias_promesas').select('*', { count: 'exact', head: true }),
       ])
       return {

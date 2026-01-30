@@ -1,6 +1,7 @@
 import { useState, useMemo } from 'react'
-import { X, Plus, MessageSquareQuote, FileText, TrendingUp, Users, ChevronDown } from 'lucide-react'
+import { X, Plus, MessageSquareQuote, FileText, TrendingUp, Users, ChevronDown, ChevronLeft, ChevronRight } from 'lucide-react'
 import { useSearchCandidatosByName, useCandidatosByCargo } from '@/hooks/useCandidatos'
+import { usePartidos } from '@/hooks/usePartidos'
 import { usePromesasByPartido } from '@/hooks/usePromesas'
 import { useDeclaraciones } from '@/hooks/useDeclaraciones'
 import { SearchInput } from '@/components/ui/SearchInput'
@@ -12,6 +13,16 @@ import { BackButton } from '@/components/ui/BackButton'
 import { useCategoriasByPartidos } from '@/hooks/useCategorias'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
+
+const DEPARTAMENTO_OPTIONS = [
+  'AMAZONAS', 'ANCASH', 'APURIMAC', 'AREQUIPA', 'AYACUCHO',
+  'CAJAMARCA', 'CALLAO', 'CUSCO', 'HUANCAVELICA', 'HUANUCO',
+  'ICA', 'JUNIN', 'LA LIBERTAD', 'LAMBAYEQUE', 'LIMA',
+  'LORETO', 'MADRE DE DIOS', 'MOQUEGUA', 'PASCO', 'PIURA',
+  'PUNO', 'SAN MARTIN', 'TACNA', 'TUMBES', 'UCAYALI',
+].map((d) => ({ value: d, label: d }))
+
+const PAGE_SIZE = 12
 
 const CARGO_OPTIONS = [
   { value: 'PRESIDENTE DE LA REPÚBLICA', label: 'Presidente' },
@@ -208,9 +219,21 @@ export function Comparar() {
   const [selectedCandidatos, setSelectedCandidatos] = useState<CandidatoCompleto[]>([])
   const [categoriaFilter, setCategoriaFilter] = useState('')
   const [cargoFilter, setCargoFilter] = useState('')
-  const [showAllCandidatos, setShowAllCandidatos] = useState(false)
+  const [partidoFilter, setPartidoFilter] = useState('')
+  const [departamentoFilter, setDepartamentoFilter] = useState('')
+  const [candidatoPage, setCandidatoPage] = useState(0)
   const [textFilter, setTextFilter] = useState('')
   const [selectorHidden, setSelectorHidden] = useState(false)
+
+  // Fetch partidos for filter
+  const { data: partidos } = usePartidos()
+  const partidoOptions = useMemo(() =>
+    (partidos ?? []).map((p) => ({ value: String(p.id), label: p.nombre_oficial })),
+    [partidos]
+  )
+
+  // Check if cargo is national (no departamento filter needed)
+  const isNationalCargo = cargoFilter.includes('PRESIDENTE') || cargoFilter.includes('PARLAMENTO')
 
   // Get partido IDs from selected candidates
   const selectedPartidoIds = useMemo(() =>
@@ -269,13 +292,20 @@ export function Comparar() {
     return options
   }, [categoriaCounts])
 
-  // Get candidates by selected cargo (only fetch when cargo is selected)
+  // Get candidates by selected cargo with pagination and filters
   const { data: candidatosData, isLoading: loadingCandidatos } = useCandidatosByCargo(
     cargoFilter || '',
-    showAllCandidatos ? 100 : 11
+    PAGE_SIZE,
+    true,
+    {
+      offset: candidatoPage * PAGE_SIZE,
+      partido_id: partidoFilter ? Number(partidoFilter) : undefined,
+      departamento: !isNationalCargo && departamentoFilter ? departamentoFilter : undefined,
+    }
   )
   const candidatos = candidatosData?.data ?? []
   const totalCandidatos = candidatosData?.count ?? 0
+  const totalPages = Math.ceil(totalCandidatos / PAGE_SIZE)
 
   const { data: searchResults, isLoading: searchLoading } = useSearchCandidatosByName(searchQuery)
 
@@ -302,7 +332,14 @@ export function Comparar() {
   }
 
   function removeCandidato(id: number) {
-    setSelectedCandidatos((prev) => prev.filter((c) => c.id !== id))
+    setSelectedCandidatos((prev) => {
+      const newList = prev.filter((c) => c.id !== id)
+      // Si quedan menos de 2 candidatos, mostrar el selector nuevamente
+      if (newList.length < 2) {
+        setSelectorHidden(false)
+      }
+      return newList
+    })
   }
 
   const gridCols =
@@ -394,21 +431,46 @@ export function Comparar() {
           {/* Selection controls - only show if less than 4 selected and not hidden */}
           {selectedCandidatos.length < 4 && !selectorHidden && (
             <>
-              {/* Step 1: Cargo selector */}
+              {/* Step 1: Cargo selector + Filters */}
               <div className="mb-4">
                 <label className="block text-sm font-medium text-foreground mb-2">
                   1. Elige el cargo
                 </label>
-                <FilterSelect
-                  value={cargoFilter}
-                  onChange={(v) => {
-                    setCargoFilter(v)
-                    setShowAllCandidatos(false)
-                  }}
-                  options={CARGO_OPTIONS}
-                  placeholder="Elige el cargo"
-                  className="max-w-xs"
-                />
+                <div className="flex flex-wrap gap-3">
+                  <FilterSelect
+                    value={cargoFilter}
+                    onChange={(v) => {
+                      setCargoFilter(v)
+                      setCandidatoPage(0)
+                      setDepartamentoFilter('')
+                    }}
+                    options={CARGO_OPTIONS}
+                    placeholder="Elige el cargo"
+                    className="min-w-[180px]"
+                  />
+                  <FilterSelect
+                    value={partidoFilter}
+                    onChange={(v) => {
+                      setPartidoFilter(v)
+                      setCandidatoPage(0)
+                    }}
+                    options={partidoOptions}
+                    placeholder="Filtrar por partido"
+                    className="min-w-[180px]"
+                  />
+                  {!isNationalCargo && (
+                    <FilterSelect
+                      value={departamentoFilter}
+                      onChange={(v) => {
+                        setDepartamentoFilter(v)
+                        setCandidatoPage(0)
+                      }}
+                      options={DEPARTAMENTO_OPTIONS}
+                      placeholder="Filtrar por departamento"
+                      className="min-w-[180px]"
+                    />
+                  )}
+                </div>
               </div>
 
               {/* Step 2: Search by name */}
@@ -455,43 +517,61 @@ export function Comparar() {
                 <>
                   <p className="text-sm text-muted-foreground mb-3">
                     O selecciona de la lista ({CARGO_OPTIONS.find(o => o.value === cargoFilter)?.label}):
+                    <span className="ml-2 font-medium">{formatNumber(totalCandidatos)} candidatos</span>
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {loadingCandidatos ? (
                       <div className="col-span-full"><LoadingSpinner /></div>
+                    ) : availableCandidatos.length === 0 ? (
+                      <div className="col-span-full text-center text-sm text-muted-foreground py-8">
+                        No se encontraron candidatos con los filtros seleccionados
+                      </div>
                     ) : (
-                      <>
-                        {availableCandidatos.slice(0, showAllCandidatos ? 100 : 11).map((c) => (
-                          <button
-                            key={c.id}
-                            onClick={() => addCandidato(c)}
-                            disabled={selectedCandidatos.length >= 4}
-                            className="p-3 border rounded-xl hover:border-primary hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
-                          >
-                            <CandidatoAvatar
-                              nombre={c.nombre_completo || ''}
-                              fotoUrl={c.foto_url}
-                              size="lg"
-                              className="mx-auto mb-2"
-                            />
-                            <div className="text-sm font-medium text-foreground truncate">{c.nombre_completo}</div>
-                            <div className="text-xs text-muted-foreground truncate">{c.partido_nombre}</div>
-                          </button>
-                        ))}
-                        {/* Ver más button */}
-                        {!showAllCandidatos && totalCandidatos > 11 && (
-                          <button
-                            onClick={() => setShowAllCandidatos(true)}
-                            className="p-3 border-2 border-dashed rounded-xl hover:border-primary hover:bg-primary/5 transition-colors text-center flex flex-col items-center justify-center"
-                          >
-                            <Plus className="h-8 w-8 text-muted-foreground mb-1" />
-                            <span className="text-sm text-muted-foreground">Ver más</span>
-                            <span className="text-xs text-muted-foreground">+{totalCandidatos - 11}</span>
-                          </button>
-                        )}
-                      </>
+                      availableCandidatos.map((c) => (
+                        <button
+                          key={c.id}
+                          onClick={() => addCandidato(c)}
+                          disabled={selectedCandidatos.length >= 4}
+                          className="p-3 border rounded-xl hover:border-primary hover:bg-primary/5 transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-center"
+                        >
+                          <CandidatoAvatar
+                            nombre={c.nombre_completo || ''}
+                            fotoUrl={c.foto_url}
+                            size="lg"
+                            className="mx-auto mb-2"
+                          />
+                          <div className="text-sm font-medium text-foreground truncate">{c.nombre_completo}</div>
+                          <div className="text-xs text-muted-foreground truncate">{c.partido_nombre}</div>
+                        </button>
+                      ))
                     )}
                   </div>
+                  {/* Pagination */}
+                  {totalPages > 1 && (
+                    <div className="flex items-center justify-center gap-4 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setCandidatoPage((p) => Math.max(0, p - 1))}
+                        disabled={candidatoPage === 0}
+                        className="inline-flex items-center gap-1 rounded-lg border bg-card px-3 py-1.5 text-sm font-medium transition-all hover:border-primary/30 disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        <ChevronLeft size={16} />
+                        Anterior
+                      </button>
+                      <span className="text-sm text-muted-foreground tabular-nums">
+                        {candidatoPage + 1} / {totalPages}
+                      </span>
+                      <button
+                        type="button"
+                        onClick={() => setCandidatoPage((p) => Math.min(totalPages - 1, p + 1))}
+                        disabled={candidatoPage >= totalPages - 1}
+                        className="inline-flex items-center gap-1 rounded-lg border bg-card px-3 py-1.5 text-sm font-medium transition-all hover:border-primary/30 disabled:opacity-50 disabled:pointer-events-none"
+                      >
+                        Siguiente
+                        <ChevronRight size={16} />
+                      </button>
+                    </div>
+                  )}
                 </>
               )}
             </>

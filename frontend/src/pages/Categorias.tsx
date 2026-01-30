@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom'
 import { useCategoriaCounts } from '@/hooks/useCategorias'
 import { getDynamicCategoryConfig } from '@/lib/constants'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatNumber } from '@/lib/utils'
 import { Tags, ArrowRight, FileText, MessageSquareQuote, ChevronDown } from 'lucide-react'
 import type { CategoryConfig } from '@/lib/constants'
@@ -103,6 +104,9 @@ export function Categorias() {
 
   return (
     <div className="space-y-8">
+      {/* Back to Dashboard */}
+      <BackButton fallback="/" label="Volver al Dashboard" />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-primary/10">

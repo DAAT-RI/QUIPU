@@ -18,7 +18,16 @@ import {
   ChevronLeft,
   ChevronRight,
   ChevronDown,
+  AtSign,
 } from 'lucide-react'
+
+const TIPO_ELECCION_OPTIONS = [
+  { value: '', label: 'Todos los tipos' },
+  { value: 'PRESIDENCIAL', label: 'Presidencial' },
+  { value: 'DIPUTADOS', label: 'Diputados' },
+  { value: 'SENADORES', label: 'Senadores' },
+  { value: 'PARLAMENTO_ANDINO', label: 'Parlamento Andino' },
+]
 
 const LIMIT = 50
 
@@ -344,9 +353,26 @@ export function CategoriaDetalle() {
                     to={`/declaraciones/${d.master_id}`}
                     className="group flex items-start gap-4 rounded-xl border bg-card p-4 transition-all hover:shadow-sm hover:border-primary/30"
                   >
-                    <Quote className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    {d.tipo === 'mention' ? (
+                      <AtSign className="h-4 w-4 text-orange-500 shrink-0 mt-0.5" />
+                    ) : (
+                      <Quote className="h-4 w-4 text-primary shrink-0 mt-0.5" />
+                    )}
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium">{d.stakeholder}</p>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <p className="text-sm font-medium">{d.stakeholder}</p>
+                        {d.tipo === 'mention' ? (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-1.5 py-0.5 text-[11px] font-medium">
+                            <AtSign className="h-3 w-3" />
+                            Mención
+                          </span>
+                        ) : (
+                          <span className="inline-flex items-center gap-1 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 text-[11px] font-medium">
+                            <Quote className="h-3 w-3" />
+                            Declaración
+                          </span>
+                        )}
+                      </div>
                       <blockquote className="mt-1 text-sm text-muted-foreground border-l-2 border-primary pl-3 leading-relaxed">
                         {d.contenido}
                       </blockquote>

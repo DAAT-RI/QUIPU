@@ -41,12 +41,22 @@ export function useCandidatos(filters: CandidatoFilters) {
 }
 
 /**
- * Fetch candidates by cargo_postula.
+ * Fetch candidates by cargo_postula with optional filters.
  * Uses case-insensitive exact match by default. Set exactMatch=false for partial matching.
  */
-export function useCandidatosByCargo(cargo: string, limit = 50, exactMatch = true) {
+export function useCandidatosByCargo(
+  cargo: string,
+  limit = 50,
+  exactMatch = true,
+  options?: {
+    offset?: number
+    partido_id?: number
+    departamento?: string
+  }
+) {
+  const offset = options?.offset ?? 0
   return useQuery({
-    queryKey: ['candidatos-cargo', cargo, limit, exactMatch],
+    queryKey: ['candidatos-cargo', cargo, limit, exactMatch, offset, options?.partido_id, options?.departamento],
     enabled: !!cargo,
     queryFn: async () => {
       let query = supabase
@@ -60,9 +70,17 @@ export function useCandidatosByCargo(cargo: string, limit = 50, exactMatch = tru
         query = query.ilike('cargo_postula', `%${cargo}%`)
       }
 
+      // Optional filters
+      if (options?.partido_id) {
+        query = query.eq('partido_id', options.partido_id)
+      }
+      if (options?.departamento) {
+        query = query.eq('departamento', options.departamento)
+      }
+
       const { data, error, count } = await query
         .order('partido_nombre')
-        .limit(limit)
+        .range(offset, offset + limit - 1)
       if (error) throw error
       return { data: data as CandidatoCompleto[], count: count ?? 0 }
     },

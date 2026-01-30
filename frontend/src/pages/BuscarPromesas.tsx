@@ -17,8 +17,9 @@ export function BuscarPromesas() {
   const [query, setQuery] = useState('')
   const [categoria, setCategoria] = useState('')
   const [partidoId, setPartidoId] = useState('')
+  // Track if user has ever entered results view to prevent disorienting view changes
+  const [hasEnteredResults, setHasEnteredResults] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
-  const prevHasQuery = useRef(false)
 
   const { data: partidos } = usePartidos()
 
@@ -53,22 +54,23 @@ export function BuscarPromesas() {
 
   const hasQuery = query.length >= 3
   const hasFilters = categoria !== '' || partidoId !== ''
-  const showResults = hasQuery || hasFilters // Show results view if we have query OR filters
+  // Show results view if we have query OR filters, or if user is typing (to prevent layout jumps)
+  const showResults = hasQuery || hasFilters || (hasEnteredResults && query.length > 0)
   const promesas = promesasResult?.data ?? []
   const promesasCount = promesasResult?.count ?? 0
   const declaraciones = declaracionesResult?.data ?? []
   const declaracionesCount = declaracionesResult?.count ?? 0
 
-  // Keep focus when transitioning from hero to results
+  // Track when user enters results view
   useEffect(() => {
-    if (showResults && !prevHasQuery.current) {
-      // Just transitioned to results view, restore focus
-      setTimeout(() => {
-        inputRef.current?.focus()
-      }, 0)
+    if (hasQuery || hasFilters) {
+      setHasEnteredResults(true)
     }
-    prevHasQuery.current = showResults
-  }, [showResults])
+    // Reset when query is completely cleared
+    if (query === '' && !hasFilters) {
+      setHasEnteredResults(false)
+    }
+  }, [hasQuery, hasFilters, query])
 
   // Hero layout when no query entered and no filters active
   if (!showResults) {

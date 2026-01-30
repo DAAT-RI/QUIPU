@@ -52,9 +52,9 @@ export function sourceFromUrl(url: string | null): 'twitter' | 'facebook' | 'ins
 /** Detects source type from canal name (more comprehensive detection) */
 export function sourceFromCanal(canal: string | null): 'twitter' | 'facebook' | 'instagram' | 'tiktok' | 'youtube' | 'tv' | 'radio' | 'prensa' | 'otro' {
   if (!canal) return 'otro'
-  const c = canal.toLowerCase()
-  // Social media
-  if (c.includes('twitter') || c.includes(' x ') || c === 'x' || c.endsWith('/x')) return 'twitter'
+  const c = canal.toLowerCase().trim()
+  // Social media - Twitter/X detection improved
+  if (c.includes('twitter') || c.includes('x.com') || c === 'x' || c.startsWith('x ') || c.endsWith(' x') || c.includes('@')) return 'twitter'
   if (c.includes('facebook') || c.includes('fb')) return 'facebook'
   if (c.includes('instagram') || c.includes('ig')) return 'instagram'
   if (c.includes('tiktok')) return 'tiktok'

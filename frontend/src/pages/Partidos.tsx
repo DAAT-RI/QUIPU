@@ -4,6 +4,7 @@ import { usePartidos } from '@/hooks/usePartidos'
 import { SearchInput } from '@/components/ui/SearchInput'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatNumber } from '@/lib/utils'
 import { Building2, Users, FileText, ArrowRight } from 'lucide-react'
 
@@ -16,6 +17,9 @@ export function Partidos() {
 
   return (
     <div className="space-y-8">
+      {/* Back to Dashboard */}
+      <BackButton fallback="/" label="Volver al Dashboard" />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-violet-500/10">

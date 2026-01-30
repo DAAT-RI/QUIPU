@@ -6,6 +6,7 @@ import { SearchInput } from '@/components/ui/SearchInput'
 import { FilterSelect } from '@/components/ui/FilterSelect'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { EmptyState } from '@/components/ui/EmptyState'
+import { BackButton } from '@/components/ui/BackButton'
 import { formatDate, isRedundantCanal } from '@/lib/utils'
 import {
   ExternalLink,
@@ -97,6 +98,9 @@ export function Declaraciones() {
 
   return (
     <div className="space-y-6">
+      {/* Back to Dashboard */}
+      <BackButton fallback="/" label="Volver al Dashboard" />
+
       {/* Header */}
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-amber-500/10">
