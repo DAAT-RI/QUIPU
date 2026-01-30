@@ -48,6 +48,26 @@ export function CategoriaDetalle() {
     return getDynamicCategoryConfig(label, 0)
   }, [nombre, counts])
 
+  // Obtener el label correcto para filtrar (puede ser diferente de config.label mientras counts carga)
+  // Para planes: usar planLabels[key] || CATEGORY_CONFIG[key].label (disponible inmediatamente)
+  // Para declaraciones: usar declarationLabels[key] (necesita esperar a counts)
+  const filterLabel = useMemo(() => {
+    if (!nombre) return ''
+    if (isPlanCategory) {
+      // Para planes, CATEGORY_CONFIG tiene el label original
+      return counts?.planLabels[nombre] || CATEGORY_CONFIG[nombre]?.label || nombre
+    }
+    // Para declaraciones, necesitamos counts para obtener el label original
+    return counts?.declarationLabels[nombre] || ''
+  }, [nombre, isPlanCategory, counts])
+
+  // Indicar si el filterLabel está listo para hacer queries
+  // Para planes: siempre listo (CATEGORY_CONFIG tiene el label)
+  // Para declaraciones: solo cuando counts ha cargado
+  const filterLabelReady = isPlanCategory
+    ? !!CATEGORY_CONFIG[nombre || '']?.label || !!counts?.planLabels[nombre || '']
+    : !!counts?.declarationLabels[nombre || '']
+
   // Get partidos for filter dropdown
   const { data: partidos } = usePartidos()
   const partidoOptions = useMemo(() => {
@@ -56,15 +76,17 @@ export function CategoriaDetalle() {
   }, [partidos])
 
   // --- Plan category data ---
+  // Usar filterLabel (el label original con tildes) para filtrar, no la key normalizada
+  // Solo ejecutar query cuando filterLabelReady para evitar buscar con key normalizada
   const { data: planData, isLoading: loadingPlan } = usePromesas({
-    categoria: !isDeclaracion ? nombre : undefined,
+    categoria: !isDeclaracion && filterLabelReady ? filterLabel : undefined,
     partido: partidoFilter || undefined,
     offset: page * LIMIT,
     limit: LIMIT,
   })
 
   const { data: allPlanData } = usePromesas({
-    categoria: !isDeclaracion ? nombre : undefined,
+    categoria: !isDeclaracion && filterLabelReady ? filterLabel : undefined,
     offset: 0,
     limit: 5000,
   })
@@ -82,8 +104,10 @@ export function CategoriaDetalle() {
   }, [allPlanData])
 
   // --- Declaration tema data ---
+  // Usar filterLabel (el label original con tildes) para filtrar
+  // Solo ejecutar query cuando filterLabelReady para evitar buscar con key normalizada
   const { data: declData, isLoading: loadingDecl } = useDeclaraciones({
-    temaDeclaracion: isDeclaracion ? config?.label : undefined,
+    temaDeclaracion: isDeclaracion && filterLabelReady ? filterLabel : undefined,
     offset: 0,
     limit: 200,
   })

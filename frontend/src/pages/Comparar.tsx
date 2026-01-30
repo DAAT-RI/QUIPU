@@ -9,7 +9,7 @@ import { CategoryBadge } from '@/components/ui/CategoryBadge'
 import { CandidatoAvatar } from '@/components/ui/CandidatoAvatar'
 import { LoadingSpinner } from '@/components/ui/LoadingSpinner'
 import { BackButton } from '@/components/ui/BackButton'
-import { useCategoriaCounts } from '@/hooks/useCategorias'
+import { useCategoriasByPartidos } from '@/hooks/useCategorias'
 import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
@@ -203,10 +203,16 @@ export function Comparar() {
   const [showAllCandidatos, setShowAllCandidatos] = useState(false)
   const [textFilter, setTextFilter] = useState('')
 
-  // Get category counts for dynamic dropdown
-  const { data: categoriaCounts } = useCategoriaCounts()
+  // Get partido IDs from selected candidates
+  const selectedPartidoIds = useMemo(() =>
+    selectedCandidatos.map(c => c.partido_id).filter((id): id is number => id != null),
+    [selectedCandidatos]
+  )
 
-  // Generate tema options dynamically from actual DB categories
+  // Get category counts only for selected partidos
+  const { data: categoriaCounts } = useCategoriasByPartidos(selectedPartidoIds)
+
+  // Generate tema options dynamically from selected candidates' categories
   const temaOptions = useMemo(() => {
     const options = [{ value: '', label: 'Todos los temas' }]
     if (categoriaCounts) {
@@ -220,18 +226,6 @@ export function Comparar() {
         })
       for (const [key] of planEntries) {
         const label = categoriaCounts.planLabels[key] || key
-        options.push({ value: label, label })
-      }
-      // Add declaration temas that aren't already in plans (sorted alphabetically)
-      const declEntries = Object.entries(categoriaCounts.declarations)
-        .filter(([key, count]) => count > 0 && !categoriaCounts.plans[key])
-        .sort(([keyA], [keyB]) => {
-          const labelA = categoriaCounts.declarationLabels[keyA] || keyA
-          const labelB = categoriaCounts.declarationLabels[keyB] || keyB
-          return labelA.localeCompare(labelB, 'es')
-        })
-      for (const [key] of declEntries) {
-        const label = categoriaCounts.declarationLabels[key] || key
         options.push({ value: label, label })
       }
     }

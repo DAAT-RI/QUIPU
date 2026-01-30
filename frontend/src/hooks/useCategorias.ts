@@ -94,3 +94,37 @@ export function useCategoriaCounts() {
     },
   })
 }
+
+/**
+ * Fetches categories only for specific partido IDs.
+ * Used in Comparar page to show only relevant categories.
+ */
+export function useCategoriasByPartidos(partidoIds: number[]) {
+  return useQuery({
+    queryKey: ['categorias-by-partidos', partidoIds],
+    enabled: partidoIds.length > 0,
+    queryFn: async () => {
+      const plans: Record<string, number> = {}
+      const planLabels: Record<string, string> = {}
+
+      // Fetch categories for selected partidos
+      const { data, error } = await supabase
+        .from('quipu_promesas_planes')
+        .select('categoria')
+        .in('partido_id', partidoIds)
+
+      if (error) throw error
+
+      for (const row of data) {
+        if (!row.categoria) continue
+        const key = normalizeKey(row.categoria)
+        plans[key] = (plans[key] || 0) + 1
+        if (!planLabels[key]) {
+          planLabels[key] = row.categoria
+        }
+      }
+
+      return { plans, planLabels }
+    },
+  })
+}
