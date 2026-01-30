@@ -162,3 +162,156 @@ export function useRemoveCandidato() {
     },
   })
 }
+
+// ==================== TEMAS/CATEGORÍAS ====================
+
+export interface Tema {
+  id: number
+  nombre: string
+  nombre_normalizado: string | null
+  categoria: string | null
+  sector: string | null
+  icono: string | null
+  color: string | null
+  orden: number
+}
+
+export interface ClienteTema {
+  cliente_id: number
+  tema_id: number
+  prioridad: number
+  alertas_activas: boolean
+  added_at: string
+  quipu_temas: Tema | null
+}
+
+// Listar todos los temas disponibles
+export function useTemas() {
+  return useQuery({
+    queryKey: ['admin-temas'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('quipu_temas')
+        .select('*')
+        .eq('activo', true)
+        .order('orden')
+
+      if (error) throw error
+      return data as Tema[]
+    },
+  })
+}
+
+// Listar temas asignados a un cliente
+export function useClienteTemas(clienteId: number | undefined) {
+  return useQuery({
+    queryKey: ['admin-cliente-temas', clienteId],
+    enabled: !!clienteId,
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('quipu_cliente_temas')
+        .select(
+          `
+          cliente_id,
+          tema_id,
+          prioridad,
+          alertas_activas,
+          added_at,
+          quipu_temas (
+            id,
+            nombre,
+            nombre_normalizado,
+            categoria,
+            sector,
+            icono,
+            color,
+            orden
+          )
+        `
+        )
+        .eq('cliente_id', clienteId!)
+        .order('prioridad')
+
+      if (error) throw error
+      // Supabase returns joined data, need to flatten
+      return (data as unknown as ClienteTema[]) ?? []
+    },
+  })
+}
+
+// Asignar temas a un cliente (bulk)
+export function useAssignTemas() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      clienteId,
+      temaIds,
+      prioridad = 2,
+    }: {
+      clienteId: number
+      temaIds: number[]
+      prioridad?: number
+    }) => {
+      const inserts = temaIds.map((tema_id) => ({
+        cliente_id: clienteId,
+        tema_id,
+        prioridad,
+      }))
+
+      const { error } = await supabase.from('quipu_cliente_temas').upsert(inserts, {
+        onConflict: 'cliente_id,tema_id',
+      })
+
+      if (error) throw error
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-cliente-temas', variables.clienteId] })
+    },
+  })
+}
+
+// Actualizar prioridad de un tema
+export function useUpdateTemaPrioridad() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({
+      clienteId,
+      temaId,
+      prioridad,
+    }: {
+      clienteId: number
+      temaId: number
+      prioridad: number
+    }) => {
+      const { error } = await supabase
+        .from('quipu_cliente_temas')
+        .update({ prioridad })
+        .eq('cliente_id', clienteId)
+        .eq('tema_id', temaId)
+
+      if (error) throw error
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-cliente-temas', variables.clienteId] })
+    },
+  })
+}
+
+// Eliminar tema de cliente
+export function useRemoveTema() {
+  const queryClient = useQueryClient()
+  return useMutation({
+    mutationFn: async ({ clienteId, temaId }: { clienteId: number; temaId: number }) => {
+      const { error } = await supabase
+        .from('quipu_cliente_temas')
+        .delete()
+        .eq('cliente_id', clienteId)
+        .eq('tema_id', temaId)
+
+      if (error) throw error
+    },
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['admin-cliente-temas', variables.clienteId] })
+    },
+  })
+}

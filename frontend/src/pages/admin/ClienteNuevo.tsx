@@ -1,10 +1,17 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, Check, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Check, AlertTriangle, Tags } from 'lucide-react'
 import { CSVUploader } from '@/components/admin/CSVUploader'
 import { useCreateCliente, useAssignCandidatos } from '@/hooks/useAdminClientes'
 import { extractDNIs, useValidateCandidatosCSV } from '@/hooks/useCSVParser'
+import { useTemas, useAssignTemas } from '@/hooks/useAdminUsuarios'
 import { cn } from '@/lib/utils'
+
+const PRIORIDADES = [
+  { value: 1, label: 'Alta', color: 'text-red-600' },
+  { value: 2, label: 'Media', color: 'text-amber-600' },
+  { value: 3, label: 'Baja', color: 'text-green-600' },
+]
 
 const TIPOS = ['gremio', 'empresa', 'consultora', 'medio']
 const SECTORES = ['seguros', 'mineria', 'banca', 'salud', 'comunicaciones', 'energia', 'retail', 'tecnologia']
@@ -39,9 +46,34 @@ export function ClienteNuevo() {
     total: number
   } | null>(null)
 
+  // Temas/Categorías
+  const [selectedTemas, setSelectedTemas] = useState<Map<number, number>>(new Map()) // temaId -> prioridad
+
   const createCliente = useCreateCliente()
   const assignCandidatos = useAssignCandidatos()
+  const assignTemas = useAssignTemas()
   const validateCSV = useValidateCandidatosCSV()
+  const { data: temas, isLoading: temasLoading } = useTemas()
+
+  const toggleTema = (temaId: number) => {
+    setSelectedTemas((prev) => {
+      const next = new Map(prev)
+      if (next.has(temaId)) {
+        next.delete(temaId)
+      } else {
+        next.set(temaId, 2) // Default: prioridad media
+      }
+      return next
+    })
+  }
+
+  const updateTemaPrioridad = (temaId: number, prioridad: number) => {
+    setSelectedTemas((prev) => {
+      const next = new Map(prev)
+      next.set(temaId, prioridad)
+      return next
+    })
+  }
 
   const handleCSVParsed = async (rows: string[][]) => {
     const dnis = extractDNIs(rows)
@@ -70,6 +102,26 @@ export function ClienteNuevo() {
           clienteId: cliente.id,
           candidatoIds: candidatosValidation.found.map((c) => c.id),
         })
+      }
+
+      // 3. Asignar temas
+      if (selectedTemas.size > 0) {
+        // Group by priority and assign
+        const temasByPrioridad = new Map<number, number[]>()
+        selectedTemas.forEach((prioridad, temaId) => {
+          if (!temasByPrioridad.has(prioridad)) {
+            temasByPrioridad.set(prioridad, [])
+          }
+          temasByPrioridad.get(prioridad)!.push(temaId)
+        })
+
+        for (const [prioridad, temaIds] of temasByPrioridad) {
+          await assignTemas.mutateAsync({
+            clienteId: cliente.id,
+            temaIds,
+            prioridad,
+          })
+        }
       }
 
       navigate('/admin/clientes')
@@ -292,11 +344,85 @@ export function ClienteNuevo() {
         )}
 
         {currentStep === 3 && (
-          <div className="text-center py-8 text-muted-foreground">
-            <p>Categorías (opcional) - Por implementar</p>
-            <p className="text-sm">
-              Puedes agregar categorías después desde la edición del cliente.
-            </p>
+          <div className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Tags className="h-4 w-4" />
+              <span>Selecciona las categorías de interés para este cliente (opcional)</span>
+            </div>
+
+            {temasLoading ? (
+              <p className="text-sm text-muted-foreground">Cargando categorías...</p>
+            ) : (
+              <div className="space-y-6">
+                {/* Group temas by categoria */}
+                {['politica', 'economia', 'social', 'seguridad', 'infraestructura'].map((cat) => {
+                  const temasInCat = temas?.filter((t) => t.categoria === cat) ?? []
+                  if (temasInCat.length === 0) return null
+
+                  return (
+                    <div key={cat} className="space-y-2">
+                      <h4 className="font-medium capitalize text-sm">{cat}</h4>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                        {temasInCat.map((tema) => {
+                          const isSelected = selectedTemas.has(tema.id)
+                          const prioridad = selectedTemas.get(tema.id) ?? 2
+
+                          return (
+                            <div
+                              key={tema.id}
+                              className={cn(
+                                'flex items-center justify-between p-3 rounded-lg border cursor-pointer transition-colors',
+                                isSelected
+                                  ? 'border-primary bg-primary/5'
+                                  : 'border-muted hover:border-muted-foreground/50'
+                              )}
+                              onClick={() => toggleTema(tema.id)}
+                            >
+                              <div className="flex items-center gap-2">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => toggleTema(tema.id)}
+                                  className="rounded"
+                                />
+                                <span className="text-sm">{tema.nombre}</span>
+                              </div>
+
+                              {isSelected && (
+                                <select
+                                  value={prioridad}
+                                  onChange={(e) => {
+                                    e.stopPropagation()
+                                    updateTemaPrioridad(tema.id, parseInt(e.target.value))
+                                  }}
+                                  onClick={(e) => e.stopPropagation()}
+                                  className="text-xs px-2 py-1 border rounded bg-background"
+                                >
+                                  {PRIORIDADES.map((p) => (
+                                    <option key={p.value} value={p.value}>
+                                      {p.label}
+                                    </option>
+                                  ))}
+                                </select>
+                              )}
+                            </div>
+                          )
+                        })}
+                      </div>
+                    </div>
+                  )
+                })}
+
+                {selectedTemas.size > 0 && (
+                  <div className="pt-4 border-t">
+                    <p className="text-sm text-muted-foreground">
+                      {selectedTemas.size} categoría{selectedTemas.size !== 1 ? 's' : ''} seleccionada
+                      {selectedTemas.size !== 1 ? 's' : ''}
+                    </p>
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         )}
 
@@ -324,7 +450,36 @@ export function ClienteNuevo() {
                 <span className="text-muted-foreground">Candidatos a asignar:</span>
                 <p className="font-medium">{candidatosValidation?.found.length ?? 0}</p>
               </div>
+              <div>
+                <span className="text-muted-foreground">Categorías seleccionadas:</span>
+                <p className="font-medium">{selectedTemas.size}</p>
+              </div>
             </div>
+
+            {selectedTemas.size > 0 && (
+              <div className="mt-4 pt-4 border-t">
+                <span className="text-sm text-muted-foreground">Categorías:</span>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {Array.from(selectedTemas.entries()).map(([temaId, prioridad]) => {
+                    const tema = temas?.find((t) => t.id === temaId)
+                    const prioridadLabel = PRIORIDADES.find((p) => p.value === prioridad)
+                    return (
+                      <span
+                        key={temaId}
+                        className={cn(
+                          'text-xs px-2 py-1 rounded-full border',
+                          prioridad === 1 && 'border-red-300 bg-red-50 text-red-700',
+                          prioridad === 2 && 'border-amber-300 bg-amber-50 text-amber-700',
+                          prioridad === 3 && 'border-green-300 bg-green-50 text-green-700'
+                        )}
+                      >
+                        {tema?.nombre} ({prioridadLabel?.label})
+                      </span>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
