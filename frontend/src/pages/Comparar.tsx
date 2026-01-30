@@ -14,7 +14,6 @@ import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
 const CARGO_OPTIONS = [
-  { value: '', label: 'Elige el cargo' },
   { value: 'PRESIDENTE DE LA REP', label: 'Presidente' },
   { value: 'PRIMER VICEPRESIDENTE', label: '1er Vicepresidente' },
   { value: 'SEGUNDO VICEPRESIDENTE', label: '2do Vicepresidente' },
@@ -26,10 +25,12 @@ const CARGO_OPTIONS = [
 function CandidatoColumn({
   candidato,
   categoriaFilter,
+  textFilter,
   onRemove,
 }: {
   candidato: CandidatoCompleto
   categoriaFilter: string
+  textFilter: string
   onRemove: () => void
 }) {
   const [expandedDecl, setExpandedDecl] = useState(false)
@@ -40,7 +41,7 @@ function CandidatoColumn({
     categoriaFilter || undefined
   )
 
-  const promesasList = promesasCategoryResult?.data ?? []
+  const promesasListRaw = promesasCategoryResult?.data ?? []
   const promesasCount = promesasCategoryResult?.count ?? 0
 
   const apellido = candidato.apellido_paterno ?? candidato.nombre_completo?.split(' ').pop() ?? ''
@@ -52,8 +53,17 @@ function CandidatoColumn({
     limit: 50,
   })
 
-  const declaraciones = declResult?.data ?? []
+  const declaracionesRaw = declResult?.data ?? []
   const declCount = declResult?.count ?? 0
+
+  // Apply text filter
+  const textLower = textFilter.toLowerCase()
+  const declaraciones = textFilter
+    ? declaracionesRaw.filter(d => d.contenido?.toLowerCase().includes(textLower) || d.tema_interaccion?.toLowerCase().includes(textLower))
+    : declaracionesRaw
+  const promesasList = textFilter
+    ? promesasListRaw.filter(p => p.promesa?.toLowerCase().includes(textLower) || p.categoria?.toLowerCase().includes(textLower))
+    : promesasListRaw
 
   return (
     <div className="border border-border rounded-xl overflow-hidden bg-card">
@@ -189,6 +199,7 @@ export function Comparar() {
   const [categoriaFilter, setCategoriaFilter] = useState('')
   const [cargoFilter, setCargoFilter] = useState('')
   const [showAllCandidatos, setShowAllCandidatos] = useState(false)
+  const [textFilter, setTextFilter] = useState('')
 
   // Get category counts for dynamic dropdown
   const { data: categoriaCounts } = useCategoriaCounts()
@@ -217,9 +228,11 @@ export function Comparar() {
     return options
   }, [categoriaCounts])
 
-  // Get candidates by selected cargo (or default to presidente)
-  const cargoToFetch = cargoFilter || 'PRESIDENTE DE LA REP'
-  const { data: candidatosData, isLoading: loadingCandidatos } = useCandidatosByCargo(cargoToFetch, showAllCandidatos ? 100 : 11)
+  // Get candidates by selected cargo (only fetch when cargo is selected)
+  const { data: candidatosData, isLoading: loadingCandidatos } = useCandidatosByCargo(
+    cargoFilter || '',
+    showAllCandidatos ? 100 : 11
+  )
   const candidatos = candidatosData?.data ?? []
   const totalCandidatos = candidatosData?.count ?? 0
 
@@ -373,11 +386,11 @@ export function Comparar() {
                 )}
               </div>
 
-              {/* Candidate grid */}
-              {searchQuery.length < 2 && (
+              {/* Candidate grid - only show when cargo is selected */}
+              {searchQuery.length < 2 && cargoFilter && (
                 <>
                   <p className="text-sm text-muted-foreground mb-3">
-                    O selecciona de la lista ({cargoFilter ? CARGO_OPTIONS.find(o => o.value === cargoFilter)?.label : 'Presidente'}):
+                    O selecciona de la lista ({CARGO_OPTIONS.find(o => o.value === cargoFilter)?.label}):
                   </p>
                   <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-6 gap-4">
                     {loadingCandidatos ? (
@@ -425,15 +438,26 @@ export function Comparar() {
       {/* Filter bar */}
       {selectedCandidatos.length > 0 && (
         <section className="bg-muted/30 border-b py-4 px-8">
-          <div className="max-w-6xl mx-auto flex items-center gap-4">
-            <span className="font-medium text-foreground text-sm">Filtrar por categoría:</span>
-            <FilterSelect
-              value={categoriaFilter}
-              onChange={setCategoriaFilter}
-              options={temaOptions}
-              placeholder="Todas las categorías"
-              className="min-w-[200px]"
-            />
+          <div className="max-w-6xl mx-auto flex flex-wrap items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground text-sm">Filtrar por categoría:</span>
+              <FilterSelect
+                value={categoriaFilter}
+                onChange={setCategoriaFilter}
+                options={temaOptions}
+                placeholder="Todas las categorías"
+                className="min-w-[200px]"
+              />
+            </div>
+            <div className="flex items-center gap-2">
+              <span className="font-medium text-foreground text-sm">Buscar:</span>
+              <SearchInput
+                value={textFilter}
+                onChange={setTextFilter}
+                placeholder="Buscar en declaraciones..."
+                className="min-w-[250px]"
+              />
+            </div>
           </div>
         </section>
       )}
@@ -468,6 +492,7 @@ export function Comparar() {
                     key={c.id}
                     candidato={c}
                     categoriaFilter={categoriaFilter}
+                    textFilter={textFilter}
                     onRemove={() => removeCandidato(c.id)}
                   />
                 ))}
