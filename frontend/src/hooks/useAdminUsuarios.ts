@@ -101,7 +101,7 @@ export function useUpdateUsuario() {
 export function useDeleteUsuario() {
   const queryClient = useQueryClient()
   return useMutation({
-    mutationFn: async ({ id, clienteId }: { id: string; clienteId: number }) => {
+    mutationFn: async ({ id }: { id: string; clienteId: number }) => {
       const { error } = await supabase.from('quipu_usuarios').delete().eq('id', id)
 
       if (error) throw error
