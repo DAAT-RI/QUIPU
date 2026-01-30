@@ -53,10 +53,10 @@ export function Dashboard() {
     if (!porTema) return []
     const total = porTema.reduce((s, c) => s + c.count, 0)
     return porTema.slice(0, 6).map((item, index) => {
-      const cfg = getDynamicCategoryConfig(item.tema, index, 'declaracion')
+      const cfg = getDynamicCategoryConfig(item.categoria, index, 'declaracion')
       return {
         key: cfg.key,
-        label: item.tema, // Keep original tema label for filtering
+        label: item.categoria, // Keep original category label for filtering
         icon: cfg.icon,
         color: cfg.color,
         count: item.count,
@@ -278,12 +278,12 @@ export function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">Categorías en el feed</p>
               <div className="rounded-xl border bg-card divide-y">
                 {(() => {
-                  // Extraer categorías únicas de las declaraciones (tema_interaccion puede tener múltiples separadas por ;)
+                  // Extraer categorías únicas de las declaraciones (categorias_interaccion puede tener múltiples separadas por ;)
                   const categoryMap = new Map<string, number>()
                   recentDeclaraciones.forEach((decl) => {
-                    if (decl.tema_interaccion) {
+                    if (decl.categorias_interaccion) {
                       // Separar por ; y contar cada categoría individualmente
-                      const cats = decl.tema_interaccion.split(';').map(c => c.trim()).filter(c => c)
+                      const cats = decl.categorias_interaccion.split(';').map(c => c.trim()).filter(c => c)
                       cats.forEach(cat => {
                         categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1)
                       })

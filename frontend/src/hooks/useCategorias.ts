@@ -76,15 +76,15 @@ export function useCategoriaCounts() {
         if (!entry.interacciones) continue
         for (const inter of entry.interacciones as Interaccion[]) {
           if (inter.type !== 'declaration') continue
-          if (!inter.tema) continue
-          // Dividir temas múltiples separados por ; (ej: "Derechos Humanos; Política")
-          const temas = inter.tema.split(';').map(t => t.trim()).filter(Boolean)
-          for (const tema of temas) {
-            const key = normalizeKey(tema)
+          if (!inter.categorias) continue
+          // Dividir categorías múltiples separadas por ; (ej: "Derechos Humanos; Política")
+          const categorias = inter.categorias.split(';').map(t => t.trim()).filter(Boolean)
+          for (const categoria of categorias) {
+            const key = normalizeKey(categoria)
             declarations[key] = (declarations[key] || 0) + 1
             // Guardar el label original (primera vez que lo vemos)
             if (!declarationLabels[key]) {
-              declarationLabels[key] = tema
+              declarationLabels[key] = categoria
             }
           }
         }
@@ -143,19 +143,19 @@ export function useCategoriasByPartidos(partidoIds: number[], stakeholders: stri
           if (!entry.interacciones) continue
           for (const inter of entry.interacciones as Interaccion[]) {
             if (inter.type !== 'declaration') continue
-            if (!inter.tema) continue
+            if (!inter.categorias) continue
             // Check if stakeholder matches any of our candidates
             const stakeholder = (inter.stakeholder || '').toLowerCase()
             const matches = stakeholderLower.some(s => stakeholder.includes(s) || s.includes(stakeholder))
             if (!matches) continue
 
-            // Dividir temas múltiples separados por ;
-            const temas = inter.tema.split(';').map(t => t.trim()).filter(Boolean)
-            for (const tema of temas) {
-              const key = normalizeKey(tema)
+            // Dividir categorías múltiples separadas por ;
+            const categorias = inter.categorias.split(';').map(t => t.trim()).filter(Boolean)
+            for (const categoria of categorias) {
+              const key = normalizeKey(categoria)
               declarations[key] = (declarations[key] || 0) + 1
               if (!declarationLabels[key]) {
-                declarationLabels[key] = tema
+                declarationLabels[key] = categoria
               }
             }
           }

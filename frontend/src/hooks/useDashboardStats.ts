@@ -83,15 +83,15 @@ export function useTopPartidos() {
 }
 
 /**
- * Hook para contar temas de declaraciones (tema_interaccion de v_quipu_declaraciones)
- * Usado para "Temas Más Discutidos" en el Dashboard
+ * Hook para contar categorías de declaraciones (categorias_interaccion de v_quipu_declaraciones)
+ * Usado para "Categorías Más Discutidas" en el Dashboard
  * Normaliza keys para agrupar variantes (con/sin tildes) y guarda labels originales
  */
 export function useDeclaracionesPorTema() {
   return useQuery({
     queryKey: ['declaraciones-por-tema'],
     queryFn: async () => {
-      // Get all tema_interaccion from QUIPU_MASTER
+      // Get all categorias from QUIPU_MASTER interacciones
       const { data, error } = await supabase
         .from('QUIPU_MASTER')
         .select('interacciones')
@@ -101,20 +101,20 @@ export function useDeclaracionesPorTema() {
       // Count topics from all interactions (normalize to group variants)
       const counts: Record<string, { label: string; count: number }> = {}
       for (const entry of data || []) {
-        const interacciones = entry.interacciones as Array<{ type?: string; tema?: string }> | null
+        const interacciones = entry.interacciones as Array<{ type?: string; categorias?: string }> | null
         if (!interacciones) continue
 
         for (const i of interacciones) {
           // Only count declarations (not mentions)
           if (i.type !== 'declaration') continue
-          if (!i.tema) continue
+          if (!i.categorias) continue
 
-          // tema can have multiple topics separated by ;
-          const temas = i.tema.split(';').map(t => t.trim()).filter(t => t)
-          for (const tema of temas) {
-            const key = normalizeKey(tema)
+          // categorias can have multiple topics separated by ;
+          const categorias = i.categorias.split(';').map(t => t.trim()).filter(t => t)
+          for (const categoria of categorias) {
+            const key = normalizeKey(categoria)
             if (!counts[key]) {
-              counts[key] = { label: tema, count: 0 }
+              counts[key] = { label: categoria, count: 0 }
             }
             counts[key].count += 1
           }
@@ -122,7 +122,7 @@ export function useDeclaracionesPorTema() {
       }
 
       return Object.entries(counts)
-        .map(([key, { label, count }]) => ({ key, tema: label, count }))
+        .map(([key, { label, count }]) => ({ key, categoria: label, count }))
         .sort((a, b) => b.count - a.count)
     },
   })

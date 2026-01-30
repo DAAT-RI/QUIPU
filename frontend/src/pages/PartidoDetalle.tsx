@@ -85,29 +85,29 @@ export function PartidoDetalle() {
     return { declaraciones, menciones }
   }, [declData, partido])
 
-  // Build tema chart: group declarations by tema
-  const temaChartData = useMemo(() => {
+  // Build categoria chart: group declarations by categoria
+  const categoriaChartData = useMemo(() => {
     if (!partidoDeclaraciones.length) return []
     const counts: Record<string, number> = {}
     for (const d of partidoDeclaraciones) {
-      // Use individual declaration tema first, then fall back to entry-level temas
-      const temas: string[] = []
-      if (d.tema_interaccion) {
-        temas.push(...d.tema_interaccion.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
-      } else if (d.temas) {
-        temas.push(...d.temas.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
+      // Use individual declaration categoria first, then fall back to entry-level categorias
+      const categorias: string[] = []
+      if (d.categorias_interaccion) {
+        categorias.push(...d.categorias_interaccion.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
+      } else if (d.categorias) {
+        categorias.push(...d.categorias.split(/[;,]/).map((t) => t.trim()).filter(Boolean))
       }
-      if (temas.length === 0) temas.push('Sin tema')
-      for (const t of temas) {
+      if (categorias.length === 0) categorias.push('Sin categoría')
+      for (const t of categorias) {
         counts[t] = (counts[t] || 0) + 1
       }
     }
     return Object.entries(counts)
-      .map(([tema, count]) => ({ tema, count }))
+      .map(([categoria, count]) => ({ categoria, count }))
       .sort((a, b) => b.count - a.count)
   }, [partidoDeclaraciones])
 
-  const maxTemaCount = temaChartData[0]?.count || 1
+  const maxCategoriaCount = categoriaChartData[0]?.count || 1
 
   // Build chart data: group all promesas (unfiltered) by categoria
   const { data: allPromesasResult } = usePromesasByPartido(
@@ -211,16 +211,16 @@ export function PartidoDetalle() {
           </button>
           {temasOpen && (
             <div className="rounded-xl border bg-card divide-y mt-2">
-              {temaChartData.map((item) => {
-                const barPct = (item.count / maxTemaCount) * 100
+              {categoriaChartData.map((item) => {
+                const barPct = (item.count / maxCategoriaCount) * 100
                 return (
                   <div
-                    key={item.tema}
+                    key={item.categoria}
                     className="flex items-center gap-4 p-4"
                   >
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-1">
-                        <p className="text-sm font-medium truncate">{item.tema}</p>
+                        <p className="text-sm font-medium truncate">{item.categoria}</p>
                         <span className="text-sm font-bold shrink-0 ml-2 tabular-nums">
                           {formatNumber(item.count)}
                         </span>
@@ -291,13 +291,13 @@ export function PartidoDetalle() {
                         &laquo;{d.contenido}&raquo;
                       </blockquote>
                       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                        {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
-                          <span key={tema} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
-                            {tema}
+                        {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
+                          <span key={cat} className="rounded-md bg-primary/10 text-primary px-2 py-0.5 text-[11px] font-medium">
+                            {cat}
                           </span>
                         ))}
-                        {d.temas &&
-                          d.temas
+                        {d.categorias &&
+                          d.categorias
                             .split(';')
                             .map((t) => t.trim())
                             .filter(Boolean)
@@ -388,9 +388,9 @@ export function PartidoDetalle() {
                         {d.contenido}
                       </p>
                       <div className="mt-2.5 flex flex-wrap items-center gap-1.5">
-                        {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
-                          <span key={tema} className="rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-0.5 text-[11px] font-medium">
-                            {tema}
+                        {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
+                          <span key={cat} className="rounded-md bg-orange-500/10 text-orange-600 dark:text-orange-400 px-2 py-0.5 text-[11px] font-medium">
+                            {cat}
                           </span>
                         ))}
                         {d.fecha && (

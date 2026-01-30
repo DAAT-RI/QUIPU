@@ -707,39 +707,39 @@ function TabDeclaracionesMejorado({
   loading: boolean
   nombreCandidato: string
 }) {
-  const [filtroTema, setFiltroTema] = useState<string | null>(null)
+  const [filtroCategoria, setFiltroCategoria] = useState<string | null>(null)
 
   // Calcular estadísticas
   const stats = useMemo(() => {
-    const temasMap = new Map<string, number>()
+    const categoriasMap = new Map<string, number>()
     const canalesSet = new Set<string>()
 
     declaraciones.forEach((d) => {
-      if (d.tema_interaccion) {
-        temasMap.set(d.tema_interaccion, (temasMap.get(d.tema_interaccion) || 0) + 1)
+      if (d.categorias_interaccion) {
+        categoriasMap.set(d.categorias_interaccion, (categoriasMap.get(d.categorias_interaccion) || 0) + 1)
       }
       if (d.canal) {
         canalesSet.add(d.canal)
       }
     })
 
-    const temasOrdenados = Array.from(temasMap.entries())
+    const categoriasOrdenadas = Array.from(categoriasMap.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 6)
 
     return {
       total: totalCount,
-      temasUnicos: temasMap.size,
+      categoriasUnicas: categoriasMap.size,
       canalesUnicos: canalesSet.size,
-      topTemas: temasOrdenados,
+      topCategorias: categoriasOrdenadas,
     }
   }, [declaraciones, totalCount])
 
   // Filtrar declaraciones si hay filtro activo
   const declaracionesFiltradas = useMemo(() => {
-    if (!filtroTema) return declaraciones
-    return declaraciones.filter((d) => d.tema_interaccion === filtroTema)
-  }, [declaraciones, filtroTema])
+    if (!filtroCategoria) return declaraciones
+    return declaraciones.filter((d) => d.categorias_interaccion === filtroCategoria)
+  }, [declaraciones, filtroCategoria])
 
   if (loading) return <LoadingSpinner />
 
@@ -768,7 +768,7 @@ function TabDeclaracionesMejorado({
           <p className="text-xs text-muted-foreground mt-1">declaraciones</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
-          <p className="text-2xl font-bold">{stats.temasUnicos}</p>
+          <p className="text-2xl font-bold">{stats.categoriasUnicas}</p>
           <p className="text-xs text-muted-foreground mt-1">categorías</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
@@ -778,33 +778,33 @@ function TabDeclaracionesMejorado({
       </div>
 
       {/* Categorías más frecuentes (clickeables para filtrar) */}
-      {stats.topTemas.length > 0 && (
+      {stats.topCategorias.length > 0 && (
         <div className="space-y-2">
           <p className="text-sm font-medium text-muted-foreground flex items-center gap-1.5">
             <Hash size={14} /> Categorías más frecuentes
           </p>
           <div className="flex flex-wrap gap-2">
-            {filtroTema && (
+            {filtroCategoria && (
               <button
                 type="button"
-                onClick={() => setFiltroTema(null)}
+                onClick={() => setFiltroCategoria(null)}
                 className="rounded-full border border-dashed px-3 py-1 text-xs font-medium text-muted-foreground hover:bg-muted/50 transition-colors"
               >
                 × Quitar filtro
               </button>
             )}
-            {stats.topTemas.map(([tema, count]) => (
+            {stats.topCategorias.map(([categoria, count]) => (
               <button
-                key={tema}
+                key={categoria}
                 type="button"
-                onClick={() => setFiltroTema(filtroTema === tema ? null : tema)}
+                onClick={() => setFiltroCategoria(filtroCategoria === categoria ? null : categoria)}
                 className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
-                  filtroTema === tema
+                  filtroCategoria === categoria
                     ? 'bg-primary text-primary-foreground'
                     : 'bg-primary/10 text-primary hover:bg-primary/20'
                 }`}
               >
-                {tema} ({count})
+                {categoria} ({count})
               </button>
             ))}
           </div>
@@ -813,9 +813,9 @@ function TabDeclaracionesMejorado({
 
       {/* Lista de declaraciones */}
       <div className="space-y-3">
-        {filtroTema && (
+        {filtroCategoria && (
           <p className="text-sm text-muted-foreground">
-            Mostrando {declaracionesFiltradas.length} declaraciones sobre "{filtroTema}"
+            Mostrando {declaracionesFiltradas.length} declaraciones sobre "{filtroCategoria}"
           </p>
         )}
         {declaracionesFiltradas.map((d) => (
@@ -835,9 +835,9 @@ function TabDeclaracionesMejorado({
                       {d.canal}
                     </span>
                   )}
-                  {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
-                    <span key={tema} className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
-                      {tema}
+                  {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
+                    <span key={cat} className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
+                      {cat}
                     </span>
                   ))}
                   {d.fecha && <span>{formatDate(d.fecha)}</span>}
@@ -866,18 +866,18 @@ function TabPerfilMediatico({
   nombreCandidato: string
   onVerDeclaraciones: () => void
 }) {
-  // Calcular estadísticas de temas y canales
+  // Calcular estadísticas de categorías y canales
   const stats = useMemo(() => {
-    const temasMap = new Map<string, number>()
+    const categoriasMap = new Map<string, number>()
     const canalesMap = new Map<string, number>()
 
     declaraciones.forEach((d) => {
-      if (d.tema_interaccion) {
-        // Handle multiple topics separated by semicolon
-        d.tema_interaccion.split(';').forEach((t) => {
-          const tema = t.trim()
-          if (tema) {
-            temasMap.set(tema, (temasMap.get(tema) || 0) + 1)
+      if (d.categorias_interaccion) {
+        // Handle multiple categories separated by semicolon
+        d.categorias_interaccion.split(';').forEach((t) => {
+          const categoria = t.trim()
+          if (categoria) {
+            categoriasMap.set(categoria, (categoriasMap.get(categoria) || 0) + 1)
           }
         })
       }
@@ -886,11 +886,11 @@ function TabPerfilMediatico({
       }
     })
 
-    // Get top topics for charts
-    const topTemas = Array.from(temasMap.entries())
+    // Get top categories for charts
+    const topCategorias = Array.from(categoriasMap.entries())
       .sort((a, b) => b[1] - a[1])
       .slice(0, 8)
-      .map(([name, value]) => ({ name, value, fullMark: Math.max(...Array.from(temasMap.values())) }))
+      .map(([name, value]) => ({ name, value, fullMark: Math.max(...Array.from(categoriasMap.values())) }))
 
     const topCanales = Array.from(canalesMap.entries())
       .sort((a, b) => b[1] - a[1])
@@ -899,9 +899,9 @@ function TabPerfilMediatico({
 
     return {
       total: totalCount,
-      temasUnicos: temasMap.size,
+      categoriasUnicas: categoriasMap.size,
       canalesUnicos: canalesMap.size,
-      topTemas,
+      topCategorias,
       topCanales,
     }
   }, [declaraciones, totalCount])
@@ -943,7 +943,7 @@ function TabPerfilMediatico({
           <p className="text-xs text-muted-foreground mt-1">declaraciones</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
-          <p className="text-3xl font-bold">{stats.temasUnicos}</p>
+          <p className="text-3xl font-bold">{stats.categoriasUnicas}</p>
           <p className="text-xs text-muted-foreground mt-1">categorías diferentes</p>
         </div>
         <div className="rounded-xl border bg-card p-4 text-center">
@@ -955,7 +955,7 @@ function TabPerfilMediatico({
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Radar Chart - Topics */}
-        {stats.topTemas.length >= 3 && (
+        {stats.topCategorias.length >= 3 && (
           <div className="rounded-xl border bg-card p-4">
             <h3 className="text-sm font-semibold mb-4 flex items-center gap-2">
               <Hash size={14} className="text-muted-foreground" />
@@ -963,7 +963,7 @@ function TabPerfilMediatico({
             </h3>
             <div className="h-[280px]">
               <ResponsiveContainer width="100%" height="100%">
-                <RadarChart data={stats.topTemas} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
+                <RadarChart data={stats.topCategorias} margin={{ top: 20, right: 30, bottom: 20, left: 30 }}>
                   <PolarGrid stroke="hsl(var(--border))" />
                   <PolarAngleAxis
                     dataKey="name"

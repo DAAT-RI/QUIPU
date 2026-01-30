@@ -76,15 +76,15 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
         query = query.eq('canal', filters.canal)
       }
 
-      // Filtro por tema del artículo
-      if (filters.tema) {
-        query = query.ilike('temas', `%${filters.tema}%`)
+      // Filtro por categoría del artículo (antes: tema)
+      if (filters.categoria) {
+        query = query.ilike('categorias', `%${filters.categoria}%`)
       }
 
-      // Filtro por tema de la declaración específica (con soporte para tildes)
-      if (filters.temaDeclaracion) {
-        const variants = getSearchVariants(filters.temaDeclaracion)
-        query = query.or(variants.map(v => `tema_interaccion.ilike.%${v}%`).join(','))
+      // Filtro por categoría de la declaración específica (con soporte para tildes)
+      if (filters.categoriaDeclaracion) {
+        const variants = getSearchVariants(filters.categoriaDeclaracion)
+        query = query.or(variants.map(v => `categorias_interaccion.ilike.%${v}%`).join(','))
       }
 
       // Filtro por organización mencionada (IMPORTANTE para gremios) - con soporte para tildes

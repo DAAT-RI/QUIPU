@@ -87,10 +87,10 @@ export function Categorias() {
       })
   }, [counts])
 
-  // Generar temas de declaraciones dinámicamente basado en los datos
-  const sortedDeclTemas = useMemo(() => {
+  // Generar categorías de declaraciones dinámicamente basado en los datos
+  const sortedDeclCategorias = useMemo(() => {
     if (!counts) return []
-    // Crear configs dinámicos para todos los temas encontrados
+    // Crear configs dinámicos para todas las categorías encontradas
     return Object.entries(counts.declarations)
       .filter(([, count]) => count > 0)
       .sort(([, a], [, b]) => b - a)
@@ -120,8 +120,8 @@ export function Categorias() {
         </div>
       </div>
 
-      {/* Declaration temas — on top */}
-      {sortedDeclTemas.length > 0 && (
+      {/* Declaration categorias — on top */}
+      {sortedDeclCategorias.length > 0 && (
         <section>
           <button
             type="button"
@@ -145,7 +145,7 @@ export function Categorias() {
           </button>
           {declOpen && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-4">
-              {sortedDeclTemas.map((cat) => (
+              {sortedDeclCategorias.map((cat) => (
                 <CategoryCard
                   key={cat.key}
                   cat={cat}

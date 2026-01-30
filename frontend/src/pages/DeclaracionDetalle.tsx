@@ -165,15 +165,15 @@ function HeroDeclaracion({
         «{declaration.content}»
       </blockquote>
 
-      {/* Temas */}
-      {declaration.tema && (
+      {/* Categorías */}
+      {declaration.categorias && (
         <div className="flex flex-wrap items-center gap-2">
-          {declaration.tema.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
+          {declaration.categorias.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
             <span
-              key={tema}
+              key={cat}
               className="rounded-full bg-primary/10 text-primary px-3 py-1 text-sm font-medium"
             >
-              {tema}
+              {cat}
             </span>
           ))}
         </div>
@@ -374,14 +374,14 @@ function OtrasDeclaraciones({
             <p className="text-sm text-muted-foreground line-clamp-1 mt-0.5">
               «{d.content}»
             </p>
-            {d.tema && (
+            {d.categorias && (
               <div className="flex flex-wrap gap-1 mt-1.5">
-                {d.tema.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((tema) => (
+                {d.categorias.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
                   <span
-                    key={tema}
+                    key={cat}
                     className="rounded-full bg-muted px-2 py-0.5 text-[10px] font-medium"
                   >
-                    {tema}
+                    {cat}
                   </span>
                 ))}
               </div>

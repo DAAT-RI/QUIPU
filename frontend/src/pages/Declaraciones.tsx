@@ -70,7 +70,7 @@ export function Declaraciones() {
   // Generar opciones de tema dinámicamente desde la BD
   const temaOptions = useMemo(() => {
     if (!temasData) return []
-    return temasData.map((t) => ({ value: t.tema, label: t.tema }))
+    return temasData.map((t) => ({ value: t.categoria, label: t.categoria }))
   }, [temasData])
 
   const offset = page * PAGE_LIMIT
@@ -80,7 +80,7 @@ export function Declaraciones() {
     search: search || undefined,
     stakeholder: stakeholder || undefined,
     canal: canal || undefined,
-    temaDeclaracion: tema || undefined, // Filter by tema_interaccion (declaration topic)
+    categoriaDeclaracion: tema || undefined, // Filter by categorias_interaccion (declaration category)
     organizacion: organizacion || undefined,
     producto: producto || undefined,
     offset,
@@ -264,8 +264,8 @@ export function Declaraciones() {
 
                 {/* Tags: Temas de la interacción + Canal */}
                 <div className="flex flex-wrap items-center gap-1.5">
-                  {d.tema_interaccion &&
-                    d.tema_interaccion
+                  {d.categorias_interaccion &&
+                    d.categorias_interaccion
                       .split(';')
                       .map((t) => t.trim())
                       .filter(Boolean)

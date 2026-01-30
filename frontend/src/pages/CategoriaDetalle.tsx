@@ -41,7 +41,7 @@ export function CategoriaDetalle() {
   const [stakeholderFilter, setStakeholderFilter] = useState('')
   const [topPartidosOpen, setTopPartidosOpen] = useState(false)
 
-  // Obtener labels dinámicos para temas de declaraciones
+  // Obtener labels dinámicos para categorías de declaraciones
   const { data: counts } = useCategoriaCounts()
 
   // Determinar si es categoría de plan o declaración
@@ -53,7 +53,7 @@ export function CategoriaDetalle() {
     if (CATEGORY_CONFIG[nombre || '']) {
       return CATEGORY_CONFIG[nombre || '']
     }
-    // Para temas dinámicos de declaraciones, usar el label original
+    // Para categorías dinámicas de declaraciones, usar el label original
     const label = counts?.declarationLabels[nombre || ''] || nombre || ''
     return getDynamicCategoryConfig(label, 0)
   }, [nombre, counts])
