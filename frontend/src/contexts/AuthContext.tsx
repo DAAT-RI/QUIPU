@@ -114,13 +114,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function loadClienteData(authUserId: string) {
     console.log('[Auth] Loading cliente data for:', authUserId)
     try {
+      console.log('[Auth] Ejecutando query a quipu_usuarios...')
       const { data, error } = await supabase
         .from('quipu_usuarios')
         .select('cliente_id, rol, quipu_clientes(nombre)')
         .eq('auth_user_id', authUserId)
         .single()
 
-      console.log('[Auth] Query result:', { data, error })
+      console.log('[Auth] Query completada. Data:', JSON.stringify(data), 'Error:', JSON.stringify(error))
 
       if (error) {
         console.error('[Auth] Error fetching usuario:', error)
