@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom'
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+import { QueryClientProvider } from '@tanstack/react-query'
 import { useEffect } from 'react'
+import { queryClient } from '@/lib/queryClient'
 import { AuthProvider } from '@/contexts/AuthContext'
 import { ProtectedRoute } from '@/components/auth/ProtectedRoute'
 import { AdminRoute } from '@/components/admin/AdminRoute'
@@ -25,16 +26,6 @@ import { CategoriaDetalle } from '@/pages/CategoriaDetalle'
 import { Comparar } from '@/pages/Comparar'
 import { MapaElectoral } from '@/pages/MapaElectoral'
 import Login from '@/pages/Login'
-
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      staleTime: 5 * 60 * 1000,
-      gcTime: 10 * 60 * 1000,
-      retry: 1,
-    },
-  },
-})
 
 // Scroll to top on route change (compatible with BrowserRouter)
 function ScrollToTop() {

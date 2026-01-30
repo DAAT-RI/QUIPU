@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from 'react'
 import type { ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
+import { queryClient } from '@/lib/queryClient'
 
 interface AuthContextType {
   user: User | null
@@ -28,54 +29,31 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   // Cargar sesión inicial
   useEffect(() => {
+    // Clear React Query cache to prevent stale data after refresh
+    queryClient.clear()
+
     // Safety timeout - never stay in loading state for more than 10 seconds
     const safetyTimeout = setTimeout(() => {
       setLoading(false)
     }, 10000)
 
-    // Try refreshSession first (forces network), fallback to getSession (uses cache)
-    supabase.auth.refreshSession().then(async ({ data: { session }, error }) => {
-      // If refresh failed, try getSession as fallback
-      if (error || !session) {
-        const { data } = await supabase.auth.getSession()
-        if (data.session) {
-          setSession(data.session)
-          setUser(data.session.user)
-          try {
-            await loadClienteData(data.session.user.id)
-            await registerSession(data.session.user.id)
-          } catch (err) {
-            console.error('[Auth] Error loading cliente data:', err)
-          }
-        }
-        setLoading(false)
-        clearTimeout(safetyTimeout)
-        return
-      }
-
+    supabase.auth.getSession().then(async ({ data: { session } }) => {
       setSession(session)
-      setUser(session.user)
-      try {
-        await loadClienteData(session.user.id)
-        await registerSession(session.user.id)
-      } catch (error) {
-        console.error('[Auth] Error loading cliente data:', error)
-      }
-      setLoading(false)
-      clearTimeout(safetyTimeout)
-    }).catch(async (error) => {
-      console.error('[Auth] Error refreshing session:', error)
-      // Fallback to getSession on error
-      try {
-        const { data } = await supabase.auth.getSession()
-        if (data.session) {
-          setSession(data.session)
-          setUser(data.session.user)
-          await loadClienteData(data.session.user.id)
+      setUser(session?.user ?? null)
+      if (session?.user) {
+        try {
+          await loadClienteData(session.user.id)
+          await registerSession(session.user.id)
+        } catch (error) {
+          console.error('[Auth] Error loading cliente data:', error)
+          setLoading(false)
         }
-      } catch (e) {
-        console.error('[Auth] Fallback getSession failed:', e)
+      } else {
+        setLoading(false)
       }
+      clearTimeout(safetyTimeout)
+    }).catch((error) => {
+      console.error('[Auth] Error getting session:', error)
       setLoading(false)
       clearTimeout(safetyTimeout)
     })
@@ -178,6 +156,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
+    // Clear React Query cache to prevent stale data on next login
+    queryClient.clear()
+
     // Clear state first (don't wait for DB)
     setUser(null)
     setSession(null)
