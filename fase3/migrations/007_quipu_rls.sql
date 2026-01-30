@@ -62,18 +62,18 @@ USING (
 );
 
 -- =====================================================
--- POLÍTICAS PARA quipu_cliente_temas
+-- POLÍTICAS PARA quipu_cliente_categorias
 -- =====================================================
-ALTER TABLE quipu_cliente_temas ENABLE ROW LEVEL SECURITY;
+ALTER TABLE quipu_cliente_categorias ENABLE ROW LEVEL SECURITY;
 
-CREATE POLICY "Cliente ve sus temas"
-ON quipu_cliente_temas FOR SELECT
+CREATE POLICY "Cliente ve sus categorias"
+ON quipu_cliente_categorias FOR SELECT
 USING (
     cliente_id = get_current_cliente_id()
 );
 
-CREATE POLICY "Admin cliente modifica temas"
-ON quipu_cliente_temas FOR ALL
+CREATE POLICY "Admin cliente modifica categorias"
+ON quipu_cliente_categorias FOR ALL
 USING (
     cliente_id = get_current_cliente_id()
     AND EXISTS (
@@ -117,16 +117,10 @@ USING (
 -- TABLAS PÚBLICAS (sin RLS o lectura libre)
 -- =====================================================
 
--- Temas: todos pueden leer el catálogo
-ALTER TABLE quipu_temas ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Temas son públicos"
-ON quipu_temas FOR SELECT
-USING (true);
-
--- Organizaciones: catálogo público
-ALTER TABLE quipu_organizaciones ENABLE ROW LEVEL SECURITY;
-CREATE POLICY "Organizaciones son públicas"
-ON quipu_organizaciones FOR SELECT
+-- Categorías: todos pueden leer el catálogo
+ALTER TABLE quipu_categorias ENABLE ROW LEVEL SECURITY;
+CREATE POLICY "Categorias son publicas"
+ON quipu_categorias FOR SELECT
 USING (true);
 
 -- Candidatos: público (el filtro es por quipu_cliente_candidatos)
@@ -148,5 +142,5 @@ USING (true);
 GRANT USAGE ON SCHEMA public TO authenticated;
 GRANT SELECT ON ALL TABLES IN SCHEMA public TO authenticated;
 GRANT INSERT, UPDATE ON quipu_cliente_candidatos TO authenticated;
-GRANT INSERT, UPDATE ON quipu_cliente_temas TO authenticated;
+GRANT INSERT, UPDATE ON quipu_cliente_categorias TO authenticated;
 GRANT UPDATE ON quipu_promesa_declaracion TO authenticated;

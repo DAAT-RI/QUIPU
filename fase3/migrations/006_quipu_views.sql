@@ -36,7 +36,7 @@ SELECT
 FROM quipu_declaraciones d
 LEFT JOIN quipu_candidatos c ON d.candidato_id = c.id
 LEFT JOIN quipu_partidos pp ON c.partido_id = pp.id
-LEFT JOIN quipu_temas t ON d.tema_id = t.id;
+LEFT JOIN quipu_categorias t ON d.tema_id = t.id;
 
 -- Vista: Declaraciones filtradas por cliente (usa RLS internamente)
 -- El frontend usa esta vista y RLS filtra automáticamente
@@ -47,7 +47,7 @@ SELECT
     ct.prioridad as tema_prioridad
 FROM v_quipu_declaraciones_completas dc
 JOIN quipu_cliente_candidatos cc ON cc.candidato_id = dc.candidato_id
-JOIN quipu_cliente_temas ct ON ct.tema_id = dc.tema_id AND ct.cliente_id = cc.cliente_id;
+JOIN quipu_cliente_categorias ct ON ct.tema_id = dc.tema_id AND ct.cliente_id = cc.cliente_id;
 
 -- Vista: Candidatos del cliente con stats
 CREATE OR REPLACE VIEW v_quipu_cliente_candidatos_stats AS
@@ -71,7 +71,7 @@ LEFT JOIN quipu_declaraciones d ON d.candidato_id = c.id
 GROUP BY c.id, pp.id, cc.cliente_id, cc.added_at;
 
 -- Vista: Temas del cliente con stats
-CREATE OR REPLACE VIEW v_quipu_cliente_temas_stats AS
+CREATE OR REPLACE VIEW v_quipu_cliente_categorias_stats AS
 SELECT
     t.id,
     t.nombre,
@@ -85,8 +85,8 @@ SELECT
     ct.alertas_activas,
     COUNT(DISTINCT d.id) as total_declaraciones,
     COUNT(DISTINCT d.candidato_id) as candidatos_hablando
-FROM quipu_temas t
-JOIN quipu_cliente_temas ct ON ct.tema_id = t.id
+FROM quipu_categorias t
+JOIN quipu_cliente_categorias ct ON ct.tema_id = t.id
 LEFT JOIN quipu_declaraciones d ON d.tema_id = t.id
     AND d.candidato_id IN (
         SELECT candidato_id FROM quipu_cliente_candidatos
@@ -105,7 +105,7 @@ SELECT
     COUNT(DISTINCT CASE WHEN d.fecha > CURRENT_DATE - INTERVAL '1 day' THEN d.id END) as declaraciones_hoy,
     MAX(d.fecha) as ultima_actividad
 FROM quipu_cliente_candidatos cc
-JOIN quipu_cliente_temas ct ON ct.cliente_id = cc.cliente_id
+JOIN quipu_cliente_categorias ct ON ct.cliente_id = cc.cliente_id
 LEFT JOIN quipu_declaraciones d ON d.candidato_id = cc.candidato_id
     AND d.tema_id = ct.tema_id
 GROUP BY cc.cliente_id;
@@ -133,4 +133,4 @@ JOIN quipu_declaraciones d ON pd.declaracion_id = d.id
 JOIN quipu_cliente_candidatos cc ON cc.candidato_id = d.candidato_id
 LEFT JOIN quipu_candidatos c ON d.candidato_id = c.id
 LEFT JOIN quipu_partidos pp ON p.partido_id = pp.id
-LEFT JOIN quipu_temas t ON d.tema_id = t.id;
+LEFT JOIN quipu_categorias t ON d.tema_id = t.id;

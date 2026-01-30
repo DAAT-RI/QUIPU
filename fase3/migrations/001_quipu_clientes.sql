@@ -25,6 +25,7 @@ CREATE TABLE IF NOT EXISTS quipu_usuarios (
     nombre VARCHAR(200),
     rol VARCHAR(50) DEFAULT 'viewer', -- 'admin', 'analyst', 'viewer'
     auth_user_id UUID UNIQUE,         -- FK a Supabase Auth (auth.users.id)
+    current_session_id UUID,          -- Para sesiones exclusivas (un dispositivo a la vez)
     activo BOOLEAN DEFAULT TRUE,
     created_at TIMESTAMPTZ DEFAULT NOW()
 );

@@ -20,7 +20,7 @@ CREATE TABLE IF NOT EXISTS quipu_declaraciones (
 
     -- VÍNCULOS NORMALIZADOS
     candidato_id INTEGER REFERENCES quipu_candidatos(id),
-    tema_id INTEGER REFERENCES quipu_temas(id),
+    tema_id INTEGER REFERENCES quipu_categorias(id),
 
     -- BÚSQUEDA SEMÁNTICA
     embedding vector(1536),
@@ -41,14 +41,6 @@ CREATE TABLE IF NOT EXISTS quipu_declaraciones (
     UNIQUE (master_id, indice_interaccion)
 );
 
--- Organizaciones mencionadas en cada declaración (many-to-many)
-CREATE TABLE IF NOT EXISTS quipu_declaracion_organizaciones (
-    declaracion_id INTEGER REFERENCES quipu_declaraciones(id) ON DELETE CASCADE,
-    organizacion_id INTEGER REFERENCES quipu_organizaciones(id) ON DELETE CASCADE,
-    tipo_mencion VARCHAR(30) DEFAULT 'neutral', -- 'neutral', 'positiva', 'critica'
-    PRIMARY KEY (declaracion_id, organizacion_id)
-);
-
 -- Índices para queries frecuentes
 CREATE INDEX IF NOT EXISTS idx_decl_master ON quipu_declaraciones(master_id);
 CREATE INDEX IF NOT EXISTS idx_decl_candidato ON quipu_declaraciones(candidato_id);
@@ -60,10 +52,6 @@ CREATE INDEX IF NOT EXISTS idx_decl_canal ON quipu_declaraciones(canal);
 -- Índice vectorial para búsqueda semántica
 CREATE INDEX IF NOT EXISTS idx_decl_embedding ON quipu_declaraciones
     USING hnsw (embedding vector_cosine_ops);
-
--- Índice para organizaciones
-CREATE INDEX IF NOT EXISTS idx_decl_org_decl ON quipu_declaracion_organizaciones(declaracion_id);
-CREATE INDEX IF NOT EXISTS idx_decl_org_org ON quipu_declaracion_organizaciones(organizacion_id);
 
 -- Trigger para updated_at
 CREATE OR REPLACE FUNCTION update_declaraciones_timestamp()

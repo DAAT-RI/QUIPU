@@ -55,7 +55,7 @@ JOIN quipu_promesas_planes p ON pd.promesa_id = p.id
 JOIN quipu_partidos pp ON p.partido_id = pp.id
 JOIN quipu_declaraciones d ON pd.declaracion_id = d.id
 LEFT JOIN quipu_candidatos c ON d.candidato_id = c.id
-LEFT JOIN quipu_temas t ON d.tema_id = t.id
+LEFT JOIN quipu_categorias t ON d.tema_id = t.id
 WHERE pd.coherencia = 'contradice'
 ORDER BY pd.similarity DESC;
 
