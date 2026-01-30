@@ -96,7 +96,7 @@ export function getContrastColor(hex: string): string {
   return luminance > 0.55 ? '#000000' : '#ffffff'
 }
 
-const JNE_FOTO_BASE = 'https://mpesije.jne.gob.pe/apidocs/'
+const JNE_FOTO_BASE = 'https://plataformaelectoral.jne.gob.pe/Fotos/'
 
 export function buildFotoUrl(fotoUrl: string | null | undefined): string | null {
   if (!fotoUrl) return null

@@ -1,0 +1,2088 @@
+[
+  {
+    "dni": "09475875",
+    "nombre": "CALERO CAMARA, REBECA MAURA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "09372198",
+    "nombre": "VELASQUEZ PAREDES, PEDRO RICARDO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "06540545",
+    "nombre": "GUIDO DAVALOS, PATRICIA YUVELL",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "10417514",
+    "nombre": "GARCIA GOMEZ, MIRIAM",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "09602797",
+    "nombre": "ROSADIO NAUPARI, JESSICA MANUELA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "08785763",
+    "nombre": "UGAZ LA ROSA, JOSE OCTAVIO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "09677079",
+    "nombre": "ZEVALLOS BUENO, MARCO ANTONIO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "10182930",
+    "nombre": "SALAZAR VARGAS, MANUEL ELOY",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "09386487",
+    "nombre": "BOTTERI MC FARLANE, GIANCARLO MARIO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "16020291",
+    "nombre": "PEREZ CASTILLO, JACQUELIN JOSEFINA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "09375873",
+    "nombre": "GARCIA ARZUBIALDE VDA DE LASTARRIA, TANIA ADID",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "10342732",
+    "nombre": "CHAVEZ ALVARADO, SUSANA ISABEL",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "08271866",
+    "nombre": "FLORES CASTAÑON, CECILIA MILAGROS",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "07750301",
+    "nombre": "GUEVARA CAMPOS, LUIS REINALDO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "29666430",
+    "nombre": "APAZA ORDOÑEZ, JUSTINIANO ROMULO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "06200373",
+    "nombre": "SAAVEDRA TARMEÑO, ELI ENRIQUE",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "10808292",
+    "nombre": "MUJICA YEPEZ, JORGE LUIS",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "23932556",
+    "nombre": "BENAVENTE GARCIA, JEAN PAUL",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "10257086",
+    "nombre": "MORALES MANDUJANO, BETSABE ZULEMA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "09753559",
+    "nombre": "CORTAVITARTE LAHURA, MIGUEL ALBERTO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "06785430",
+    "nombre": "IBERICO DIAZ, MARCIA ADRIANA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "07867789",
+    "nombre": "PEREZ TELLO DE RODRIGUEZ, MARIA SOLEDAD",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "08936887",
+    "nombre": "ALVAREZ ESCOBAR DE VILLALBA, JOSEFINA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "27557657",
+    "nombre": "REGALADO CABRERA, JUAN CESAR",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "00107153",
+    "nombre": "SANTOS MIRANDA, RICHARD",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "00478096",
+    "nombre": "REINOSO GUILLERMO, ROSANA JULIA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "06012255",
+    "nombre": "CASTRO LLAJA, LINDOMIRA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "20085925",
+    "nombre": "SOTO ARIAS, GLORIA SATURNINA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "07914344",
+    "nombre": "MATTOS BARRIOS, EDGAR HERACLIO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "07777874",
+    "nombre": "MOLINA MARTINEZ, RAUL ALBERTO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_UNICO"
+  },
+  {
+    "dni": "41243755",
+    "nombre": "BARRANTES VASQUEZ, ROSA MABEL",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "16734493",
+    "nombre": "CARBONEL CHOTA, JORGE LUIS",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "02879361",
+    "nombre": "GUTIERREZ GUERRERO, DELKY EDMUNDO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "27571101",
+    "nombre": "REGALADO CABRERA, LUZ ANGELICA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "26942153",
+    "nombre": "CABALLERO ROLDAN, HERMINIA",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "06246968",
+    "nombre": "SEGOVIA QUIN, WILBERT GABINO",
+    "cargo": "SENADOR",
+    "partido": "PARTIDO DEMOCRATA UNIDO PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "29420821",
+    "nombre": "APAZA CACERES, HISPANA MARIA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "29358543",
+    "nombre": "VILLENA ZUÑIGA, HAMER EDUARDO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "44358528",
+    "nombre": "VILLAVERDE HILARIO, CARMEN LAURA",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "10289033",
+    "nombre": "AGUADO ÑAVINCOPA, JOSE CARLOS",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "09218332",
+    "nombre": "QUEZADA LECCA, SEGUNDA ERCELIZ",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "03127223",
+    "nombre": "LANDACAY RAIMUNDO, RIEDEL",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "23861137",
+    "nombre": "OROSCO HUARAYA, JUANA",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "18141156",
+    "nombre": "FERNANDEZ BAZAN, ROSARIO DEL PILAR",
+    "cargo": "SENADOR",
+    "partido": "UN CAMINO DIFERENTE",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "04007893",
+    "nombre": "MENDIETA QUISPE, HUGO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "04053772",
+    "nombre": "MAURICIO ROSAS VDA. DE GALLARDO, EMILIA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "29679918",
+    "nombre": "CENTENO HERRERA, BLADIMIRO",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "17400118",
+    "nombre": "CHAMAYA TEMOCHE, MARIA YMELDA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "01305484",
+    "nombre": "LLANOS CRUZ, CRISTINA",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "01224784",
+    "nombre": "BERNEDO BERNEDO, ROLANDO JAVIER",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "31040058",
+    "nombre": "RIMASCCA MOSQUEIRA, SONIA VIRGINIA",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "31039877",
+    "nombre": "SERRANO CHOQUE, ISABEL",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "31008029",
+    "nombre": "SANCHEZ MEJIA, ARNALDO",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "07817028",
+    "nombre": "VILLACORTA CARRANZA, JORGE LUIS",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "09352919",
+    "nombre": "BAZA ESPINOSA, ROXANA DEL SOCORRO",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "41168795",
+    "nombre": "LEANDRO ISIDRO, PERCY OMAR",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "32781909",
+    "nombre": "AZAÑA ANGULO, EVA ALICIA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "00510486",
+    "nombre": "NAVARRO PEÑA, PATRICIA YENNYFER",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "00431613",
+    "nombre": "FRANKO LLANOS, CARLOS",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "08655258",
+    "nombre": "PALACIOS RIVERA, LUIS JAVIER",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "00323886",
+    "nombre": "RISCO VALLADARES, RUTH NINON",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "00209398",
+    "nombre": "CAMPOS DIOSES, NILA",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "00220666",
+    "nombre": "MELGAR HERRERA, JULIO JOSE",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "09476742",
+    "nombre": "URBINA BALDEON, ALEXANDER",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "28290408",
+    "nombre": "VERA GUTIERREZ, NORCA BLANCA",
+    "cargo": "SENADOR",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "25503642",
+    "nombre": "MOYA MESIAS, JUANA LUZ",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "10348487",
+    "nombre": "ROJAS TULICH, CHRISTIAN MARTIN",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "25321515",
+    "nombre": "OLAVE UGARTE, HERBE",
+    "cargo": "SENADOR",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "31010129",
+    "nombre": "RAMOS HUILLCAS, ANDRES AVELINO",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "23271450",
+    "nombre": "YAURI TUNQUE, JOAQUIN",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "80508761",
+    "nombre": "COBOS RIOS, SONIA",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "27416892",
+    "nombre": "CABRERA CAMPOS, WERNER",
+    "cargo": "SENADOR",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "07787126",
+    "nombre": "MERINO CHONG, MARIA EVELINA",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "07833839",
+    "nombre": "GARCIA SAYAN LARRABURE, DIEGO",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "08171751",
+    "nombre": "BRICEÑO CERNA, DEMETRIO JOSE",
+    "cargo": "SENADOR",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "23990083",
+    "nombre": "PRADA CHIPAYO, WELLINGTON",
+    "cargo": "SENADOR",
+    "partido": "PARTIDO POLITICO INTEGRIDAD DEMOCRATICA",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "09177250",
+    "nombre": "BELMONT CASSINELLI, RICARDO PABLO",
+    "cargo": "SENADOR",
+    "partido": "PARTIDO CIVICO OBRAS",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "10684615",
+    "nombre": "VEGA YBAÑEZ, JULIO ALBERTO",
+    "cargo": "SENADOR",
+    "partido": "PARTIDO POLITICO PRIN",
+    "tipo_eleccion": "SENADORES_DISTRITO_MULTIPLE"
+  },
+  {
+    "dni": "33404526",
+    "nombre": "SALAZAR SERVAN, WILMER",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "40202194",
+    "nombre": "BURGA MARTINEZ, DOMICIANO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10538391",
+    "nombre": "HEREDIA CARRANZA, MARIA ROSALIA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "33764381",
+    "nombre": "MARIN LOZANO, INES",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "32526837",
+    "nombre": "VIVAR EVANGELISTA, EDILBERTO YSIDRO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43581209",
+    "nombre": "CARRANZA AZAÑA, SARITA VANIA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "32970673",
+    "nombre": "ANGELES PAUCAR, YESENIA ROXANA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "40750935",
+    "nombre": "JAIMES MAGUIÑA, ALEJANDRO WALTER",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46313782",
+    "nombre": "RAFAEL VILLANUEVA, GELI MAGALY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43904348",
+    "nombre": "BARBOZA REQUEJO, JORGE LUIS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43131589",
+    "nombre": "CCENTE SOLANO, ELIZABETH ROSA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46092412",
+    "nombre": "GAMONAL IDROGO, JUANA MAGALY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42359786",
+    "nombre": "ORTIZ REGALADO, OSCAR",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43079504",
+    "nombre": "AGUILAR BARDALES, LUCAS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "74984730",
+    "nombre": "SALAZAR MONTOYA, ROSITA DEL CARMEN",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43428521",
+    "nombre": "CARDENAS ABANTO, DEYSI RENE",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "26934162",
+    "nombre": "GAMBOA ROJAS, CARLOS FRANCISCO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42581911",
+    "nombre": "VILLAR ORDOÑEZ, AMY CECILIA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23806318",
+    "nombre": "QUINTANA ORTEGA, YRENE",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "31420755",
+    "nombre": "VIZCARRA PEÑA, NILO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23888691",
+    "nombre": "VALLENAS BELLOTA, JUSTO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47456507",
+    "nombre": "CARRASCO ANDRADE, GABRIELA FERNANDA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "24003357",
+    "nombre": "ALVAREZ CHUCHULLO, QUINTIN",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23840453",
+    "nombre": "SARMIENTO NUÑEZ, AMPARO JULIA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "48133729",
+    "nombre": "HUAYAS GUZMAN, ANDREA MELISSA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "48184475",
+    "nombre": "CHAÑI AGRAMONTE, ALBERT EVERETS",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29305414",
+    "nombre": "CRUZ CUENTAS, NILO MADBE",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29506874",
+    "nombre": "ZELA VALDIVIA, MERY ANTONIETA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29515547",
+    "nombre": "LUQUE RUIZ DE SOMOCURCIO, ANDRES FERNANDO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29421019",
+    "nombre": "APAZA RONDON, KATIUZKA JACOVINA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29390992",
+    "nombre": "ROJAS PAREDES, JUAN ELIAS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "28303446",
+    "nombre": "SULCA CASTILLO, PILAR",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "28294850",
+    "nombre": "MIRANDA SULCA, MARLENE ERLINDA",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "28249167",
+    "nombre": "BONILLA YARANGA, EDGAR WILFREDO",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "28308889",
+    "nombre": "OBLEA CABRERA, GERMAN",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "28601554",
+    "nombre": "MERINO MEDINA, ROSARIO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "28243451",
+    "nombre": "GONZALES AGUADO, JUSTO IRWIN",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "28601421",
+    "nombre": "MERINO MEDINA, MARINA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23648538",
+    "nombre": "ALMIDON ROMERO, HERLINDA BETZABE",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42487959",
+    "nombre": "REQUENA BOZA, ESAUD",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23266182",
+    "nombre": "GUILLEN VALENCIA, HECTOR",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47700352",
+    "nombre": "SULLCARAY QUISPE, MARIA ELENA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42353743",
+    "nombre": "VALENCIA RIOS, GARY WILLIAM",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "72264879",
+    "nombre": "OCHOA CHOCCE, GABRIEL TOBIAS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42599275",
+    "nombre": "POCOMUCHA GOMEZ, MABEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "74490570",
+    "nombre": "MORALES TOLEDO DE RUIZ, DAYANA LUCERO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "60512853",
+    "nombre": "ALADO HUAYTA, FRANK ANTONY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09423723",
+    "nombre": "PAUCAR LUQUE, LUIS AMADEO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10503817",
+    "nombre": "FREITAS DIAZ, ELISA ISABEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23989944",
+    "nombre": "DELGADO UNDA, JUAN CARLOS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10141534",
+    "nombre": "SANTOS RAMOS, ANGELA ROCIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07472058",
+    "nombre": "SANTOS RAMOS, DANIEL AGUSTIN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45492603",
+    "nombre": "SALAZAR RAMOS, MARIA DEL ROSARIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "70149519",
+    "nombre": "LIMA CHIPANA, KETTY MILAGROS",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "05071161",
+    "nombre": "SALLO MENDOZA, MARIA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09673799",
+    "nombre": "MELENDEZ CIEZA, LUIS ARTEMIO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07425908",
+    "nombre": "VALDIVIEZO GUEVARA, FRANCISCO ROBERTO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42156710",
+    "nombre": "RODRIGUEZ DEL CARPIO, KAREN CECILIA",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "04417137",
+    "nombre": "CONDORI CALIZAYA, ODILON OSCAR",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "04414744",
+    "nombre": "MENDOZA MANCHEGO, EDWIN OWER",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "04633469",
+    "nombre": "CONDORI FLORES, GEORGINA MERCEDES",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "04744945",
+    "nombre": "SOLDEVILLA VELAZCO, CRISTOBAL ISMAEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "04433387",
+    "nombre": "VALDEZ BARRERA, YOVANNA MARTINA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07577645",
+    "nombre": "PORRAS CALLO, TOLOMEO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29499231",
+    "nombre": "FLORES YUGRA, NOLBERTA LILIANA",
+    "cargo": "DIPUTADO",
+    "partido": "PARTIDO PATRIOTICO DEL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42927742",
+    "nombre": "CHOQUEHUANCA FLORES, CONSTANTINO EDILBERTO",
+    "cargo": "DIPUTADO",
+    "partido": "PARTIDO PATRIOTICO DEL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45377760",
+    "nombre": "MAMANI CHATA, NELSON YONNY",
+    "cargo": "DIPUTADO",
+    "partido": "PARTIDO PATRIOTICO DEL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "76217125",
+    "nombre": "HUARAZ ZAVALETA, LEYDY STEPHANY",
+    "cargo": "DIPUTADO",
+    "partido": "PARTIDO PATRIOTICO DEL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "19188051",
+    "nombre": "CHANG BRIONES, ALEX COLBERT",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "17892392",
+    "nombre": "QUIÑONES CARLOS, FANI LILIAN",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "18821010",
+    "nombre": "PASTOR VASQUEZ, MARCELINA",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46406354",
+    "nombre": "SOLES GARCIA, ALICIA ESTHER",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "19427808",
+    "nombre": "DOMINGUEZ TRUJILLO, JOSE FELIPE",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45020098",
+    "nombre": "PONCE LOLOY, KEYLA DENIS",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "70039045",
+    "nombre": "RUIZ CARRANZA, MILTON JHON",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45484962",
+    "nombre": "TICLIHUANCA GARCIA, FRANCEFELINA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "18036378",
+    "nombre": "RIOS COTRINA, MARIA ASUNCION",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "17922918",
+    "nombre": "VALDERRAMA GARCIA, CARLOS MAXIMO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "33664767",
+    "nombre": "SANCHEZ MERCADO, RAMIRO BENJAMIN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "25495147",
+    "nombre": "CASANOVA HERRERA, ALFONSO RAFAEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "17878508",
+    "nombre": "SEGURA RODRIGUEZ, MARIA ESTHER",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "75594130",
+    "nombre": "NAVARRO VILCHEZ, CAROL ESTEFANY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "73298468",
+    "nombre": "NUÑEZ ZAVALA, TULA ADELA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "04073297",
+    "nombre": "CARLOS VALENZUELA, VICTORIA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45351439",
+    "nombre": "CLARO SANCHEZ, JHOEL DANIEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "72121849",
+    "nombre": "MENDIETA NUÑEZ, BRAYAN ANTONIK",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "74651831",
+    "nombre": "PARIAHUACHE GONZA, ASAEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "03884973",
+    "nombre": "GARCIA MENDOZA, JENNY ELIZABETH",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "44887610",
+    "nombre": "LLACSAHUANGA CESPEDES, JACINTO ALEXANDER",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "02823788",
+    "nombre": "CRUZ VILCHEZ, JOSE ENRIQUE",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "71106366",
+    "nombre": "CASTILLO PALACIOS, ESPERANZA ANAIS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "73784542",
+    "nombre": "CALLE HUAMAN, DIANA LEYSDY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43049846",
+    "nombre": "OROZCO MORETO, JULIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42610268",
+    "nombre": "REQUENA HUAMAN, ROGGER",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47554813",
+    "nombre": "LAZO ROSAS, ROSMERY",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "02675003",
+    "nombre": "CHANDUVI CHAVEZ, VICTOR RAUL",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "72490594",
+    "nombre": "LAZO TUME, MARELI DE LOS ANGELES",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45086423",
+    "nombre": "RODRIGUEZ CALERO, MARIA DEL CARMEN EMILIA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "44557470",
+    "nombre": "RIOS SANTI, MEGUI JACKELINE",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "73210702",
+    "nombre": "FLORES QUISPE, MARCIAL JHON",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47002427",
+    "nombre": "BERNAL SAIRE, LAURA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29633478",
+    "nombre": "RIOS CISNEROS, ORLANDO HILARIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "01308872",
+    "nombre": "SONCCO QUISPE, VICENTE FREDY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "41529989",
+    "nombre": "ACEVEDO SONCCO, JUAN JORGE",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "71291534",
+    "nombre": "QUISPE SORIA DE WINKELMANN, ISABEL ROSARIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "08633033",
+    "nombre": "SALAZAR BRICEÑO DE MARIANO, ELEONORA FLAVIANA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "08111966",
+    "nombre": "ALVARO CARBAJAL DE WONG, BRIGIDA PRIMITIVA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46909859",
+    "nombre": "CORNEJO CASUSOL, JORGE JOSE",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "25611281",
+    "nombre": "RAMIREZ JUAREZ, VIOLETA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09240783",
+    "nombre": "ARIAS FERNANDEZ, LEONOR ESPERANZA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "25777038",
+    "nombre": "ANDRADE RODRIGUEZ, CESAR MIRKO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "44144313",
+    "nombre": "GARCIA FUENTES, DAVID ESTEBAN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "73755821",
+    "nombre": "CALMET ZEGARRA, JORGE LUIS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46443860",
+    "nombre": "MARENGO MARIN, CECILIA ARACELY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "44995527",
+    "nombre": "PIZARRO HUAMANI, AUGUSTO YOSHIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "73028826",
+    "nombre": "GONZALES CUADROS, KAMIRA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07868846",
+    "nombre": "WENSJOE MANTILLA, SUEN HERBERT",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43082257",
+    "nombre": "FARJE NAPA, CESAR AUGUSTO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "71232080",
+    "nombre": "LA ROSA FERREYRA, DIEGO ALEJANDRO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "72683272",
+    "nombre": "PACHAS SULCA, SILVIA FIORELLA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10062415",
+    "nombre": "RIOS CHAVEZ, ROCIO DEL CARMEN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "43309354",
+    "nombre": "TRISTAN ZUÑIGA, BENJAMIN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42860076",
+    "nombre": "ERAZO TRUJILLO, MONICA GISSELLA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "48446645",
+    "nombre": "ACUACHE PEREZ, HAROLD ARTURO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "44296336",
+    "nombre": "YUFRA HENRIQUEZ, AMILCAR VLADIMIR",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10176666",
+    "nombre": "ANDIA VERANO, MILAGRITOS DEL CARMEN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "74299655",
+    "nombre": "ALBUJAR SANTOS, MARIA LISBETH",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "41235550",
+    "nombre": "VILLALBA ALVAREZ, MIGUEL LENIN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07999506",
+    "nombre": "MAHUAD MARTENS, KARIM GAMAL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "72748282",
+    "nombre": "COTRINA OQUENDO, LIZZETI SAMANTHA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09843150",
+    "nombre": "CORDOVA MARTINEZ, LUCIA DE LOS MILAGROS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47806931",
+    "nombre": "GAMARRA RAMOS, JUAN MIGUEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "70478365",
+    "nombre": "DIAZ GIUNTA, RENZO SEBASTIAN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47629166",
+    "nombre": "AGUILAR CUEVA, SANDRA ROSA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07623819",
+    "nombre": "ORTIZ GONZALEZ, FRANCISCA EBELIN CEBELIN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "41922908",
+    "nombre": "REYES LLANOS, JOSE FERNANDO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10604507",
+    "nombre": "MORENO ROJAS, JIMMY ANTONIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "06408079",
+    "nombre": "REATEGUI RAMIREZ, EROITO JOSÉ",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "02802490",
+    "nombre": "RIVAS MORENO, MARIA DEL PILAR",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09936657",
+    "nombre": "PALOMINO ISASI, KARINA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09671193",
+    "nombre": "DERTEANO BIDEGARAY, JAVIER ALFONSO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "70122304",
+    "nombre": "LOMA TONCONI, RENE NICOLAS",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45792658",
+    "nombre": "FERNANDEZ GONZALEZ, SVIETA VALIA",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46282259",
+    "nombre": "VIZA CONDORI, LILA MILUSKA",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29310594",
+    "nombre": "ESCOBEDO VELANDO, EDGARD RAFAEL",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "08676009",
+    "nombre": "LOAYZA LINIAN, ARTURO MARTIN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10491705",
+    "nombre": "ZAPATA SEDANO, ANGEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09472776",
+    "nombre": "MATOS CHAVARRIA, CELINA OLGA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07622939",
+    "nombre": "VILLAVICENCIO OTINIANO DE SANTOS, MARITZA LEONOR",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "75582529",
+    "nombre": "AGUILAR VASQUEZ, JOSE ROGELIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "80416547",
+    "nombre": "OLAYA SILVA, ALBERTO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "00250386",
+    "nombre": "OZETA ZURITA, CANDIDA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47207990",
+    "nombre": "SANJINEZ CRIOLLO, NADIA ELIZABETH",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46548212",
+    "nombre": "VILLANUEVA CONDOR, DORA ALICIA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42389392",
+    "nombre": "SEDANO CALDERON, MILCA SAYURI ELIPHELET",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "00212166",
+    "nombre": "SANJINEZ RODRIGUEZ, FREDY CARLOS",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "47832732",
+    "nombre": "ANGELES VILCHEZ, JULAY KATHERINE",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "09918627",
+    "nombre": "MEJIA ZARATE, PABLO CESAR",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "25583422",
+    "nombre": "TENORIO SERNAQUE, RICCE JAVIER",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "41809779",
+    "nombre": "PANDURO CARRERA, ANGEL",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "08006861",
+    "nombre": "CORREA ALCANTARA, AMADA ETELVINA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "44560484",
+    "nombre": "MANAY PILLACA, ALEJANDRO JOSÉ",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "48689735",
+    "nombre": "PALOMINO CASAVILCA, CATHERIN NORMA",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42578522",
+    "nombre": "LAVADO VALDIVIA, MARINO TEOFILO",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "40775741",
+    "nombre": "CHIPANA CONDORI, GRACIELA",
+    "cargo": "DIPUTADO",
+    "partido": "JUNTOS POR EL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "32941650",
+    "nombre": "VALVERDE MEDINA, ARMANDO RAUL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "70945153",
+    "nombre": "CALLATA LOPEZ, LUCERO JAZMIN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46120986",
+    "nombre": "QUISPE MENDOZA, WELCHER",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23964995",
+    "nombre": "ARIZABAL ARRIAGA, ELIZABETH",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "80336370",
+    "nombre": "TORRES BRAVO, CARLOS ANTONIO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "29337912",
+    "nombre": "DEZA GUTIERREZ, VIRNA VICTORIA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "16680524",
+    "nombre": "VALLEJOS CALDERON, CESAR",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "03884364",
+    "nombre": "PANTA PANTA, GIOVANA MILAGROS",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "01327153",
+    "nombre": "FLORES FLORES, CAROLL NOEMI",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46011933",
+    "nombre": "GUADALUPE NAJARRO DE SIERRA, RAIZA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "10268199",
+    "nombre": "DEL CASTILLO REYES, MIGUEL ANGEL",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "16296253",
+    "nombre": "REYES RAMOS, WISTON MANOLO",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45064625",
+    "nombre": "YAURI YARINGAÑO, JHOVANA",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "40334435",
+    "nombre": "JARAMILLO LIMA, KELLY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "78021215",
+    "nombre": "RAMIREZ GOMEZ, MARIA BELEN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "45224974",
+    "nombre": "PEREYRA ZAPLANA, ROCIO DEL CARMEN",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "46006548",
+    "nombre": "CALDERON GOICOCHEA, DENNIS MARDELY",
+    "cargo": "DIPUTADO",
+    "partido": "PRIMERO LA GENTE - COMUNIDAD, ECOLOGIA, LIBERTAD Y PROGRESO",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "42890633",
+    "nombre": "VARGAS-MACHUCA RAMIREZ, LUIS MIGUEL",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "25782021",
+    "nombre": "DEMURTAS MOYA, GIOVANNA ANGELA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23927155",
+    "nombre": "CHOQQUENAYRA CHOQUENAIRA, ROLANDO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "23956238",
+    "nombre": "CARAZAS MACHACA, TOMASA",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "02885934",
+    "nombre": "YUPANQUI FARRO, JUAN CARLOS",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "41287506",
+    "nombre": "AGURTO JAHNSEN, GIOVANNA STEFANY",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "07219108",
+    "nombre": "RODRIGUEZ GRADOS, EDUARDO ULDARICO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "08056280",
+    "nombre": "AMAYA SALDARRIAGA, SANTIAGO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "41158255",
+    "nombre": "MONTOYA ORTIZ, GERMAN",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "26953164",
+    "nombre": "BRICEÑO CERNA, SERGIO JACINTO",
+    "cargo": "DIPUTADO",
+    "partido": "SALVEMOS AL PERU",
+    "tipo_eleccion": "DIPUTADOS"
+  },
+  {
+    "dni": "75050392",
+    "nombre": "FLORES ROMAINA, KIMBERLY LLOLENI",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "42869876",
+    "nombre": "CACERES ARONES, VANIA FLOR",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "41013986",
+    "nombre": "TIPARRA REQUEJO, WILIAM MERCEDES",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "77674891",
+    "nombre": "HUAMANI RIVAS, FRAN LUIS",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "75145166",
+    "nombre": "FERNÁNDEZ TORRES, JOSELITO",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "45873827",
+    "nombre": "CABANA QUISPE, ANDRES ROMULO",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "06098107",
+    "nombre": "OROPEZA DIAZ, JESUS EULOGIA",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "75074068",
+    "nombre": "QUIÑONES ITURRIA, ALEXANDRA PATRICIA",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "74733524",
+    "nombre": "SOSA LUISPE, JEAN PAUL",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "61522033",
+    "nombre": "TINEO CAYCHO, CLAUDIA ROSA",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "PARTIDO DEMOCRATICO SOMOS PERU",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "08778400",
+    "nombre": "VALDIVIESO MENDEZ, GUILLERMO HUMBERTO",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "RENOVACION POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "10683474",
+    "nombre": "BELLO SOLORZANO, EVERLENY ELCI",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "RENOVACION POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "40416230",
+    "nombre": "MATHEWS PAREDES, VICTOR GUILLERMO",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "RENOVACION POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "40768988",
+    "nombre": "GAMARRA SALDIVAR, AUGUSTA",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "RENOVACION POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "41005446",
+    "nombre": "MERINO DURAN, LEONCIO CARLOS",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "RENOVACION POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "40962039",
+    "nombre": "CUICAPUSA SILVA, GENNY SOLEDAD",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "RENOVACION POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "73147633",
+    "nombre": "GONZALES UGAZ, YOSSELIN MARLENI",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "ALIANZA PARA EL PROGRESO",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "74426739",
+    "nombre": "SÁNCHEZ MUÑOZ, EDWIN",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "ALIANZA PARA EL PROGRESO",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "76411665",
+    "nombre": "PELAEZ CEDANO, MARCELA ALESSANDRA",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "ALIANZA PARA EL PROGRESO",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "16721329",
+    "nombre": "SANCHEZ CHACON, ANTONIO GREGORY",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "ALIANZA PARA EL PROGRESO",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "47748926",
+    "nombre": "RAMOS CHILO, YANELIZ XIOMARA",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "ALIANZA PARA EL PROGRESO",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "43875368",
+    "nombre": "MUÑOZ BENITES, ERIKA IVONN",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "ALIANZA PARA EL PROGRESO",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "48122474",
+    "nombre": "ZANABRIA POMA, ZARA",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "FUERZA POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "40408408",
+    "nombre": "FIESTAS BUSTOS, ELENA DEL ROSARIO",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "FUERZA POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "04436187",
+    "nombre": "CHOQUE NUÑEZ, LELIS",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "FUERZA POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "42928489",
+    "nombre": "GIL SILVA, JULIO CESAR",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "FUERZA POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "70176496",
+    "nombre": "SANTANDER MARTINEZ, MARIA DEL CARMEN",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "FUERZA POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  },
+  {
+    "dni": "09882068",
+    "nombre": "TORRES GARCIA, OSCAR ALFREDO",
+    "cargo": "REPRESENTANTE ANTE EL PARLAMENTO ANDINO",
+    "partido": "FUERZA POPULAR",
+    "tipo_eleccion": "PARLAMENTO_ANDINO"
+  }
+]

@@ -209,6 +209,58 @@ function renderExperienciaLaboral(data: unknown[] | null | undefined) {
   )
 }
 
+function renderBienesInmuebles(data: unknown[] | null | undefined) {
+  if (!data || !Array.isArray(data) || data.length === 0) {
+    return (
+      <div className="rounded-xl border border-dashed p-6 text-center text-sm text-muted-foreground">
+        Sin registros de bienes inmuebles
+      </div>
+    )
+  }
+  return (
+    <div className="grid gap-3 sm:grid-cols-2">
+      {data.map((item, i) => {
+        if (typeof item !== 'object' || item === null) return null
+        const bien = item as Record<string, unknown>
+        const partida = String(bien.partida_sunarp || bien.partida_registral || '')
+        const valor = Number(bien.valor_autoavaluo || bien.valor || 0)
+        const comentario = String(bien.comentario || bien.observacion || '')
+        const tipo = String(bien.tipo || '')
+
+        return (
+          <div key={i} className="rounded-xl border bg-card p-4">
+            <div className="flex items-start justify-between gap-2">
+              <div className="flex-1 min-w-0">
+                {partida ? (
+                  <p className="font-mono text-sm font-medium">
+                    SUNARP: {partida}
+                  </p>
+                ) : (
+                  <p className="text-sm text-muted-foreground">Sin partida registral</p>
+                )}
+                {tipo.trim() && (
+                  <p className="text-xs text-muted-foreground mt-1">{tipo}</p>
+                )}
+                {comentario.trim() && (
+                  <span className="inline-block mt-2 rounded-md bg-primary/10 text-primary px-2 py-0.5 text-xs font-medium">
+                    {comentario}
+                  </span>
+                )}
+              </div>
+              {valor > 0 && (
+                <div className="text-right shrink-0">
+                  <p className="text-xs text-muted-foreground">Autoavalúo</p>
+                  <p className="text-sm font-semibold">S/ {valor.toLocaleString()}</p>
+                </div>
+              )}
+            </div>
+          </div>
+        )
+      })}
+    </div>
+  )
+}
+
 export function CandidatoDetalle() {
   const { id } = useParams()
   const [activeTab, setActiveTab] = useState('perfil-mediatico')
@@ -490,7 +542,7 @@ export function CandidatoDetalle() {
                   <SectionHeader icon={Wallet} color="bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Bienes Muebles" />
                   {renderJsonArray(hojaVida?.bienes_muebles, 'bienes muebles')}
                   <SectionHeader icon={Wallet} color="bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Bienes Inmuebles" />
-                  {renderJsonArray(hojaVida?.bienes_inmuebles, 'bienes inmuebles')}
+                  {renderBienesInmuebles(hojaVida?.bienes_inmuebles)}
                   <SectionHeader icon={Wallet} color="bg-amber-500/10 text-amber-600 dark:text-amber-400" title="Ingresos" />
                   {renderJsonArray(hojaVida?.ingresos, 'ingresos')}
                 </>
