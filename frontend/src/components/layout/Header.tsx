@@ -1,9 +1,11 @@
-import { Moon, Sun, LogOut } from 'lucide-react'
+import { Moon, Sun, LogOut, Shield } from 'lucide-react'
 import { useEffect, useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { useAuth } from '@/contexts/AuthContext'
 
 export function Header() {
-  const { clienteNombre, signOut } = useAuth()
+  const navigate = useNavigate()
+  const { clienteNombre, isSuperadmin, signOut } = useAuth()
   const [dark, setDark] = useState(() => {
     if (typeof window !== 'undefined') {
       return document.documentElement.classList.contains('dark')
@@ -32,11 +34,16 @@ export function Header() {
       <div className="flex-1" />
 
       <div className="flex items-center gap-4">
-        {clienteNombre && (
+        {isSuperadmin ? (
+          <span className="flex items-center gap-1.5 text-sm text-amber-600 dark:text-amber-400 font-medium">
+            <Shield className="h-4 w-4" />
+            Superadmin
+          </span>
+        ) : clienteNombre ? (
           <span className="text-sm text-gray-600 dark:text-gray-400">
             {clienteNombre}
           </span>
-        )}
+        ) : null}
         <button
           onClick={() => setDark(!dark)}
           className="p-2 rounded-md hover:bg-muted transition-colors"
@@ -45,7 +52,10 @@ export function Header() {
           {dark ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
         </button>
         <button
-          onClick={() => signOut()}
+          onClick={async () => {
+            await signOut()
+            navigate('/login')
+          }}
           className="p-2 rounded-md hover:bg-gray-100 dark:hover:bg-gray-700"
           title="Cerrar sesión"
         >

@@ -156,13 +156,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }
 
   async function signOut() {
-    if (user) {
-      await supabase
-        .from('quipu_usuarios')
-        .update({ current_session_id: null })
-        .eq('auth_user_id', user.id)
+    try {
+      if (user) {
+        await supabase
+          .from('quipu_usuarios')
+          .update({ current_session_id: null })
+          .eq('auth_user_id', user.id)
+      }
+      await supabase.auth.signOut()
+      // Clear state immediately
+      setUser(null)
+      setSession(null)
+      setClienteId(null)
+      setClienteNombre(null)
+      setIsSuperadmin(false)
+    } catch (error) {
+      console.error('Error signing out:', error)
+      // Force sign out even if there's an error
+      await supabase.auth.signOut()
     }
-    await supabase.auth.signOut()
   }
 
   return (
