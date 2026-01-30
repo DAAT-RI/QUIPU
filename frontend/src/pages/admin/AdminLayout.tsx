@@ -1,11 +1,12 @@
 import { Link, Outlet, useLocation } from 'react-router-dom'
-import { ArrowLeft, LayoutDashboard, Building2, Users } from 'lucide-react'
+import { ArrowLeft, LayoutDashboard, Building2, Users, Link2 } from 'lucide-react'
 import { cn } from '@/lib/utils'
 
 const adminNav = [
   { name: 'Dashboard', href: '/admin', icon: LayoutDashboard },
   { name: 'Clientes', href: '/admin/clientes', icon: Building2 },
   { name: 'Usuarios', href: '/admin/usuarios', icon: Users },
+  { name: 'Aliases', href: '/admin/aliases', icon: Link2 },
 ]
 
 export function AdminLayout() {

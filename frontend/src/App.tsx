@@ -10,6 +10,7 @@ import { AdminDashboard } from '@/pages/admin/AdminDashboard'
 import { Clientes } from '@/pages/admin/Clientes'
 import { ClienteNuevo } from '@/pages/admin/ClienteNuevo'
 import { ClienteEditar } from '@/pages/admin/ClienteEditar'
+import StakeholderAliases from '@/pages/admin/StakeholderAliases'
 import { Dashboard } from '@/pages/Dashboard'
 import { Declaraciones } from '@/pages/Declaraciones'
 import { DeclaracionDetalle } from '@/pages/DeclaracionDetalle'
@@ -78,6 +79,7 @@ function App() {
                 <Route path="clientes" element={<Clientes />} />
                 <Route path="clientes/nuevo" element={<ClienteNuevo />} />
                 <Route path="clientes/:id" element={<ClienteEditar />} />
+                <Route path="aliases" element={<StakeholderAliases />} />
               </Route>
             </Route>
           </Routes>
@@ -88,3 +90,4 @@ function App() {
 }
 
 export default App
+
