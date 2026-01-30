@@ -72,7 +72,7 @@ function CandidatoColumn({
   // Apply text filter
   const textLower = textFilter.toLowerCase()
   const declaraciones = textFilter
-    ? declaracionesRaw.filter(d => d.contenido?.toLowerCase().includes(textLower) || d.categorias_interaccion?.toLowerCase().includes(textLower))
+    ? declaracionesRaw.filter(d => d.contenido?.toLowerCase().includes(textLower) || d.tema_interaccion?.toLowerCase().includes(textLower))
     : declaracionesRaw
   const promesasList = textFilter
     ? promesasListRaw.filter(p => p.promesa?.toLowerCase().includes(textLower) || p.categoria?.toLowerCase().includes(textLower))
@@ -145,7 +145,7 @@ function CandidatoColumn({
                     className="p-3 bg-muted/30 rounded-lg"
                   >
                     <div className="flex flex-wrap items-center gap-1.5 mb-2">
-                      {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
+                      {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
                         <span key={cat} className="text-xs font-medium text-amber-700 dark:text-amber-400 bg-amber-100 dark:bg-amber-900/30 px-2 py-1 rounded">
                           {cat}
                         </span>

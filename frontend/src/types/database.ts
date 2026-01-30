@@ -215,7 +215,7 @@ export interface DeclaracionView {
   tipo: 'declaration' | 'mention'  // Tipo de interacción
   stakeholder: string  // Quién dijo/fue mencionado
   contenido: string  // LO QUE DIJO - esto es lo más importante
-  categorias_interaccion: string | null  // Categoría específica de esta declaración - Antes: tema_interaccion
+  tema_interaccion: string | null  // Categoría específica de esta declaración (campo de la vista)
 }
 
 // Vista: v_quipu_promesas_planes_completas

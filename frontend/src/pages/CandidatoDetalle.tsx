@@ -715,8 +715,8 @@ function TabDeclaracionesMejorado({
     const canalesSet = new Set<string>()
 
     declaraciones.forEach((d) => {
-      if (d.categorias_interaccion) {
-        categoriasMap.set(d.categorias_interaccion, (categoriasMap.get(d.categorias_interaccion) || 0) + 1)
+      if (d.tema_interaccion) {
+        categoriasMap.set(d.tema_interaccion, (categoriasMap.get(d.tema_interaccion) || 0) + 1)
       }
       if (d.canal) {
         canalesSet.add(d.canal)
@@ -738,7 +738,7 @@ function TabDeclaracionesMejorado({
   // Filtrar declaraciones si hay filtro activo
   const declaracionesFiltradas = useMemo(() => {
     if (!filtroCategoria) return declaraciones
-    return declaraciones.filter((d) => d.categorias_interaccion === filtroCategoria)
+    return declaraciones.filter((d) => d.tema_interaccion === filtroCategoria)
   }, [declaraciones, filtroCategoria])
 
   if (loading) return <LoadingSpinner />
@@ -835,7 +835,7 @@ function TabDeclaracionesMejorado({
                       {d.canal}
                     </span>
                   )}
-                  {d.categorias_interaccion && d.categorias_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
+                  {d.tema_interaccion && d.tema_interaccion.split(/[;,]/).map(t => t.trim()).filter(Boolean).map((cat) => (
                     <span key={cat} className="rounded-md bg-primary/10 text-primary px-1.5 py-0.5 text-[11px] font-medium">
                       {cat}
                     </span>
@@ -872,9 +872,9 @@ function TabPerfilMediatico({
     const canalesMap = new Map<string, number>()
 
     declaraciones.forEach((d) => {
-      if (d.categorias_interaccion) {
+      if (d.tema_interaccion) {
         // Handle multiple categories separated by semicolon
-        d.categorias_interaccion.split(';').forEach((t) => {
+        d.tema_interaccion.split(';').forEach((t) => {
           const categoria = t.trim()
           if (categoria) {
             categoriasMap.set(categoria, (categoriasMap.get(categoria) || 0) + 1)

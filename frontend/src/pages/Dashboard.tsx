@@ -278,12 +278,12 @@ export function Dashboard() {
               <p className="text-sm font-medium text-muted-foreground">Categorías en el feed</p>
               <div className="rounded-xl border bg-card divide-y">
                 {(() => {
-                  // Extraer categorías únicas de las declaraciones (categorias_interaccion puede tener múltiples separadas por ;)
+                  // Extraer categorías únicas de las declaraciones (tema_interaccion puede tener múltiples separadas por ;)
                   const categoryMap = new Map<string, number>()
                   recentDeclaraciones.forEach((decl) => {
-                    if (decl.categorias_interaccion) {
+                    if (decl.tema_interaccion) {
                       // Separar por ; y contar cada categoría individualmente
-                      const cats = decl.categorias_interaccion.split(';').map(c => c.trim()).filter(c => c)
+                      const cats = decl.tema_interaccion.split(';').map(c => c.trim()).filter(c => c)
                       cats.forEach(cat => {
                         categoryMap.set(cat, (categoryMap.get(cat) || 0) + 1)
                       })
