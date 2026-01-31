@@ -129,6 +129,15 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function loadClienteData(authUserId: string) {
     console.log('[Auth DEBUG] loadClienteData called for:', authUserId)
     try {
+      // Verify we have an active session before querying
+      const { data: sessionData } = await supabase.auth.getSession()
+      console.log('[Auth DEBUG] Session check before query:', { hasSession: !!sessionData.session })
+
+      if (!sessionData.session) {
+        console.warn('[Auth DEBUG] No active session, skipping quipu_usuarios query')
+        return
+      }
+
       const { data, error } = await supabase
         .from('quipu_usuarios')
         .select('cliente_id, rol, quipu_clientes(nombre)')
