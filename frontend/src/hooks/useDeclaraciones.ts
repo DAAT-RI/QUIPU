@@ -65,10 +65,14 @@ export function useDeclaraciones(filters: DeclaracionFilters) {
   // Get candidato IDs for this client
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
+  const enabled = !loading && (isSuperadmin || clienteCandidatoIds.length > 0)
+  console.log('[useDeclaraciones DEBUG] State:', { loading, isSuperadmin, candidatosCount: clienteCandidatoIds.length, enabled })
+
   return useQuery({
     queryKey: ['declaraciones', filters, clienteId, clienteCandidatoIds, isSuperadmin],
-    enabled: !loading && (isSuperadmin || clienteCandidatoIds.length > 0),
+    enabled,
     queryFn: async () => {
+      console.log('[useDeclaraciones DEBUG] queryFn EXECUTING')
       // For non-superadmin users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
       if (!isSuperadmin && clienteCandidatoIds.length > 0) {

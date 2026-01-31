@@ -25,12 +25,20 @@ import { formatNumber, formatDate, isRedundantCanal } from '@/lib/utils'
 import type { CandidatoCompleto } from '@/types/database'
 
 export function Dashboard() {
-  const { data: stats, isLoading: statsLoading } = useDashboardStats()
-  const { data: porTema, isLoading: catLoading } = useDeclaracionesPorTema()
-  const { data: topPartidos, isLoading: partidosLoading } = useTopPartidosByDeclaraciones()
-  const { data: declaracionesResult, isLoading: declLoading } = useDeclaraciones({
+  console.log('[Dashboard DEBUG] Component rendering')
+  const { data: stats, isLoading: statsLoading, isPending: statsPending, isFetching: statsFetching } = useDashboardStats()
+  const { data: porTema, isLoading: catLoading, isPending: catPending } = useDeclaracionesPorTema()
+  const { data: topPartidos, isLoading: partidosLoading, isPending: partidosPending } = useTopPartidosByDeclaraciones()
+  const { data: declaracionesResult, isLoading: declLoading, isPending: declPending } = useDeclaraciones({
     offset: 0,
     limit: 5,
+  })
+
+  console.log('[Dashboard DEBUG] Hook states:', {
+    stats: { loading: statsLoading, pending: statsPending, fetching: statsFetching, hasData: !!stats },
+    porTema: { loading: catLoading, pending: catPending, hasData: !!porTema },
+    topPartidos: { loading: partidosLoading, pending: partidosPending, hasData: !!topPartidos },
+    declaraciones: { loading: declLoading, pending: declPending, hasData: !!declaracionesResult }
   })
 
   // Get presidential candidates by cargo type (separated)

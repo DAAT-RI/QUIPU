@@ -30,25 +30,32 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   // Cargar sesión inicial
   useEffect(() => {
     // Clear React Query cache to prevent stale data after refresh
+    console.log('[Auth DEBUG] useEffect start - clearing queryClient cache')
     queryClient.clear()
+    console.log('[Auth DEBUG] queryClient.clear() called')
 
     // Safety timeout - never stay in loading state for more than 10 seconds
     const safetyTimeout = setTimeout(() => {
       setLoading(false)
     }, 10000)
 
+    console.log('[Auth DEBUG] calling getSession()...')
     supabase.auth.getSession().then(async ({ data: { session } }) => {
+      console.log('[Auth DEBUG] getSession returned:', { hasSession: !!session, userId: session?.user?.id })
       setSession(session)
       setUser(session?.user ?? null)
       if (session?.user) {
         try {
+          console.log('[Auth DEBUG] calling loadClienteData...')
           await loadClienteData(session.user.id)
+          console.log('[Auth DEBUG] loadClienteData completed')
           await registerSession(session.user.id)
         } catch (error) {
           console.error('[Auth] Error loading cliente data:', error)
           setLoading(false)
         }
       } else {
+        console.log('[Auth DEBUG] No session, setting loading=false')
         setLoading(false)
       }
       clearTimeout(safetyTimeout)
@@ -114,6 +121,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [user, sessionId])
 
   async function loadClienteData(authUserId: string) {
+    console.log('[Auth DEBUG] loadClienteData called for:', authUserId)
     try {
       const { data, error } = await supabase
         .from('quipu_usuarios')
@@ -124,6 +132,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       if (error) {
         console.error('[Auth] Error fetching usuario:', error)
       } else if (data) {
+        console.log('[Auth DEBUG] Setting auth state:', { clienteId: data.cliente_id, rol: data.rol })
         setClienteId(data.cliente_id)
         setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
         setIsSuperadmin(data.rol === 'superadmin')
@@ -131,6 +140,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch (error) {
       console.error('[Auth] Exception in loadClienteData:', error)
     } finally {
+      console.log('[Auth DEBUG] loadClienteData finished, setting loading=false')
       setLoading(false)
     }
   }

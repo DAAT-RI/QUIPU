@@ -5,10 +5,14 @@ import { useAuth } from '@/contexts/AuthContext'
 export function useClienteCandidatos() {
   const { clienteId, loading, isSuperadmin } = useAuth()
 
+  const enabled = !loading && (isSuperadmin || clienteId !== null)
+  console.log('[useClienteCandidatos DEBUG] Auth state:', { clienteId, loading, isSuperadmin, enabled })
+
   return useQuery({
     queryKey: ['cliente-candidatos', clienteId, isSuperadmin],
-    enabled: !loading && (isSuperadmin || clienteId !== null),
+    enabled,
     queryFn: async () => {
+      console.log('[useClienteCandidatos DEBUG] queryFn EXECUTING - this means enabled=true and cache miss')
       // Superadmin = todos los candidatos (más eficiente que ir por junction table)
       if (isSuperadmin) {
         const { data, error } = await supabase

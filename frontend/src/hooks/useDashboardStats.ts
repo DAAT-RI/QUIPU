@@ -15,9 +15,11 @@ function normalizeForMatch(text: string): string {
 }
 
 export function useDashboardStats() {
+  console.log('[useDashboardStats DEBUG] Hook called')
   return useQuery({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
+      console.log('[useDashboardStats DEBUG] queryFn EXECUTING')
       const [partidos, promesas, candidatos, categorias] = await Promise.all([
         supabase.from('quipu_partidos').select('*', { count: 'exact', head: true }),
         supabase.from('quipu_promesas_planes').select('*', { count: 'exact', head: true }),
@@ -97,10 +99,14 @@ export function useDeclaracionesPorTema() {
   // Get candidato IDs for this client
   const clienteCandidatoIds = candidatosData?.map(c => c.candidato_id) ?? []
 
+  const enabled = !loading && (isSuperadmin || clienteCandidatoIds.length > 0)
+  console.log('[useDeclaracionesPorTema DEBUG] State:', { loading, isSuperadmin, clienteCandidatoIds: clienteCandidatoIds.length, enabled })
+
   return useQuery({
     queryKey: ['declaraciones-por-tema', clienteId, clienteCandidatoIds, isSuperadmin],
-    enabled: !loading && (isSuperadmin || clienteCandidatoIds.length > 0),
+    enabled,
     queryFn: async () => {
+      console.log('[useDeclaracionesPorTema DEBUG] queryFn EXECUTING')
       // For non-superadmin users, first get aliases that map to their candidates
       let aliasNormalized: string[] = []
       if (!isSuperadmin && clienteCandidatoIds.length > 0) {
