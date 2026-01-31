@@ -129,6 +129,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         .eq('auth_user_id', authUserId)
         .single()
 
+      console.log('[Auth DEBUG] quipu_usuarios query result:', { data, error })
+
       if (error) {
         console.error('[Auth] Error fetching usuario:', error)
       } else if (data) {
@@ -136,6 +138,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         setClienteId(data.cliente_id)
         setClienteNombre((data.quipu_clientes as any)?.nombre ?? null)
         setIsSuperadmin(data.rol === 'superadmin')
+      } else {
+        console.warn('[Auth DEBUG] No data returned for user - check RLS policies')
       }
     } catch (error) {
       console.error('[Auth] Exception in loadClienteData:', error)
