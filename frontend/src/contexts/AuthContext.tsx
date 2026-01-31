@@ -1,4 +1,4 @@
-import { createContext, useContext, useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, useRef } from 'react'
 import type { ReactNode } from 'react'
 import type { User, Session } from '@supabase/supabase-js'
 import { supabase } from '@/lib/supabase'
@@ -27,61 +27,44 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true)
   const [sessionId] = useState(() => crypto.randomUUID())
 
-  // Cargar sesión inicial
+  // Cargar sesión inicial - usando solo onAuthStateChange (patrón recomendado por Supabase)
   useEffect(() => {
-    // Clear React Query cache to prevent stale data after refresh
-    console.log('[Auth DEBUG] useEffect start - clearing queryClient cache')
+    console.log('[Auth] Initializing auth...')
     queryClient.clear()
-    console.log('[Auth DEBUG] queryClient.clear() called')
+
+    let isMounted = true
 
     // Safety timeout - never stay in loading state for more than 10 seconds
     const safetyTimeout = setTimeout(() => {
-      setLoading(false)
+      if (isMounted) {
+        console.log('[Auth] Safety timeout triggered')
+        setLoading(false)
+      }
     }, 10000)
 
-    console.log('[Auth DEBUG] calling getSession()...')
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
-      console.log('[Auth DEBUG] getSession returned:', { hasSession: !!session, userId: session?.user?.id })
-      setSession(session)
-      setUser(session?.user ?? null)
-      if (session?.user) {
-        try {
-          console.log('[Auth DEBUG] calling loadClienteData...')
-          await loadClienteData(session.user.id)
-          console.log('[Auth DEBUG] loadClienteData completed')
-          await registerSession(session.user.id)
-        } catch (error) {
-          console.error('[Auth] Error loading cliente data:', error)
-          setLoading(false)
-        }
-      } else {
-        // No session from getSession - but onAuthStateChange might still fire
-        // Wait a bit to see if auth state change triggers
-        console.log('[Auth DEBUG] No session from getSession, waiting for onAuthStateChange...')
-        setTimeout(() => {
-          // Only set loading=false if we still don't have a user
-          console.log('[Auth DEBUG] Timeout check - will set loading=false only if no session arrived')
-          setLoading(false)
-        }, 500)
-      }
-      clearTimeout(safetyTimeout)
-    }).catch((error) => {
-      console.error('[Auth] Error getting session:', error)
-      setLoading(false)
-      clearTimeout(safetyTimeout)
-    })
-
+    // Usar SOLO onAuthStateChange como fuente de verdad
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
+      async (event, session) => {
+        if (!isMounted) return
+        console.log('[Auth] onAuthStateChange:', event, session?.user?.id)
+        clearTimeout(safetyTimeout)
+
         setSession(session)
         setUser(session?.user ?? null)
+
         if (session?.user) {
-          try {
-            await loadClienteData(session.user.id)
-            await registerSession(session.user.id)
-          } catch (error) {
-            console.error('Error on auth state change:', error)
-          }
+          // Usar setTimeout para evitar deadlock con Supabase
+          // Las queries dentro de onAuthStateChange pueden bloquearse
+          setTimeout(async () => {
+            if (!isMounted) return
+            try {
+              await loadClienteData(session.user.id)
+              if (isMounted) await registerSession(session.user.id)
+            } catch (error) {
+              console.error('[Auth] Error on auth state change:', error)
+              if (isMounted) setLoading(false)
+            }
+          }, 0)
         } else {
           setClienteId(null)
           setClienteNombre(null)
@@ -91,7 +74,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       }
     )
 
-    return () => subscription.unsubscribe()
+    // Trigger initial session check (no esperamos el resultado)
+    supabase.auth.getSession()
+
+    return () => {
+      isMounted = false
+      subscription.unsubscribe()
+      clearTimeout(safetyTimeout)
+    }
   }, [])
 
   // Validación de sesión exclusiva (cada 30 segundos)
@@ -129,15 +119,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   async function loadClienteData(authUserId: string) {
     console.log('[Auth DEBUG] loadClienteData called for:', authUserId)
     try {
-      // Verify we have an active session before querying
-      const { data: sessionData } = await supabase.auth.getSession()
-      console.log('[Auth DEBUG] Session check before query:', { hasSession: !!sessionData.session })
-
-      if (!sessionData.session) {
-        console.warn('[Auth DEBUG] No active session, skipping quipu_usuarios query')
-        return
-      }
-
+      // NO llamar getSession() aquí - causa deadlock si onAuthStateChange
+      // se dispara mientras getSession() inicial aún está en progreso
       const { data, error } = await supabase
         .from('quipu_usuarios')
         .select('cliente_id, rol, quipu_clientes(nombre)')
