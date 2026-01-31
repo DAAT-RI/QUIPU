@@ -55,8 +55,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           setLoading(false)
         }
       } else {
-        console.log('[Auth DEBUG] No session, setting loading=false')
-        setLoading(false)
+        // No session from getSession - but onAuthStateChange might still fire
+        // Wait a bit to see if auth state change triggers
+        console.log('[Auth DEBUG] No session from getSession, waiting for onAuthStateChange...')
+        setTimeout(() => {
+          // Only set loading=false if we still don't have a user
+          setLoading(prev => {
+            console.log('[Auth DEBUG] Timeout check - will set loading=false only if no session arrived')
+            return false
+          })
+        }, 500)
       }
       clearTimeout(safetyTimeout)
     }).catch((error) => {
